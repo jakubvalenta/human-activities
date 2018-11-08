@@ -26,6 +26,21 @@ class Window(Gtk.Window):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        box = Gtk.Box(spacing=6)
+
+        button_1 = Gtk.Button('About')
+        button_1.show()
+        button_1.set_action_name('app.about')
+        box.add(button_1)
+
+        button_2 = Gtk.Button('Quit')
+        button_2.show()
+        button_2.set_action_name('app.quit')
+        box.add(button_2)
+
+        self.add(box)
+        box.show()
+
 
 class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
@@ -57,7 +72,7 @@ class Application(Gtk.Application):
 
         # TODO: Remove this window
         if not self.window:
-            self.window = Window(application=self, title="Main Window")
+            self.window = Window(application=self, title='Main Window')
         self.window.present()
 
     def on_popup_menu(self, icon, button, time):
