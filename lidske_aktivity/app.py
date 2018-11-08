@@ -1,64 +1,85 @@
-import gi  # isort:skip
+import logging
+import sys
+from pathlib import Path
+
+import gi
 
 gi.require_version('Gtk', '3.0')
 
-import logging  # noqa:E402
-import sys  # noqa:E402
-
-from gi.repository import Gtk  # noqa:E402
+from gi.repository import Gio, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
+
+XML = str(Path(__file__).parent / 'ui.xml')
 
 
 class AppError(Exception):
     pass
 
 
-class App:
-    def __init__(self):
-        self.status_icon = Gtk.StatusIcon()
-        self.status_icon.set_from_stock(Gtk.STOCK_HOME)
-        self.status_icon.connect('popup-menu', self.right_click_event)
+class StatusIcon(Gtk.StatusIcon):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class Window(Gtk.Window):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class Application(Gtk.Application):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, application_id='org.example.myapp', **kwargs)
+        self.status_icon = None
+        self.window = None
+
+    def do_startup(self):
+        Gtk.Application.do_startup(self)
+
+        action = Gio.SimpleAction.new('about', None)
+        action.connect('activate', self.on_about)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new('quit', None)
+        action.connect('activate', self.on_quit)
+        self.add_action(action)
+
+        builder = Gtk.Builder.new_from_file(XML)
+        menu_model = builder.get_object('popup-menu')
+        self.popup_menu = Gtk.Menu.new_from_model(menu_model)
+
+    def do_activate(self):
+        self.status_icon = Gtk.StatusIcon.new_from_stock(Gtk.STOCK_HOME)
         self.status_icon.set_tooltip_text('Lidské aktivity')
-        #if not self.status_icon.is_embedded():
+        # if not self.status_icon.is_embedded():
         #    raise AppError('Tray icon is not supported on this platform')
+        self.status_icon.connect('popup-menu', self.on_popup_menu)
 
-    def right_click_event(self, icon, button, time):
-        self.menu = Gtk.Menu()
+        # TODO: Remove this window
+        if not self.window:
+            self.window = Window(application=self, title="Main Window")
+        self.window.present()
 
-        about = Gtk.MenuItem()
-        about.set_label('About')
-        quit = Gtk.MenuItem()
-        quit.set_label('Quit')
+    def on_popup_menu(self, icon, button, time):
+        self.popup_menu.popup(
+            parent_menu_shell=None,
+            parent_menu_item=None,
+            func=None,
+            data=None,
+            button=button,
+            activate_time=time)
 
-        about.connect('activate', self.show_about_dialog)
-        quit.connect('activate', Gtk.main_quit)
+    def on_about(self, action, param):
+        about_dialog = Gtk.AboutDialog(transient_for=self.window, modal=True)
+        about_dialog.present()
 
-        self.menu.append(about)
-        self.menu.append(quit)
-
-        self.menu.show_all()
-
-        def pos(menu, icon):
-            return (Gtk.Status_Icon.position_menu(menu, icon))
-
-        self.menu.popup(None, None, pos, self.status_icon, button, time)
-
-    def show_about_dialog(self, widget):
-        about_dialog = Gtk.AboutDialog()
-
-        about_dialog.set_destroy_with_parent(True)
-        about_dialog.set_name('Status_Icon Example')
-        about_dialog.set_version('1.0')
-        about_dialog.set_authors(['Andrew Steele'])
-
-        about_dialog.run()
-        about_dialog.destroy()
+    def on_quit(self, action, param):
+        self.quit()
 
 
 def main():
     try:
-        App()
-        Gtk.main()
+        app = Application()
+        app.run(sys.argv)
     except AppError:
         sys.exit(1)
