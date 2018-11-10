@@ -1,8 +1,12 @@
 import logging
 import sys
+from collections import namedtuple
 from pathlib import Path
+from typing import Callable
 
 import gi
+
+from lidske_aktivity.lib import list_home_dirs
 
 gi.require_version('Gtk', '3.0')
 
@@ -11,6 +15,10 @@ from gi.repository import Gio, Gtk  # noqa:E402  # isort:skip
 logger = logging.getLogger(__name__)
 
 XML = str(Path(__file__).parent / 'ui.xml')
+
+
+Directory = namedtuple('Directory', ['path'])
+Settings = namedtuple('Settings', ['directories'])
 
 
 class AppError(Exception):
@@ -32,6 +40,7 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
+        self.load_settings()
         self.create_menu()
         self.create_status_icon()
 
@@ -41,29 +50,40 @@ class Application(Gtk.Application):
             self.window = Window(application=self, title='Main Window')
         self.window.present()
 
-    def create_menu(self):
-        menu = Gtk.Menu()
+    def load_settings(self):
+        self.settings = Settings(directories=list(list_home_dirs()))
 
+    def create_progressbar(self, text: str):
         menu_item = Gtk.MenuItem()
         menu_item.set_sensitive(False)
-        progress_bar = Gtk.ProgressBar(text='Foo')
+        progress_bar = Gtk.ProgressBar(text=text)
         progress_bar.set_fraction(0.2)
         progress_bar.set_show_text(True)
         menu_item.add(progress_bar)
-        menu.append(menu_item)
+        self.menu.append(menu_item)
 
+    def create_menu_item(self, label: str, callback: Callable = None):
         menu_item = Gtk.MenuItem()
-        menu_item.set_label('About')
-        menu_item.connect('activate', self.on_about)
-        menu.append(menu_item)
+        menu_item.set_label(label)
+        if callback:
+            menu_item.connect('activate', callback)
+        else:
+            menu_item.set_sensitive(False)
+        self.menu.append(menu_item)
 
-        menu_item = Gtk.MenuItem()
-        menu_item.set_label('Quit')
-        menu_item.connect('activate', self.on_quit)
-        menu.append(menu_item)
+    def create_menu(self):
+        self.menu = Gtk.Menu()
 
-        menu.show_all()
-        self.menu = menu
+        if self.settings.directories:
+            for directory in self.settings.directories:
+                self.create_progressbar(directory.name)
+        else:
+            self.create_menu_item('No directories found')
+
+        self.create_menu_item('About', self.on_about)
+        self.create_menu_item('Quit', self.on_quit)
+
+        self.menu.show_all()
 
     def create_status_icon(self):
         status_icon = Gtk.StatusIcon.new_from_stock(Gtk.STOCK_HOME)
