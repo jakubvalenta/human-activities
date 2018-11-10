@@ -22,7 +22,7 @@ class StatusIcon(Gtk.StatusIcon):
         super().__init__(*args, **kwargs)
 
 
-class Window(Gtk.Window):
+class Window(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -36,6 +36,11 @@ class Window(Gtk.Window):
         button_2 = Gtk.Button('Quit')
         button_2.show()
         button_2.set_action_name('app.quit')
+        box.add(button_2)
+
+        button_2 = Gtk.Button('Menu')
+        button_2.show()
+        button_2.set_action_name('app.menu')
         box.add(button_2)
 
         self.add(box)
@@ -59,30 +64,39 @@ class Application(Gtk.Application):
         action.connect('activate', self.on_quit)
         self.add_action(action)
 
+        action = Gio.SimpleAction.new('menu', None)
+        action.connect('activate', self.on_menu)
+        self.add_action(action)
+
         builder = Gtk.Builder.new_from_file(XML)
         menu_model = builder.get_object('popup-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(menu_model)
+        self.menu = Gtk.Menu.new_from_model(menu_model)
+
+        self.set_app_menu(menu_model)
 
     def do_activate(self):
         self.status_icon = Gtk.StatusIcon.new_from_stock(Gtk.STOCK_HOME)
         self.status_icon.set_tooltip_text('Lidské aktivity')
         # if not self.status_icon.is_embedded():
         #    raise AppError('Tray icon is not supported on this platform')
-        self.status_icon.connect('popup-menu', self.on_popup_menu)
+        self.status_icon.connect('popup-menu', self.on_status_icon_popup_menu)
 
         # TODO: Remove this window
         if not self.window:
             self.window = Window(application=self, title='Main Window')
         self.window.present()
 
-    def on_popup_menu(self, icon, button, time):
-        self.popup_menu.popup(
+    def on_status_icon_popup_menu(self, icon, button, time):
+        self.menu.popup(
             parent_menu_shell=None,
             parent_menu_item=None,
             func=None,
             data=None,
             button=button,
             activate_time=time)
+
+    def on_menu(self, action, param):
+        self.menu.popup_at_pointer(None)
 
     def on_about(self, action, param):
         about_dialog = Gtk.AboutDialog(transient_for=self.window, modal=True)
