@@ -1,12 +1,11 @@
 import logging
 import sys
-from collections import namedtuple
 from pathlib import Path
 from typing import Callable, Optional
 
 import gi
 
-from lidske_aktivity.lib import list_home_dirs
+from lidske_aktivity.lib import FileSystem, watch
 
 gi.require_version('Gtk', '3.0')
 
@@ -14,11 +13,8 @@ from gi.repository import Gio, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
 
-XML = str(Path(__file__).parent / 'ui.xml')
-
-
-Directory = namedtuple('Directory', ['path'])
-Settings = namedtuple('Settings', ['directories'])
+CACHE_PATH = Path(__file__).parent / 'cache.csv'
+ROOT_PATH = Path.home() / 'desktop'
 
 
 class AppError(Exception):
@@ -40,10 +36,10 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.load_settings()
         self.create_main_menu()
         self.create_context_menu()
         self.create_status_icon()
+        watch(self.on_file_system_change, CACHE_PATH, root_path=ROOT_PATH)
 
     def do_activate(self):
         # TODO: Remove this window
@@ -51,15 +47,12 @@ class Application(Gtk.Application):
             self.window = Window(application=self, title='Main Window')
         self.window.present()
 
-    def load_settings(self):
-        self.settings = Settings(directories=list(list_home_dirs()))
-
     @staticmethod
-    def create_progressbar(menu: Gtk.Menu, text: str):
+    def create_progressbar(menu: Gtk.Menu, text: str, fraction: float):
         menu_item = Gtk.MenuItem()
         menu_item.set_sensitive(False)
         progress_bar = Gtk.ProgressBar(text=text)
-        progress_bar.set_fraction(0.2)
+        progress_bar.set_fraction(fraction)
         progress_bar.set_show_text(True)
         menu_item.add(progress_bar)
         menu.append(menu_item)
@@ -78,9 +71,17 @@ class Application(Gtk.Application):
 
     def create_main_menu(self):
         self.main_menu = Gtk.Menu()
-        if self.settings.directories:
-            for directory in self.settings.directories:
-                self.create_progressbar(self.main_menu, directory.name)
+
+    def on_file_system_change(self, file_system: FileSystem):
+        self.main_menu = Gtk.Menu()
+        if file_system.directories:
+            for directory in file_system.directories:
+                text = directory.path.name
+                if not file_system.size:
+                    fraction = 0
+                else:
+                    fraction = directory.size / file_system.size
+                self.create_progressbar(self.main_menu, text, fraction)
         else:
             self.create_menu_item(self.main_menu, 'No directories found')
         self.main_menu.show_all()
