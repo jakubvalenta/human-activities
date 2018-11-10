@@ -43,14 +43,25 @@ class Application(Gtk.Application):
 
     def create_menu(self):
         menu = Gtk.Menu()
+
+        menu_item = Gtk.MenuItem()
+        menu_item.set_sensitive(False)
+        progress_bar = Gtk.ProgressBar(text='Foo')
+        progress_bar.set_fraction(0.2)
+        progress_bar.set_show_text(True)
+        menu_item.add(progress_bar)
+        menu.append(menu_item)
+
         menu_item = Gtk.MenuItem()
         menu_item.set_label('About')
         menu_item.connect('activate', self.on_about)
         menu.append(menu_item)
+
         menu_item = Gtk.MenuItem()
         menu_item.set_label('Quit')
         menu_item.connect('activate', self.on_quit)
         menu.append(menu_item)
+
         menu.show_all()
         self.menu = menu
 
