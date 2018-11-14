@@ -1,11 +1,12 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Dict, Optional
 
 import gi
 
-from lidske_aktivity.lib import FileSystem, watch
+from lidske_aktivity.lib import (Directory, FileSystem, init_file_system,
+                                 scan_file_system)
 
 gi.require_version('Gtk', '3.0')
 
@@ -33,13 +34,18 @@ class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
         self.window = None
+        self.progress_bars: Dict[str, Gtk.ProgressBar] = {}
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.create_main_menu()
+        self.file_system = init_file_system(CACHE_PATH, root_path=ROOT_PATH)
+        self.create_main_menu(self.file_system)
         self.create_context_menu()
         self.create_status_icon()
-        watch(self.on_file_system_change, CACHE_PATH, root_path=ROOT_PATH)
+        scan_file_system(
+            self.file_system,
+            CACHE_PATH,
+            self.on_directory_change)
 
     def do_activate(self):
         # TODO: Remove this window
@@ -48,19 +54,26 @@ class Application(Gtk.Application):
         self.window.present()
 
     @staticmethod
-    def create_progressbar(menu: Gtk.Menu, text: str, fraction: float):
+    def create_progressbar(menu: Gtk.Menu,
+                           text: str,
+                           fraction: Optional[float] = None,
+                           pulse: bool = False) -> Gtk.ProgressBar:
         menu_item = Gtk.MenuItem()
         menu_item.set_sensitive(False)
         progress_bar = Gtk.ProgressBar(text=text)
-        progress_bar.set_fraction(fraction)
+        if fraction is not None:
+            progress_bar.set_fraction(fraction)
+        if pulse:
+            progress_bar.pulse()
         progress_bar.set_show_text(True)
         menu_item.add(progress_bar)
         menu.append(menu_item)
+        return progress_bar
 
     @staticmethod
     def create_menu_item(menu: Gtk.Menu,
                          label: str,
-                         callback: Callable = None):
+                         callback: Callable = None) -> None:
         menu_item = Gtk.MenuItem()
         menu_item.set_label(label)
         if callback:
@@ -69,22 +82,26 @@ class Application(Gtk.Application):
             menu_item.set_sensitive(False)
         menu.append(menu_item)
 
-    def create_main_menu(self):
-        self.main_menu = Gtk.Menu()
-
-    def on_file_system_change(self, file_system: FileSystem):
+    def create_main_menu(self, file_system: FileSystem) -> None:
         self.main_menu = Gtk.Menu()
         if file_system.directories:
             for directory in file_system.directories:
-                text = directory.path.name
-                if not file_system.size:
-                    fraction = 0
-                else:
-                    fraction = directory.size / file_system.size
-                self.create_progressbar(self.main_menu, text, fraction)
+                progress_bar = self.create_progressbar(
+                    self.main_menu,
+                    text=directory.path.name,
+                    pulse=True)
+                self.progress_bars[directory.path] = progress_bar
         else:
             self.create_menu_item(self.main_menu, 'No directories found')
         self.main_menu.show_all()
+
+    def on_directory_change(self, directory: Directory) -> None:
+        self.file_system.size += directory.size
+        if self.file_system.size:
+            fraction = directory.size / self.file_system.size
+        else:
+            fraction = 0
+        self.progress_bars[directory.path].set_fraction(fraction)
 
     def create_context_menu(self):
         self.context_menu = Gtk.Menu()

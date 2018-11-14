@@ -5,6 +5,7 @@ import stat
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
+from threading import Thread
 from typing import Callable, Dict, Iterator, List, Optional, Union
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ def _list_dirs(path: Path) -> Iterator[Path]:
     )
 
 
-def calc_directory_size(path: Path) -> int:
+def calc_path_size(path: Path) -> int:
     """See https://stackoverflow.com/a/37367965"""
     total = 0
     try:
@@ -51,11 +52,23 @@ def calc_directory_size(path: Path) -> int:
             if entry.is_file():
                 total += entry.stat().st_size
             elif entry.is_dir():
-                total += calc_directory_size(entry.path)
+                total += calc_path_size(entry.path)
     return total
 
 
-def init_file_system(root_path: Path) -> FileSystem:
+def calc_directory_size(directory: Directory,
+                        cache_path: Path,
+                        callback: Callable[[Directory], None]) -> None:
+    path = directory.path
+    logger.warn('Scanning %s', path)
+    size = calc_path_size(path)
+    logger.warn('Scanned %s, size = %d', path, size)
+    new_directory = Directory(path, size)
+    write_directory_to_cache(cache_path, new_directory)
+    callback(new_directory)
+
+
+def create_file_system(root_path: Path) -> FileSystem:
     directories = [
         Directory(path=path, size=0)
         for path in _list_dirs(root_path)
@@ -63,37 +76,43 @@ def init_file_system(root_path: Path) -> FileSystem:
     return FileSystem(directories=directories, size=0)
 
 
-def read_cache(path: Path) -> List[Dict[str, Union[str, int]]]:
-    if not path.is_file():
-        return []
-    with path.open() as f:
-        return [
-            {
-                'path': row['path'],
-                'size': int(row['size']),
+def try_int(val: any) -> Optional[int]:
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def read_cache(cache_path: Path) -> Iterator[Dict[str, Union[str, int]]]:
+    if not cache_path.is_file():
+        return iter([])
+    with cache_path.open() as f:
+        for row in csv.reader(f):
+            if len(row) != 2:
+                continue
+            path, size_raw = row
+            size = try_int(size_raw)
+            if size is None:
+                continue
+            yield {
+                'path': path,
+                'size': size,
             }
-            for row in csv.DictReader(f)
-            if 'path' in row and 'size' in row
-        ]
 
 
-def read_cache_dict(path: Path) -> Dict[str, int]:
+def read_cache_dict(cache_path: Path) -> Dict[str, int]:
     return {
         Path(cache_item['path']): cache_item['size']
-        for cache_item in read_cache(path)
+        for cache_item in read_cache(cache_path)
     }
 
 
-def write_directory_to_cache(path: Path, directory: Directory):
-    cache = read_cache(path)
-    cache.append({
-        'path': str(directory.path),
-        'size': directory.size,
-    })
-    with path.open('w') as f:
-        writer = csv.DictWriter(f, ['path', 'size'])
-        writer.writeheader()
-        writer.writerows(cache)
+def write_directory_to_cache(cache_path: Path, directory: Directory) -> None:
+    if not directory.path or directory.size is None:
+        return
+    with cache_path.open('a') as f:
+        writer = csv.writer(f)
+        writer.writerow([str(directory.path), directory.size])
 
 
 def load_cached_directories(directories: List[Directory],
@@ -120,33 +139,19 @@ def load_cache(file_system: FileSystem, path: Path) -> FileSystem:
     return update(file_system, partial(load_cached_directories, path=path))
 
 
-def scan_directories(directories: List[Directory],
-                     cache_path: Path) -> Iterator[Directory]:
-    for i, directory in enumerate(directories):
-        logger.warn('Scanning %s', directory.path)
-        size = calc_directory_size(directory.path)
-        logger.warn('Scanned %s, size = %d', directory.path, size)
-        directory = Directory(path=directory.path, size=size)
-        write_directory_to_cache(cache_path, directory)
-        yield directory
-
-
-def scan_file_system(file_system: FileSystem,
-                     cache_path: Path) -> FileSystem:
-    return update(
-        file_system,
-        partial(scan_directories, cache_path=cache_path))
-
-
-def watch(callback: Callable[[FileSystem], None],
-          cache_path: Path,
-          root_path: Optional[Path] = Path.home()):
+def init_file_system(cache_path: Path,
+                     root_path: Optional[Path] = Path.home()) -> FileSystem:
     if not root_path.is_dir():
         logger.error('Path %s doesn\'t exist', root_path)
         return FileSystem(directories=[], size=0)
-    file_system = init_file_system(root_path)
-    callback(file_system)
-    file_system = load_cache(file_system, cache_path)
-    callback(file_system)
-    file_system = scan_file_system(file_system, cache_path)
-    callback(file_system)
+    file_system = create_file_system(root_path)
+    return load_cache(file_system, cache_path)
+
+
+def scan_file_system(file_system: FileSystem,
+                     cache_path: Path,
+                     callback: Callable[[Directory], None]) -> None:
+    for i, directory in enumerate(file_system.directories):
+        func = partial(calc_directory_size, directory, cache_path, callback)
+        thread = Thread(target=func)
+        thread.start()
