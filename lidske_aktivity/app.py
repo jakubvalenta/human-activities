@@ -5,8 +5,8 @@ from typing import Callable, Dict, Optional
 
 import gi
 
-from lidske_aktivity.lib import (Directory, FileSystem, init_file_system,
-                                 scan_file_system)
+from lidske_aktivity.lib import (TDirectories, init_directories,
+                                 scan_directories, sum_size)
 
 gi.require_version('Gtk', '3.0')
 
@@ -38,14 +38,16 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.file_system = init_file_system(CACHE_PATH, root_path=ROOT_PATH)
-        self.create_main_menu(self.file_system)
+        directories = init_directories(CACHE_PATH, root_path=ROOT_PATH)
+        self.create_main_menu(directories)
         self.create_context_menu()
         self.create_status_icon()
-        scan_file_system(
-            self.file_system,
+        scan_directories(
+            directories,
             CACHE_PATH,
-            self.on_directory_change)
+            self.on_directories_change,
+            test=True
+        )
 
     def do_activate(self):
         # TODO: Remove this window
@@ -82,26 +84,30 @@ class Application(Gtk.Application):
             menu_item.set_sensitive(False)
         menu.append(menu_item)
 
-    def create_main_menu(self, file_system: FileSystem) -> None:
+    def create_main_menu(self, directories: TDirectories) -> None:
         self.main_menu = Gtk.Menu()
-        if file_system.directories:
-            for directory in file_system.directories:
-                progress_bar = self.create_progressbar(
+        if directories:
+            self.progress_bars = {
+                path: self.create_progressbar(
                     self.main_menu,
-                    text=directory.path.name,
-                    pulse=True)
-                self.progress_bars[directory.path] = progress_bar
+                    text=path.name,
+                    pulse=True
+                )
+                for path in directories.keys()
+            }
         else:
             self.create_menu_item(self.main_menu, 'No directories found')
         self.main_menu.show_all()
 
-    def on_directory_change(self, directory: Directory) -> None:
-        self.file_system.size += directory.size
-        if self.file_system.size:
-            fraction = directory.size / self.file_system.size
-        else:
-            fraction = 0
-        self.progress_bars[directory.path].set_fraction(fraction)
+    def on_directories_change(self, directories: TDirectories) -> None:
+        logger.warn(f'Directories changed')
+        total_size = sum_size(directories)
+        if total_size:
+            for path, size in directories.items():
+                progress_bar = self.progress_bars[path]
+                # progress_bar.hide()  # FIXME: Segmentation fault
+                progress_bar.set_fraction(size / total_size)
+                # progress_bar.show()
 
     def create_context_menu(self):
         self.context_menu = Gtk.Menu()
