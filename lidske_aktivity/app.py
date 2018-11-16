@@ -94,9 +94,10 @@ class Application(Gtk.Application):
                 path: self.create_progressbar(
                     self.main_menu,
                     text=path.name,
+                    fraction=size,
                     pulse=True
                 )
-                for path in directories.keys()
+                for path, size in directories.items()
             }
         else:
             self.create_menu_item(self.main_menu, 'No directories found')
@@ -107,8 +108,8 @@ class Application(Gtk.Application):
         total_size = sum_size(directories)
         if total_size:
             for path, size in directories.items():
-                progress_bar = self.progress_bars[path]
-                progress_bar.set_fraction(size / total_size)
+                if size is not None:
+                    self.progress_bars[path].set_fraction(size / total_size)
 
     def create_context_menu(self) -> None:
         self.context_menu = Gtk.Menu()
@@ -137,7 +138,8 @@ class Application(Gtk.Application):
             func=None,
             data=None,
             button=button,
-            activate_time=time)
+            activate_time=time
+        )
 
     def on_main_menu(self, widget: Gtk.StatusIcon):
         self.popup_menu(self.main_menu)

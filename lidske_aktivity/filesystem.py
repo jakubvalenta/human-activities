@@ -1,8 +1,6 @@
 import logging
 import os
-import random
 import stat
-import time
 from pathlib import Path
 from typing import Iterator
 
@@ -26,11 +24,7 @@ def list_dirs(path: Path) -> Iterator[Path]:
     )
 
 
-def random_wait():
-    time.sleep(random.randint(1, 20))
-
-
-def calc_dir_size(path: Path, test: bool = False) -> int:
+def calc_dir_size(path: Path) -> int:
     """See https://stackoverflow.com/a/37367965"""
     logger.warn('Calculating size %s', path)
     total = 0
@@ -45,6 +39,4 @@ def calc_dir_size(path: Path, test: bool = False) -> int:
             elif entry.is_dir():
                 total += calc_dir_size(entry.path)
     logger.warn('Calculated size %s = %d', path, total)
-    if test:
-        random_wait()
     return total

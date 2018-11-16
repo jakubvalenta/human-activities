@@ -1,6 +1,8 @@
 import csv
 import logging
-from functools import partial
+import random
+import time
+from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from threading import Thread
 from typing import Callable, Dict, Optional
@@ -10,14 +12,15 @@ from lidske_aktivity.filesystem import calc_dir_size, list_dirs
 logger = logging.getLogger(__name__)
 
 TDirectories = Dict[Path, int]
+TCallback = Callable[[TDirectories], None]
 
 
 def sum_size(directories: TDirectories) -> int:
-    return sum(size for size in directories.values())
+    return sum(size or 0 for size in directories.values())
 
 
 def read_directories(root_path: Path) -> TDirectories:
-    return {path: 0 for path in list_dirs(root_path)}
+    return {path: None for path in list_dirs(root_path)}
 
 
 def try_int(val: any) -> Optional[int]:
@@ -43,6 +46,7 @@ def read_cached_directories(cache_path: Path) -> TDirectories:
 
 
 def write_cache(cache_path: Path, directories: TDirectories) -> None:
+    logger.warn('Writing cache')
     with cache_path.open('w') as f:
         writer = csv.writer(f)
         writer.writerows(
@@ -72,19 +76,37 @@ def init_directories(cache_path: Path,
     )
 
 
+def random_wait():
+    time.sleep(random.randint(1, 20))
+
+
 def scan_directory(path: Path,
                    directories: TDirectories,
-                   callback: Callable[[TDirectories], None],
+                   callback: TCallback,
                    test: bool = False):
-    directories[path] = calc_dir_size(path, test)
+    directories[path] = calc_dir_size(path)
+    if test:
+        random_wait()
     callback(directories)
 
 
 def scan_directories(directories: TDirectories,
                      cache_path: Path,
-                     callback: Callable[[TDirectories], None],
+                     callback: TCallback,
                      test: bool = False) -> None:
-    for path in directories.keys():
-        func = partial(scan_directory, path, directories, callback, test=test)
-        thread = Thread(target=func)
-        thread.start()
+    def func():
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(
+                    scan_directory,
+                    path,
+                    directories,
+                    callback,
+                    test
+                )
+                for path in directories.keys()
+            ]
+            wait(futures)
+            write_cache(cache_path, directories)
+    thread = Thread(target=func)
+    thread.start()
