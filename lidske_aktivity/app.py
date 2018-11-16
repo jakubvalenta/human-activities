@@ -10,7 +10,7 @@ from lidske_aktivity.lib import (TDirectories, init_directories,
 
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import Gio, Gtk  # noqa:E402  # isort:skip
+from gi.repository import Gio, GLib, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,9 @@ class Application(Gtk.Application):
         if not self.window:
             self.window = Window(application=self, title='Main Window')
         self.window.present()
+
+    def on_directories_change(self, directories: TDirectories) -> None:
+        GLib.idle_add(self.update_progress_bars, directories)
 
     @staticmethod
     def create_progressbar(menu: Gtk.Menu,
@@ -99,23 +102,21 @@ class Application(Gtk.Application):
             self.create_menu_item(self.main_menu, 'No directories found')
         self.main_menu.show_all()
 
-    def on_directories_change(self, directories: TDirectories) -> None:
-        logger.warn(f'Directories changed')
+    def update_progress_bars(self, directories: TDirectories) -> None:
+        logger.warn(f'Updating progress bars')
         total_size = sum_size(directories)
         if total_size:
             for path, size in directories.items():
                 progress_bar = self.progress_bars[path]
-                # progress_bar.hide()  # FIXME: Segmentation fault
                 progress_bar.set_fraction(size / total_size)
-                # progress_bar.show()
 
-    def create_context_menu(self):
+    def create_context_menu(self) -> None:
         self.context_menu = Gtk.Menu()
         self.create_menu_item(self.context_menu, 'About', self.on_about)
         self.create_menu_item(self.context_menu, 'Quit', self.on_quit)
         self.context_menu.show_all()
 
-    def create_status_icon(self):
+    def create_status_icon(self) -> None:
         status_icon = Gtk.StatusIcon.new_from_stock(Gtk.STOCK_HOME)
         status_icon.set_tooltip_text('Lidské aktivity')
         # if not self.status_icon.is_embedded():
