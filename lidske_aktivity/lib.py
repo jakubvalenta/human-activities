@@ -46,7 +46,8 @@ def read_cached_directories(cache_path: Path) -> TDirectories:
 
 
 def write_cache(cache_path: Path, directories: TDirectories) -> None:
-    logger.warn('Writing cache')
+    logger.info('Writing cache')
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
     with cache_path.open('w') as f:
         writer = csv.writer(f)
         writer.writerows(

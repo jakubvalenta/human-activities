@@ -26,7 +26,7 @@ def list_dirs(path: Path) -> Iterator[Path]:
 
 def calc_dir_size(path: Path) -> int:
     """See https://stackoverflow.com/a/37367965"""
-    logger.warn('Calculating size %s', path)
+    logger.info('Calculating size %s', path)
     total = 0
     try:
         entries = os.scandir(path)
@@ -38,5 +38,5 @@ def calc_dir_size(path: Path) -> int:
                 total += entry.stat().st_size
             elif entry.is_dir():
                 total += calc_dir_size(entry.path)
-    logger.warn('Calculated size %s = %d', path, total)
+    logger.info('Calculated size %s = %d', path, total)
     return total

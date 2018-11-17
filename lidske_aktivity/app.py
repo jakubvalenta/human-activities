@@ -1,10 +1,10 @@
 import logging
 import sys
-from pathlib import Path
 from typing import Callable, Dict, Optional
 
 import gi
 
+from lidske_aktivity.config import CACHE_PATH, load_config
 from lidske_aktivity.lib import (TDirectories, init_directories,
                                  scan_directories, sum_size)
 
@@ -13,9 +13,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gio, GLib, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
-
-CACHE_PATH = Path(__file__).parent / 'cache.csv'
-ROOT_PATH = Path.home() / 'desktop'
 
 
 class AppError(Exception):
@@ -38,7 +35,8 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        directories = init_directories(CACHE_PATH, root_path=ROOT_PATH)
+        config = load_config()
+        directories = init_directories(CACHE_PATH, root_path=config.root_path)
         self.create_main_menu(directories)
         self.create_context_menu()
         self.create_status_icon()
@@ -46,7 +44,7 @@ class Application(Gtk.Application):
             directories,
             CACHE_PATH,
             self.on_directories_change,
-            test=True
+            test=config.test
         )
 
     def do_activate(self):
@@ -104,7 +102,7 @@ class Application(Gtk.Application):
         self.main_menu.show_all()
 
     def update_progress_bars(self, directories: TDirectories) -> None:
-        logger.warn(f'Updating progress bars')
+        logger.info(f'Updating progress bars')
         total_size = sum_size(directories)
         if total_size:
             for path, size in directories.items():
