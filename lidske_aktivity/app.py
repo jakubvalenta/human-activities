@@ -1,12 +1,13 @@
 import logging
 import sys
+from threading import Thread
+from time import sleep
 from typing import Callable, Dict, Optional
 
 import gi
 
 from lidske_aktivity.config import CACHE_PATH, load_config
-from lidske_aktivity.lib import (TDirectories, init_directories,
-                                 scan_directories, sum_size)
+from lidske_aktivity.lib import init_directories, scan_directories, sum_size
 
 gi.require_version('Gtk', '3.0')
 
@@ -31,21 +32,28 @@ class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
         self.window = None
+        self.running = True
         self.progress_bars: Dict[str, Gtk.ProgressBar] = {}
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        config = load_config()
-        directories = init_directories(CACHE_PATH, root_path=config.root_path)
-        self.create_main_menu(directories)
+        self.config = load_config()
+        self.directories = init_directories(
+            CACHE_PATH,
+            root_path=self.config.root_path
+        )
+        self.pending = {path: True for path in self.directories.keys()}
+        self.create_main_menu()
         self.create_context_menu()
         self.create_status_icon()
         scan_directories(
-            directories,
+            self.directories,
             CACHE_PATH,
-            self.on_directories_change,
-            test=config.test
+            self.on_directory_scanned,
+            test=self.config.test
         )
+        self.thread = Thread(target=self.tick)
+        self.thread.start()
 
     def do_activate(self):
         # TODO: Remove this window
@@ -53,22 +61,27 @@ class Application(Gtk.Application):
             self.window = Window(application=self, title='Main Window')
         self.window.present()
 
-    def on_directories_change(self, directories: TDirectories) -> None:
-        GLib.idle_add(self.update_progress_bars, directories)
+    def on_directory_scanned(self, path: str, size: int) -> None:
+        self.directories[path] = size
+        self.pending[path] = False
+
+    def tick(self):
+        while self.running:
+            sleep(1)
+            GLib.idle_add(self.update_progress_bars)
 
     @staticmethod
-    def create_progressbar(menu: Gtk.Menu,
-                           text: str,
-                           fraction: Optional[float] = None,
-                           pulse: bool = False) -> Gtk.ProgressBar:
+    def create_progressbar(
+            menu: Gtk.Menu,
+            text: str,
+            fraction: Optional[float] = None) -> Gtk.ProgressBar:
         menu_item = Gtk.MenuItem()
         menu_item.set_sensitive(False)
         progress_bar = Gtk.ProgressBar(text=text)
         if fraction is not None:
             progress_bar.set_fraction(fraction)
-        if pulse:
-            progress_bar.pulse()
         progress_bar.set_show_text(True)
+        progress_bar.set_pulse_step(1)
         menu_item.add(progress_bar)
         menu.append(menu_item)
         return progress_bar
@@ -85,28 +98,29 @@ class Application(Gtk.Application):
             menu_item.set_sensitive(False)
         menu.append(menu_item)
 
-    def create_main_menu(self, directories: TDirectories) -> None:
+    def create_main_menu(self) -> None:
         self.main_menu = Gtk.Menu()
-        if directories:
+        if self.directories:
             self.progress_bars = {
                 path: self.create_progressbar(
                     self.main_menu,
                     text=path.name,
-                    fraction=size,
-                    pulse=True
+                    fraction=size
                 )
-                for path, size in directories.items()
+                for path, size in self.directories.items()
             }
         else:
             self.create_menu_item(self.main_menu, 'No directories found')
         self.main_menu.show_all()
 
-    def update_progress_bars(self, directories: TDirectories) -> None:
+    def update_progress_bars(self) -> None:
         logger.info(f'Updating progress bars')
-        total_size = sum_size(directories)
+        total_size = sum_size(self.directories)
         if total_size:
-            for path, size in directories.items():
-                if size is not None:
+            for path, size in self.directories.items():
+                if self.pending[path]:
+                    self.progress_bars[path].pulse()
+                elif size is not None:
                     self.progress_bars[path].set_fraction(size / total_size)
 
     def create_context_menu(self) -> None:
@@ -150,6 +164,7 @@ class Application(Gtk.Application):
         about_dialog.present()
 
     def on_quit(self, param):
+        self.runnning = False
         self.quit()
 
 

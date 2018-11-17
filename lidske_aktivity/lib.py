@@ -85,10 +85,10 @@ def scan_directory(path: Path,
                    directories: TDirectories,
                    callback: TCallback,
                    test: bool = False):
-    directories[path] = calc_dir_size(path)
+    size = calc_dir_size(path)
     if test:
         random_wait()
-    callback(directories)
+    callback(path, size)
 
 
 def scan_directories(directories: TDirectories,

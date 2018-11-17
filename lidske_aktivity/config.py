@@ -31,7 +31,7 @@ def load_config() -> Config:
     with CONFIG_PATH.open() as f:
         config_json = json.load(f)
     if 'root_path' in config_json and type(config_json['root_path']) == str:
-        kwargs['root_path'] = config_json['root_path']
+        kwargs['root_path'] = Path(config_json['root_path']).expanduser()
     if 'test' in config_json and type(config_json['test']) == bool:
         kwargs['test'] = config_json['test']
     return Config(**kwargs)
