@@ -46,7 +46,7 @@ def read_cached_directories(cache_path: Path) -> TDirectories:
     return directories
 
 
-def write_cache(cache_path: Path, directories: TDirectories) -> None:
+def write_cache(cache_path: Path, directories: TDirectories):
     logger.info('Writing cache')
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     with cache_path.open('w') as f:

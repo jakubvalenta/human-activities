@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Optional, Tuple
 
 import gi
 
@@ -13,25 +13,27 @@ from gi.repository import Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
 
+TProgressBars = Dict[Path, Gtk.ProgressBar]
 
-def create_progress_bar(menu: Gtk.Menu,
-                        text: str,
+
+def create_progress_bar(text: str,
                         fraction: Optional[float] = None) -> Gtk.ProgressBar:
-    menu_item = Gtk.MenuItem()
-    menu_item.set_sensitive(False)
     progress_bar = Gtk.ProgressBar(text=text)
     if fraction is not None:
         progress_bar.set_fraction(fraction)
     progress_bar.set_show_text(True)
     progress_bar.set_pulse_step(1)
-    menu_item.add(progress_bar)
-    menu.append(menu_item)
     return progress_bar
+
+
+def vbox_add(vbox: Gtk.Box, widget: Gtk.Widget):
+    vbox.pack_start(widget, True, True, 0)
+    vbox.show_all()
 
 
 def create_menu_item(menu: Gtk.Menu,
                      label: str,
-                     callback: Callable = None) -> None:
+                     callback: Callable = None):
     menu_item = Gtk.MenuItem()
     menu_item.set_label(label)
     if callback:
@@ -41,19 +43,11 @@ def create_menu_item(menu: Gtk.Menu,
     menu.append(menu_item)
 
 
-def create_spinner_menu_item(menu: Gtk.Menu) -> Gtk.MenuItem:
-    menu_item = Gtk.MenuItem()
-    menu_item.set_sensitive(False)
+def create_spinner() -> Gtk.Spinner:
     spinner = Gtk.Spinner()
     spinner.start()
-    menu_item.add(spinner)
-    menu_item.show_all()
-    menu.append(menu_item)
-    return menu_item
-
-
-def create_main_menu() -> Gtk.Menu:
-    return Gtk.Menu()
+    spinner.show()
+    return spinner
 
 
 def calc_fraction(size: Optional[int], total_size: int) -> float:
@@ -62,30 +56,56 @@ def calc_fraction(size: Optional[int], total_size: int) -> float:
     return size / total_size
 
 
-def create_progress_bars(
-        main_menu: Gtk.Menu,
-        directories: TDirectories) -> Dict[Path, Gtk.ProgressBar]:
-    if directories:
-        total_size = sum_size(directories)
-        progress_bars = {
-            path: create_progress_bar(
-                main_menu,
-                text=path.name,
-                fraction=calc_fraction(size, total_size)
-            )
-            for path, size in directories.items()
-        }
+def create_vbox() -> Gtk.Box:
+    return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+
+
+def create_stack(vbox: Gtk.Box) -> Tuple[Gtk.Box, Gtk.Box]:
+    stack = Gtk.Stack()
+    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+    stack.set_transition_duration(1000)
+
+    vbox_size = create_vbox()
+    stack.add_titled(vbox_size, 'size', 'size')
+
+    vbox_activity = create_vbox()
+    stack.add_titled(vbox_activity, 'activity', 'activity')
+
+    stack_switcher = Gtk.StackSwitcher()
+    stack_switcher.set_stack(stack)
+
+    vbox_add(vbox, stack_switcher)
+    vbox_add(vbox, stack)
+
+    return vbox_size, vbox_activity
+
+
+def create_progress_bars(directories: TDirectories) -> TProgressBars:
+    if not directories:
+        return {}
+    total_size = sum_size(directories)
+    return {
+        path: create_progress_bar(
+            text=path.name,
+            fraction=calc_fraction(size, total_size)
+        )
+        for path, size in directories.items()
+    }
+
+
+def add_progress_bars(vbox: Gtk.Box, progress_bars: TProgressBars):
+    if progress_bars:
+        for progress_bar in progress_bars.values():
+            vbox_add(vbox, progress_bar)
     else:
-        progress_bars = {}
-        create_menu_item(main_menu, 'No directories found')
-    main_menu.show_all()
-    return progress_bars
+        label = Gtk.Labe('No directories found')
+        vbox_add(vbox, label)
 
 
-def update_progress_bars(progress_bars: Dict[Path, Gtk.ProgressBar],
+def update_progress_bars(progress_bars: TProgressBars,
                          directories: TDirectories,
                          pending: TPending,
-                         spinner_menu_item: Gtk.MenuItem) -> None:
+                         on_finished: Callable[[], None]):
     logger.info('Updating progress bars')
     some_pending = False
     if directories:
@@ -100,7 +120,7 @@ def update_progress_bars(progress_bars: Dict[Path, Gtk.ProgressBar],
             if pending[path]:
                 some_pending = True
     if not some_pending:
-        spinner_menu_item.hide()
+        on_finished()
 
 
 def create_context_menu(on_about: Callable, on_quit: Callable) -> Gtk.Menu:
@@ -124,7 +144,7 @@ def create_status_icon(on_main_menu: Callable,
 
 def popup_menu(menu: Gtk.Menu,
                button: int = 1,
-               time: Optional[int] = None) -> None:
+               time: Optional[int] = None):
     if time is None:
         time = Gtk.get_current_event_time()
     menu.popup(
@@ -137,7 +157,7 @@ def popup_menu(menu: Gtk.Menu,
     )
 
 
-def show_about_dialog() -> None:
+def show_about_dialog():
     about_dialog = Gtk.AboutDialog(
         modal=True,
         logo_icon_name='go-home',
@@ -152,5 +172,5 @@ def show_about_dialog() -> None:
     about_dialog.connect('response', on_about_response)
 
 
-def on_about_response(dialog: Gtk.Dialog, response_id: int) -> None:
+def on_about_response(dialog: Gtk.Dialog, response_id: int):
     dialog.destroy()
