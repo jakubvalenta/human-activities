@@ -59,16 +59,19 @@ class Application(Gtk.Application):
         self.pending = {path: True for path in self.directories.keys()}
 
     def scan_start(self) -> None:
-        self.scan_pool = scan_directories(
+        self.scan_event_stop = Event()
+        self.scan_thread = scan_directories(
             self.directories,
             CACHE_PATH,
             self.on_scan,
+            self.scan_event_stop,
             test=self.config.test
         )
 
     def scan_stop(self) -> None:
-        pass
-        # self.scan_pool.join()  # TODO
+        self.scan_event_stop.set()
+        self.scan_thread.join()
+        logger.info('Scan stopped')
 
     def on_scan(self, path: str, size: int) -> None:
         self.directories[path] = size
@@ -86,7 +89,7 @@ class Application(Gtk.Application):
 
     def tick(self) -> None:
         while not self.tick_event_stop.is_set():
-            logger.warn('Tick')
+            logger.info('Tick')
             GLib.idle_add(self.on_tick)
             sleep(1)
 

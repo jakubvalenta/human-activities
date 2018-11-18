@@ -2,6 +2,7 @@ import logging
 import os
 import stat
 from pathlib import Path
+from threading import Event
 from typing import Iterator
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ def list_dirs(path: Path) -> Iterator[Path]:
     )
 
 
-def calc_dir_size(path: Path) -> int:
+def calc_dir_size(path: Path, event_stop: Event) -> int:
     """See https://stackoverflow.com/a/37367965"""
     logger.info('Calculating size %s', path)
     total = 0
@@ -33,10 +34,13 @@ def calc_dir_size(path: Path) -> int:
     except PermissionError:
         entries = []
     for entry in entries:
+        if event_stop.is_set():
+            logger.warn('Stopping calculation')
+            return None
         if not entry.is_symlink():
             if entry.is_file():
                 total += entry.stat().st_size
             elif entry.is_dir():
-                total += calc_dir_size(entry.path)
+                total += calc_dir_size(entry.path, event_stop)
     logger.info('Calculated size %s = %d', path, total)
     return total

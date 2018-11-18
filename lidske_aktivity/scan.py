@@ -4,10 +4,10 @@ import random
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
-from threading import Thread
+from threading import Event, Thread
 from typing import Callable, Dict, Optional
 
-from lidske_aktivity.filesystem import calc_dir_size, list_dirs
+from lidske_aktivity import filesystem
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def sum_size(directories: TDirectories) -> int:
 
 
 def read_directories(root_path: Path) -> TDirectories:
-    return {path: None for path in list_dirs(root_path)}
+    return {path: None for path in filesystem.list_dirs(root_path)}
 
 
 def try_int(val: any) -> Optional[int]:
@@ -78,23 +78,25 @@ def init_directories(cache_path: Path,
     )
 
 
-def random_wait():
-    time.sleep(random.randint(1, 20))
-
-
 def scan_directory(path: Path,
                    directories: TDirectories,
                    callback: TCallback,
+                   event_stop: Event,
                    test: bool = False):
-    size = calc_dir_size(path)
+    size = filesystem.calc_dir_size(path, event_stop)
     if test:
-        random_wait()
+        for _ in range(random.randint(1, 20)):
+            if event_stop.is_set():
+                logger.warn('Stopping test sleep')
+                break
+            time.sleep(1)
     callback(path, size)
 
 
 def scan_directories(directories: TDirectories,
                      cache_path: Path,
                      callback: TCallback,
+                     event_stop: Event,
                      test: bool = False) -> None:
     def orchestrator():
         with ThreadPoolExecutor() as executor:
@@ -104,6 +106,7 @@ def scan_directories(directories: TDirectories,
                     path,
                     directories,
                     callback,
+                    event_stop,
                     test
                 )
                 for path in directories.keys()
@@ -112,3 +115,4 @@ def scan_directories(directories: TDirectories,
             write_cache(cache_path, directories)
     thread = Thread(target=orchestrator)
     thread.start()
+    return thread
