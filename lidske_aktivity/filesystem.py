@@ -27,7 +27,6 @@ def list_dirs(path: Path) -> List[Path]:
 
 def calc_dir_size(path: str, event_stop: Event) -> int:
     """See https://stackoverflow.com/a/37367965"""
-    logger.info('Calculating size %s', path)
     total = 0
     try:
         entries = os.scandir(path)
@@ -43,5 +42,4 @@ def calc_dir_size(path: str, event_stop: Event) -> int:
                 total += entry.stat().st_size
             elif entry.is_dir():
                 total += calc_dir_size(entry.path, event_stop)
-    logger.info('Calculated size %s = %d', path, total)
     return total

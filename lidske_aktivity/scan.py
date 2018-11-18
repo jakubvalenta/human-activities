@@ -83,7 +83,11 @@ def scan_directory(path: Path,
                    callback: TCallback,
                    event_stop: Event,
                    test: bool = False):
+    logger.info('Calculating size %s', path)
+    time_start = time.time()
     size = filesystem.calc_dir_size(str(path), event_stop)
+    time_duration = time.time() - time_start
+    logger.info('Calculated size %s = %d in %f s', path, size, time_duration)
     if test:
         for _ in range(random.randint(1, 20)):
             if event_stop.is_set():
