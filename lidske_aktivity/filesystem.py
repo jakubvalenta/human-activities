@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def has_hidden_attribute(path: Path) -> bool:
     """See https://stackoverflow.com/a/6365265"""
     return bool(getattr(path.stat(), 'st_file_attributes', 0) &
-                stat.FILE_ATTRIBUTE_HIDDEN)
+                stat.FILE_ATTRIBUTE_HIDDEN)  # type: ignore
 
 
 def is_hidden(path: Path) -> bool:
