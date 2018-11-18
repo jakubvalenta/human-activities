@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional
 
 import gi
 
+from lidske_aktivity import __version__
 from lidske_aktivity.scan import TDirectories, TPending, sum_size
 
 gi.require_version('Gtk', '3.0')
@@ -93,7 +94,7 @@ def create_status_icon(on_main_menu: Callable,
 
 def popup_menu(menu: Gtk.Menu,
                button: int = 1,
-               time: Optional[int] = None):
+               time: Optional[int] = None) -> None:
     if time is None:
         time = Gtk.get_current_event_time()
     menu.popup(
@@ -104,3 +105,22 @@ def popup_menu(menu: Gtk.Menu,
         button=button,
         activate_time=time
     )
+
+
+def show_about_dialog() -> None:
+    about_dialog = Gtk.AboutDialog(
+        modal=True,
+        logo_icon_name='go-home',
+        # logo_icon_name='application-exit',
+        authors=['Jakub Valenta', 'Jiří Skála'],
+        copyright='\u00a9 2018 Jakub Valena, Jiří Skála',
+        license_type=Gtk.License.GPL_3_0,
+        version=__version__,
+        website='https://www.example.com'  # TODO
+    )
+    about_dialog.present()
+    about_dialog.connect('response', on_about_response)
+
+
+def on_about_response(dialog: Gtk.Dialog, response_id: int) -> None:
+    dialog.destroy()

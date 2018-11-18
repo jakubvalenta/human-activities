@@ -17,6 +17,8 @@ from gi.repository import Gio, GLib, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
 
+GLib.set_application_name('Lidské aktivity')
+
 
 class AppError(Exception):
     pass
@@ -108,8 +110,7 @@ class Application(Gtk.Application):
         ui.popup_menu(self.context_menu, button=button, time=time)
 
     def on_about(self, param: Any) -> None:
-        about_dialog = Gtk.AboutDialog(transient_for=self.window, modal=True)
-        about_dialog.present()
+        ui.show_about_dialog()
 
     def on_quit(self, param: Any) -> None:
         self.scan_stop()
