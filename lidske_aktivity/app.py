@@ -20,14 +20,6 @@ class AppError(Exception):
     pass
 
 
-class Window(Gtk.ApplicationWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        label = Gtk.Label('Hello world')
-        label.show()
-        self.add(label)
-
-
 class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
@@ -56,10 +48,8 @@ class Application(Gtk.Application):
         self.thread.start()
 
     def do_activate(self):
-        # TODO: Remove this window
         if not self.window:
-            self.window = Window(application=self, title='Main Window')
-        self.window.present()
+            self.window = Gtk.ApplicationWindow(application=self)
 
     def on_directory_scanned(self, path: str, size: int) -> None:
         self.directories[path] = size
