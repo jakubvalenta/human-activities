@@ -12,6 +12,7 @@ from lidske_aktivity.filesystem import calc_dir_size, list_dirs
 logger = logging.getLogger(__name__)
 
 TDirectories = Dict[Path, int]
+TPending = Dict[Path, bool]
 TCallback = Callable[[TDirectories], None]
 
 
@@ -95,7 +96,7 @@ def scan_directories(directories: TDirectories,
                      cache_path: Path,
                      callback: TCallback,
                      test: bool = False) -> None:
-    def func():
+    def orchestrator():
         with ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(
@@ -109,5 +110,5 @@ def scan_directories(directories: TDirectories,
             ]
             wait(futures)
             write_cache(cache_path, directories)
-    thread = Thread(target=func)
+    thread = Thread(target=orchestrator)
     thread.start()
