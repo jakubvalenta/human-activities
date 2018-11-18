@@ -1,9 +1,9 @@
 import logging
 import sys
+from pathlib import Path
 from threading import Event, Thread
 from time import sleep
 from typing import Any, Dict, Optional
-from pathlib import Path
 
 import gi
 

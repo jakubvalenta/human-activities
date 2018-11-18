@@ -1,6 +1,6 @@
 import logging
-from typing import Callable, Dict, Optional
 from pathlib import Path
+from typing import Callable, Dict, Optional
 
 import gi
 
