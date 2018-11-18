@@ -1,21 +1,27 @@
-.PHONY: run install dist clean test lint help
+.PHONY: run run-debug install dist clean test unit-test lint help
 
-run:
+run:  ## Start the app
 	pipenv run python -m lidske_aktivity
 
-install:
+run-debug:  ## Start the app with extended logging
+	pipenv run python -m lidske_aktivity --verbose
+
+install:  ## Install required packages
 	sudo pacman -S gobject-introspection
 
-dist:
+dist:  ## Build distribution package
 	@echo "TODO"
 
-clean:
-	-rm lidske_aktivity/cache.csv
+clean:  ## Remove cache
+	pipenv run python -m lidske_aktivity --verbose --clean
 
-test:
+test:  ## Run unit tests and linting
 	tox
 
-lint:
+unit-test:  ## Run unit tests
+	tox -e py37
+
+lint:  ## Run linting
 	tox -e lint
 
 help:

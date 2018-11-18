@@ -1,9 +1,12 @@
 import json
+import logging
 import os.path
 import platform
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Union
+
+logger = logging.getLogger(__name__)
 
 PACKAGE_NAME = 'lidske-aktivity'
 PACKAGE_ID = 'com.example.lidske-aktivity'
@@ -54,3 +57,11 @@ def load_config() -> Config:
         if type(config_json.get('test')) == bool:
             test = config_json['test']
     return Config(root_path=root_path, test=test)
+
+
+def clean_cache():
+    if CONFIG_PATH.is_file():
+        CONFIG_PATH.unlink()
+        logger.info('Removed cache file %s', CACHE_PATH)
+    else:
+        logger.info('Nothing to do, cache file %s doesn\'t exist', CACHE_PATH)
