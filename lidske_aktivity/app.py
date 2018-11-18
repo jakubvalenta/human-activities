@@ -121,6 +121,6 @@ class Application(Gtk.Application):
 def main():
     try:
         app = Application()
-        app.run(sys.argv)
+        app.run()
     except AppError:
         sys.exit(1)
