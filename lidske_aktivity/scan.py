@@ -5,15 +5,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from threading import Event, Thread
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from lidske_aktivity import filesystem
 
 logger = logging.getLogger(__name__)
 
-TDirectories = Dict[Path, int]
+TDirectories = Dict[Path, Optional[int]]
 TPending = Dict[Path, bool]
-TCallback = Callable[[TDirectories], None]
+TCallback = Callable[[Path, Optional[int]], None]
 
 
 def sum_size(directories: TDirectories) -> int:
@@ -24,7 +24,7 @@ def read_directories(root_path: Path) -> TDirectories:
     return {path: None for path in filesystem.list_dirs(root_path)}
 
 
-def try_int(val: any) -> Optional[int]:
+def try_int(val: Any) -> Optional[int]:
     try:
         return int(val)
     except (TypeError, ValueError):
@@ -32,7 +32,7 @@ def try_int(val: any) -> Optional[int]:
 
 
 def read_cached_directories(cache_path: Path) -> TDirectories:
-    directories = {}
+    directories: TDirectories = {}
     if cache_path.is_file():
         with cache_path.open() as f:
             for row in csv.reader(f):
@@ -68,7 +68,7 @@ def merge_directories(a: TDirectories, b: TDirectories) -> TDirectories:
 
 
 def init_directories(cache_path: Path,
-                     root_path: Optional[Path] = Path.home()) -> TDirectories:
+                     root_path: Path = Path.home()) -> TDirectories:
     if not root_path.is_dir():
         logger.error('Path %s is not a directory', root_path)
         return {}
@@ -83,7 +83,7 @@ def scan_directory(path: Path,
                    callback: TCallback,
                    event_stop: Event,
                    test: bool = False):
-    size = filesystem.calc_dir_size(path, event_stop)
+    size = filesystem.calc_dir_size(str(path), event_stop)
     if test:
         for _ in range(random.randint(1, 20)):
             if event_stop.is_set():
@@ -97,7 +97,7 @@ def scan_directories(directories: TDirectories,
                      cache_path: Path,
                      callback: TCallback,
                      event_stop: Event,
-                     test: bool = False) -> None:
+                     test: bool = False) -> Thread:
     def orchestrator():
         with ThreadPoolExecutor() as executor:
             futures = [

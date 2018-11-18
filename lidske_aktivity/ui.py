@@ -1,5 +1,6 @@
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, Dict, Optional
+from pathlib import Path
 
 import gi
 
@@ -43,8 +44,9 @@ def create_main_menu() -> Gtk.Menu:
     return Gtk.Menu()
 
 
-def create_progress_bars(main_menu: Gtk.Menu,
-                         directories: TDirectories) -> List[Gtk.ProgressBar]:
+def create_progress_bars(
+        main_menu: Gtk.Menu,
+        directories: TDirectories) -> Dict[Path, Gtk.ProgressBar]:
     if directories:
         progress_bars = {
             path: create_progressbar(main_menu, text=path.name, fraction=size)
@@ -57,7 +59,7 @@ def create_progress_bars(main_menu: Gtk.Menu,
     return progress_bars
 
 
-def update_progress_bars(progress_bars: List[Gtk.ProgressBar],
+def update_progress_bars(progress_bars: Dict[Path, Gtk.ProgressBar],
                          directories: TDirectories,
                          pending: TPending) -> None:
     logger.info('Updating progress bars')

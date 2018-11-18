@@ -8,6 +8,10 @@ pygobject = "*"
 click = "*"
 
 [dev-packages]
+"flake8" = "*"
+mypy = "*"
+isort = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.7"

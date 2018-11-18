@@ -2,7 +2,8 @@ import logging
 import sys
 from threading import Event, Thread
 from time import sleep
-from typing import Dict
+from typing import Any, Dict, Optional
+from pathlib import Path
 
 import gi
 
@@ -25,9 +26,9 @@ class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
         self.window: Gtk.ApplicationWindow = None
-        self.progress_bars: Dict[str, Gtk.ProgressBar] = {}
+        self.progress_bars: Dict[Path, Gtk.ProgressBar] = {}
 
-    def do_startup(self):
+    def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
         self.init_directories()
         self.main_menu = ui.create_main_menu()
@@ -73,7 +74,7 @@ class Application(Gtk.Application):
         self.scan_thread.join()
         logger.info('Scan stopped')
 
-    def on_scan(self, path: str, size: int) -> None:
+    def on_scan(self, path: Path, size: Optional[int]) -> None:
         self.directories[path] = size
         self.pending[path] = False
 
@@ -93,24 +94,24 @@ class Application(Gtk.Application):
             GLib.idle_add(self.on_tick)
             sleep(1)
 
-    def on_tick(self):
+    def on_tick(self) -> None:
         ui.update_progress_bars(
             self.progress_bars,
             self.directories,
             self.pending
         )
 
-    def on_main_menu(self, widget: Gtk.StatusIcon):
+    def on_main_menu(self, widget: Gtk.StatusIcon) -> None:
         ui.popup_menu(self.main_menu)
 
-    def on_context_menu(self, icon: any, button: int, time: int):
+    def on_context_menu(self, icon: Any, button: int, time: int) -> None:
         ui.popup_menu(self.context_menu, button=button, time=time)
 
-    def on_about(self, param):
+    def on_about(self, param: Any) -> None:
         about_dialog = Gtk.AboutDialog(transient_for=self.window, modal=True)
         about_dialog.present()
 
-    def on_quit(self, param):
+    def on_quit(self, param: Any) -> None:
         self.scan_stop()
         self.tick_stop()
         self.quit()

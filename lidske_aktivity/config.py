@@ -2,20 +2,36 @@ import json
 import os.path
 from dataclasses import dataclass
 from pathlib import Path
+import platform
 
-
-def get_env_path(var: str, default_dir: str) -> Path:
-    val = os.environ.get(var)
-    if val is not None:
-        return Path(val)
-    return Path.home() / default_dir
-
-
-XDG_CACHE_HOME = get_env_path('XDG_CACHE_HOME', '.cache')
-XDG_CONFIG_HOME = get_env_path('XDG_CONFIG_HOME', '.config')
 PACKAGE_NAME = 'lidske-aktivity'
-CONFIG_PATH = XDG_CONFIG_HOME / PACKAGE_NAME / 'config.json'
-CACHE_PATH = XDG_CACHE_HOME / PACKAGE_NAME / 'cache.csv'
+PACKAGE_ID = 'com.example.lidske-aktivity'
+
+
+def get_dir(mac_dir: str, xdg_var: str, fallback_dir: str) -> Path:
+    if platform.win32_ver()[0]:
+        win_app_dir = os.environ.get('APPDATA')
+        if win_app_dir:
+            return Path(win_app_dir) / PACKAGE_NAME
+    elif platform.mac_ver()[0]:
+        return Path.home() / mac_dir / PACKAGE_ID
+    else:
+        xdg_cache_dir = os.environ.get(xdg_var)
+        if xdg_cache_dir:
+            return Path(xdg_cache_dir) / PACKAGE_NAME
+    return Path.home() / fallback_dir / PACKAGE_NAME
+
+
+def get_cache_dir():
+    return get_dir('Caches', 'XDG_CACHE_HOME', '.cache')
+
+
+def get_config_dir():
+    return get_dir('Preferences', 'XDG_CONFIG_HOME', '.config')
+
+
+CACHE_PATH = get_cache_dir() / 'cache.csv'
+CONFIG_PATH = get_config_dir() / 'config.json'
 
 
 @dataclass

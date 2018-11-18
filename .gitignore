@@ -1,1 +1,3 @@
-cache.csv
+.mypy_cache
+.pytest_cache
+.tox
