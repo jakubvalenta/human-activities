@@ -1,8 +1,8 @@
 import json
 import os.path
-from dataclasses import dataclass
-from pathlib import Path
 import platform
+from dataclasses import dataclass
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 PACKAGE_NAME = 'lidske-aktivity'
 PACKAGE_ID = 'com.example.lidske-aktivity'
@@ -12,13 +12,13 @@ def get_dir(mac_dir: str, xdg_var: str, fallback_dir: str) -> Path:
     if platform.win32_ver()[0]:
         win_app_dir = os.environ.get('APPDATA')
         if win_app_dir:
-            return Path(win_app_dir) / PACKAGE_NAME
+            return PureWindowsPath(win_app_dir) / PACKAGE_NAME
     elif platform.mac_ver()[0]:
         return Path.home() / mac_dir / PACKAGE_ID
     else:
         xdg_cache_dir = os.environ.get(xdg_var)
         if xdg_cache_dir:
-            return Path(xdg_cache_dir) / PACKAGE_NAME
+            return PurePosixPath(xdg_cache_dir) / PACKAGE_NAME
     return Path.home() / fallback_dir / PACKAGE_NAME
 
 

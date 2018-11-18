@@ -26,7 +26,7 @@
         },
         "pycairo": {
             "hashes": [
-                "sha256:592b53128140fbddea90a847a9c8299b6ee7a94e834a99e05fee23538c855719"
+                "sha256:abd42a4c9c2069febb4c38fe74bfc4b4a9d3a89fea3bc2e4ba7baff7a20f783f"
             ],
             "version": "==1.18.0"
         },

@@ -1,48 +1,62 @@
-from unittest import TestCase
-from unittest import mock
+from pathlib import PurePosixPath, PureWindowsPath
+from unittest import TestCase, mock
 
 from lidske_aktivity import config
 
+WIN_HOME = PureWindowsPath(r'C:\Documents and Settings\foo')
+MAC_HOME = PurePosixPath('/Users/foo')
+LINUX_HOME = PurePosixPath('/home/foo')
+WIN_APPDATA = WIN_HOME / 'Application Data'
+XDG_CACHE_HOME = LINUX_HOME / '.cache'
 
-APPDATA = r'C:\\Documents and Settings\\foo\\Application Data'
-XDG_CACHE_HOME = '/home/foo/.cache'
 
+@mock.patch('platform.win32_ver', lambda: ('1',))
+@mock.patch('platform.mac_ver', lambda: (None,))
+@mock.patch('pathlib.Path.home', lambda: WIN_HOME)
+class TestConfigWin(TestCase):
 
-class TestConfig(TestCase):
-
-    @mock.patch('os.win32_ver', ('1',))
-    @mock.patch.dict('os.environ', {'APPDATA': APPDATA})
+    @mock.patch.dict('os.environ', {'APPDATA': str(WIN_APPDATA)})
     def test_win(self):
         self.assertEqual(
             config.get_cache_dir(),
-            f'{APPDATA}/lidske-aktivity'
+            WIN_APPDATA / 'lidske-aktivity'
         )
 
-    @mock.patch('os.win32_ver', ('1',))
     @mock.patch.dict('os.environ', {'APPDATA': ''})
     def test_win_fallback(self):
         self.assertEqual(
             config.get_cache_dir(),
-            f'/home/foo/.cache/lidske-aktivity'
+            WIN_HOME / '.cache' / 'lidske-aktivity'
         )
 
-    @mock.patch('os.mac_ver', ('1',))
+
+@mock.patch('platform.win32_ver', lambda: (None,))
+@mock.patch('platform.mac_ver', lambda: ('1',))
+@mock.patch('pathlib.Path.home', lambda: MAC_HOME)
+class TestConfigMac(TestCase):
+
     def test_mac(self):
         self.assertEqual(
             config.get_cache_dir(),
-            f'/home/foo/Caches/org.example.lidske-aktivity'
+            MAC_HOME / 'Caches' / 'com.example.lidske-aktivity'
         )
 
-    @mock.patch.dict('os.environ', {'XDG_CACHE_HOME': XDG_CACHE_HOME})
+
+@mock.patch('platform.win32_ver', lambda: (None,))
+@mock.patch('platform.mac_ver', lambda: (None,))
+@mock.patch('pathlib.Path.home', lambda: LINUX_HOME)
+class TestConfigLinux(TestCase):
+
+    @mock.patch.dict('os.environ', {'XDG_CACHE_HOME': str(XDG_CACHE_HOME)})
     def test_linux(self):
         self.assertEqual(
             config.get_cache_dir(),
-            f'{XDG_CACHE_HOME}/lidske-aktivity'
+            XDG_CACHE_HOME / 'lidske-aktivity'
         )
 
-    @mock.patch.dict('os.environ', {'XDG_CACHE_HOME': None})
+    @mock.patch.dict('os.environ', {'XDG_CACHE_HOME': ''})
     def test_linux_fallback(self):
         self.assertEqual(
             config.get_cache_dir(),
-            f'{XDG_CACHE_HOME}/lidske-aktivity'
+            XDG_CACHE_HOME / 'lidske-aktivity'
         )
