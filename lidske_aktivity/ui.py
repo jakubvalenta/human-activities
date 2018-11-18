@@ -14,9 +14,9 @@ from gi.repository import Gtk  # noqa:E402  # isort:skip
 logger = logging.getLogger(__name__)
 
 
-def create_progressbar(menu: Gtk.Menu,
-                       text: str,
-                       fraction: Optional[float] = None) -> Gtk.ProgressBar:
+def create_progress_bar(menu: Gtk.Menu,
+                        text: str,
+                        fraction: Optional[float] = None) -> Gtk.ProgressBar:
     menu_item = Gtk.MenuItem()
     menu_item.set_sensitive(False)
     progress_bar = Gtk.ProgressBar(text=text)
@@ -41,16 +41,38 @@ def create_menu_item(menu: Gtk.Menu,
     menu.append(menu_item)
 
 
+def create_spinner_menu_item(menu: Gtk.Menu) -> Gtk.MenuItem:
+    menu_item = Gtk.MenuItem()
+    menu_item.set_sensitive(False)
+    spinner = Gtk.Spinner()
+    spinner.start()
+    menu_item.add(spinner)
+    menu_item.show_all()
+    menu.append(menu_item)
+    return menu_item
+
+
 def create_main_menu() -> Gtk.Menu:
     return Gtk.Menu()
+
+
+def calc_fraction(size: Optional[int], total_size: int) -> float:
+    if size is None or not total_size:
+        return 0
+    return size / total_size
 
 
 def create_progress_bars(
         main_menu: Gtk.Menu,
         directories: TDirectories) -> Dict[Path, Gtk.ProgressBar]:
     if directories:
+        total_size = sum_size(directories)
         progress_bars = {
-            path: create_progressbar(main_menu, text=path.name, fraction=size)
+            path: create_progress_bar(
+                main_menu,
+                text=path.name,
+                fraction=calc_fraction(size, total_size)
+            )
             for path, size in directories.items()
         }
     else:
@@ -62,15 +84,23 @@ def create_progress_bars(
 
 def update_progress_bars(progress_bars: Dict[Path, Gtk.ProgressBar],
                          directories: TDirectories,
-                         pending: TPending) -> None:
+                         pending: TPending,
+                         spinner_menu_item: Gtk.MenuItem) -> None:
     logger.info('Updating progress bars')
-    total_size = sum_size(directories)
-    if total_size:
+    some_pending = False
+    if directories:
+        total_size = sum_size(directories)
         for path, size in directories.items():
-            if pending[path]:
+            if size is None:
                 progress_bars[path].pulse()
-            elif size is not None:
-                progress_bars[path].set_fraction(size / total_size)
+            else:
+                progress_bars[path].set_fraction(
+                    calc_fraction(size, total_size)
+                )
+            if pending[path]:
+                some_pending = True
+    if not some_pending:
+        spinner_menu_item.hide()
 
 
 def create_context_menu(on_about: Callable, on_quit: Callable) -> Gtk.Menu:

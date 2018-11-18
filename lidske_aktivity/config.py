@@ -60,8 +60,8 @@ def load_config() -> Config:
 
 
 def clean_cache():
-    if CONFIG_PATH.is_file():
-        CONFIG_PATH.unlink()
+    if CACHE_PATH.is_file():
+        CACHE_PATH.unlink()
         logger.info('Removed cache file %s', CACHE_PATH)
     else:
         logger.info('Nothing to do, cache file %s doesn\'t exist', CACHE_PATH)

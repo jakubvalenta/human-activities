@@ -38,6 +38,7 @@ class Application(Gtk.Application):
             self.main_menu,
             self.directories
         )
+        self.spinner_menu_item = ui.create_spinner_menu_item(self.main_menu)
         self.context_menu = ui.create_context_menu(
             on_about=self.on_about,
             on_quit=self.on_quit
@@ -100,7 +101,8 @@ class Application(Gtk.Application):
         ui.update_progress_bars(
             self.progress_bars,
             self.directories,
-            self.pending
+            self.pending,
+            self.spinner_menu_item
         )
 
     def on_main_menu(self, widget: Gtk.StatusIcon) -> None:
