@@ -28,10 +28,14 @@ TFractions = Dict[Path, float]
 @dataclass
 class SizeMode:
     label: str
+    tooltip: str
     calc_fractions: Callable[[TDirectories], TFractions]
 
 
-def safe_div(a: int, b: int) -> float:
+TSizeModes = Dict[str, SizeMode]
+
+
+def safe_div(a: Optional[int], b: Optional[int]) -> float:
     if a and b:
         return a / b
     return 0
@@ -52,9 +56,23 @@ def calc_size_new_fractions(directories: TDirectories) -> TFractions:
     }
 
 
-SIZE_MODES = {
-    'size': SizeMode('by size', calc_size_fractions),
-    'size_new': SizeMode('by acitivty', calc_size_new_fractions),
+SIZE_MODES: TSizeModes = {
+    'size': SizeMode(
+        label='by size',
+        tooltip=(
+            'Each bar shows the fraction of the total root directory size '
+            'that the given directory occupies.'
+        ),
+        calc_fractions=calc_size_fractions
+    ),
+    'size_new': SizeMode(
+        label='by activity',
+        tooltip=(
+            'Each bar shows the fraction of the size of the given directory '
+            'that was modified in the last 30 days.'
+        ),
+        calc_fractions=calc_size_new_fractions
+    ),
 }
 
 

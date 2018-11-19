@@ -46,10 +46,7 @@ class Window(Gtk.ApplicationWindow):
         self.add(self.vbox)
 
         radio_buttons = ui.create_radio_buttons(
-            (
-                (size_field, size_mode.label)
-                for size_field, size_mode in SIZE_MODES.items()
-            ),
+            SIZE_MODES,
             self.application.active_size_field,
             self.on_mode_toggled
         )

@@ -1,11 +1,11 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Optional, Tuple
+from typing import Callable, Dict, Optional
 
 import gi
 
 from lidske_aktivity import __version__
-from lidske_aktivity.scan import TDirectories, TFractions, TPending
+from lidske_aktivity.scan import TDirectories, TFractions, TPending, TSizeModes
 
 gi.require_version('Gtk', '3.0')
 
@@ -54,14 +54,18 @@ def create_vbox() -> Gtk.Box:
     return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
 
-def create_radio_buttons(names_and_labels: Iterable[Tuple[str, str]],
+def create_radio_buttons(size_modes: TSizeModes,
                          active_name: str,
                          on_toggled: Callable) -> Gtk.Box:
     hbox = Gtk.Box()
     Gtk.StyleContext.add_class(hbox.get_style_context(), 'linked')
     group = None
-    for name, label in names_and_labels:
-        button = Gtk.RadioButton.new_with_label_from_widget(group, label)
+    for name, size_mode in size_modes.items():
+        button = Gtk.RadioButton.new_with_label_from_widget(
+            group,
+            size_mode.label
+        )
+        button.set_tooltip_text(size_mode.tooltip)
         button.set_mode(False)
         if not group:
             group = button
