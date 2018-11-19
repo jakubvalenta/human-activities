@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Iterable, Optional, Tuple
 
 import gi
 
@@ -26,7 +26,7 @@ def create_progress_bar(text: str,
     return progress_bar
 
 
-def vbox_add(vbox: Gtk.Box, widget: Gtk.Widget):
+def box_add(vbox: Gtk.Box, widget: Gtk.Widget):
     vbox.pack_start(widget, True, True, 0)
     vbox.show_all()
 
@@ -54,6 +54,23 @@ def create_vbox() -> Gtk.Box:
     return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
 
+def create_radio_buttons(names_and_labels: Iterable[Tuple[str, str]],
+                         active_name: str,
+                         on_toggled: Callable) -> Gtk.Box:
+    hbox = Gtk.Box()
+    Gtk.StyleContext.add_class(hbox.get_style_context(), 'linked')
+    group = None
+    for name, label in names_and_labels:
+        button = Gtk.RadioButton.new_with_label_from_widget(group, label)
+        button.set_mode(False)
+        if not group:
+            group = button
+        button.set_active(name == active_name)
+        button.connect('toggled', on_toggled, name)
+        box_add(hbox, button)
+    return hbox
+
+
 def create_progress_bars(directories: TDirectories,
                          fractions: TFractions) -> TProgressBars:
     if not directories:
@@ -67,10 +84,10 @@ def create_progress_bars(directories: TDirectories,
 def add_progress_bars(vbox: Gtk.Box, progress_bars: TProgressBars):
     if progress_bars:
         for progress_bar in progress_bars.values():
-            vbox_add(vbox, progress_bar)
+            box_add(vbox, progress_bar)
     else:
         label = Gtk.Labe('No directories found')
-        vbox_add(vbox, label)
+        box_add(vbox, label)
 
 
 def update_progress_bars(progress_bars: TProgressBars,

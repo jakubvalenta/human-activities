@@ -45,22 +45,15 @@ class Window(Gtk.ApplicationWindow):
         self.vbox = ui.create_vbox()
         self.add(self.vbox)
 
-        self.hbox = Gtk.Box()
-        Gtk.StyleContext.add_class(self.hbox.get_style_context(), 'linked')
-        ui.vbox_add(self.vbox, self.hbox)
-
-        group = None
-        for size_field, size_mode in SIZE_MODES.items():
-            button = Gtk.RadioButton.new_with_label_from_widget(
-                group,
-                size_mode.label
-            )
-            button.set_mode(False)
-            if not group:
-                group = button
-            button.set_active(size_field == self.application.active_size_field)
-            button.connect('toggled', self.on_mode_toggled, size_field)
-            ui.vbox_add(self.hbox, button)
+        radio_buttons = ui.create_radio_buttons(
+            (
+                (size_field, size_mode.label)
+                for size_field, size_mode in SIZE_MODES.items()
+            ),
+            self.application.active_size_field,
+            self.on_mode_toggled
+        )
+        ui.box_add(self.vbox, radio_buttons)
 
         self.progress_bars = ui.create_progress_bars(
             self.application.directories,
@@ -70,7 +63,7 @@ class Window(Gtk.ApplicationWindow):
 
         self.size_remember()
         self.spinner = ui.create_spinner()
-        ui.vbox_add(self.vbox, self.spinner)
+        ui.box_add(self.vbox, self.spinner)
 
         self.connect('focus-out-event', self.on_focus_out)
 
