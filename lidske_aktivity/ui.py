@@ -1,11 +1,11 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional
 
 import gi
 
 from lidske_aktivity import __version__
-from lidske_aktivity.scan import TDirectories, TPending, sum_size
+from lidske_aktivity.scan import TDirectories, TFractions, TPending
 
 gi.require_version('Gtk', '3.0')
 
@@ -50,26 +50,16 @@ def create_spinner() -> Gtk.Spinner:
     return spinner
 
 
-def calc_fraction(size: Optional[int], total_size: int) -> float:
-    if size is None or not total_size:
-        return 0
-    return size / total_size
-
-
 def create_vbox() -> Gtk.Box:
     return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
 
 def create_progress_bars(directories: TDirectories,
-                         size_field: str) -> TProgressBars:
+                         fractions: TFractions) -> TProgressBars:
     if not directories:
         return {}
-    total_size = sum_size(directories, size_field)
     return {
-        path: create_progress_bar(
-            text=path.name,
-            fraction=calc_fraction(getattr(d, size_field), total_size)
-        )
+        path: create_progress_bar(text=path.name, fraction=fractions[path])
         for path, d in directories.items()
     }
 
@@ -86,20 +76,16 @@ def add_progress_bars(vbox: Gtk.Box, progress_bars: TProgressBars):
 def update_progress_bars(progress_bars: TProgressBars,
                          directories: TDirectories,
                          pending: TPending,
-                         size_field: str,
+                         fractions: TFractions,
                          on_finished: Callable[[], None]):
     logger.info('Updating progress bars')
     some_pending = False
     if directories:
-        total_size = sum_size(directories, size_field)
         for path, d in directories.items():
-            val = getattr(d, size_field)
-            if val is None:
+            if d.size is None:
                 progress_bars[path].pulse()
             else:
-                progress_bars[path].set_fraction(
-                    calc_fraction(val, total_size)
-                )
+                progress_bars[path].set_fraction(fractions[path])
             if pending[path]:
                 some_pending = True
     if not some_pending:

@@ -9,7 +9,9 @@ import gi
 
 from lidske_aktivity import ui
 from lidske_aktivity.config import CACHE_PATH, load_config
-from lidske_aktivity.scan import Directory, init_directories, scan_directories
+from lidske_aktivity.scan import (
+    SIZE_MODES, Directory, init_directories, scan_directories,
+)
 
 gi.require_version('Gtk', '3.0')
 
@@ -20,19 +22,11 @@ logger = logging.getLogger(__name__)
 GLib.set_application_name('Lidské aktivity')
 
 
-SIZE_MODES = {
-    'size': 'by size',
-    'size_new': 'by activity',
-}
-
-
 class AppError(Exception):
     pass
 
 
 class Window(Gtk.ApplicationWindow):
-
-    active_size_field = 'size'
 
     def __init__(self, application, *args, **kwargs):
         super().__init__(
@@ -56,21 +50,21 @@ class Window(Gtk.ApplicationWindow):
         ui.vbox_add(self.vbox, self.hbox)
 
         group = None
-        for size_field, size_label in SIZE_MODES.items():
+        for size_field, size_mode in SIZE_MODES.items():
             button = Gtk.RadioButton.new_with_label_from_widget(
                 group,
-                size_label
+                size_mode.label
             )
             button.set_mode(False)
             if not group:
                 group = button
-            button.set_active(size_field == self.active_size_field)
+            button.set_active(size_field == self.application.active_size_field)
             button.connect('toggled', self.on_mode_toggled, size_field)
             ui.vbox_add(self.hbox, button)
 
         self.progress_bars = ui.create_progress_bars(
             self.application.directories,
-            self.active_size_field
+            self.application.calc_fractions(),
         )
         ui.add_progress_bars(self.vbox, self.progress_bars)
 
@@ -83,7 +77,7 @@ class Window(Gtk.ApplicationWindow):
         self.tick_start()
 
     def on_mode_toggled(self, button: Gtk.Button, size_field: str):
-        self.active_size_field = size_field
+        self.application.active_size_field = size_field
         self.on_tick()
 
     def tick_start(self):
@@ -107,7 +101,7 @@ class Window(Gtk.ApplicationWindow):
             self.progress_bars,
             self.application.directories,
             self.application.pending,
-            self.active_size_field,
+            self.application.calc_fractions(),
             self.on_scan_finished
         )
 
@@ -126,6 +120,8 @@ class Window(Gtk.ApplicationWindow):
 
 
 class Application(Gtk.Application):
+
+    active_size_field = 'size'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
@@ -156,6 +152,11 @@ class Application(Gtk.Application):
             root_path=self.config.root_path
         )
         self.pending = {path: True for path in self.directories.keys()}
+
+    def calc_fractions(self):
+        return SIZE_MODES[self.active_size_field].calc_fractions(
+            self.directories
+        )
 
     def scan_start(self):
         self.scan_event_stop = Event()

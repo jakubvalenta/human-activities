@@ -22,10 +22,40 @@ class Directory:
 TDirectories = Dict[Path, Directory]
 TPending = Dict[Path, bool]
 TCallback = Callable[[Path, Directory], None]
+TFractions = Dict[Path, float]
 
 
-def sum_size(directories: TDirectories, field: str) -> int:
-    return sum(getattr(d, field) or 0 for d in directories.values())
+@dataclass
+class SizeMode:
+    label: str
+    calc_fractions: Callable[[TDirectories], TFractions]
+
+
+def safe_div(a: int, b: int) -> float:
+    if a and b:
+        return a / b
+    return 0
+
+
+def calc_size_fractions(directories: TDirectories) -> TFractions:
+    total_size = sum(d.size or 0 for d in directories.values())
+    return {
+        path: safe_div(directory.size, total_size)
+        for path, directory in directories.items()
+    }
+
+
+def calc_size_new_fractions(directories: TDirectories) -> TFractions:
+    return {
+        path: safe_div(directory.size_new, directory.size)
+        for path, directory in directories.items()
+    }
+
+
+SIZE_MODES = {
+    'size': SizeMode('by size', calc_size_fractions),
+    'size_new': SizeMode('by acitivty', calc_size_new_fractions),
+}
 
 
 def read_directories(root_path: Path) -> TDirectories:
