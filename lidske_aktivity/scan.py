@@ -3,6 +3,7 @@ import logging
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
+from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Thread
 from typing import Any, Callable, Dict, Optional
@@ -11,17 +12,24 @@ from lidske_aktivity import filesystem
 
 logger = logging.getLogger(__name__)
 
-TDirectories = Dict[Path, Optional[int]]
+
+@dataclass
+class Directory:
+    size: Optional[int] = None
+    size_new: Optional[int] = None
+
+
+TDirectories = Dict[Path, Directory]
 TPending = Dict[Path, bool]
-TCallback = Callable[[Path, Optional[int]], None]
+TCallback = Callable[[Path, Directory], None]
 
 
-def sum_size(directories: TDirectories) -> int:
-    return sum(size or 0 for size in directories.values())
+def sum_size(directories: TDirectories, field: str) -> int:
+    return sum(getattr(d, field) or 0 for d in directories.values())
 
 
 def read_directories(root_path: Path) -> TDirectories:
-    return {path: None for path in filesystem.list_dirs(root_path)}
+    return {path: Directory() for path in filesystem.list_dirs(root_path)}
 
 
 def try_int(val: Any) -> Optional[int]:
@@ -36,13 +44,19 @@ def read_cached_directories(cache_path: Path) -> TDirectories:
     if cache_path.is_file():
         with cache_path.open() as f:
             for row in csv.reader(f):
-                if len(row) != 2:
+                if len(row) != 3:
                     continue
-                path, size_raw = row
+                path, size_raw, size_new_raw = row
                 size = try_int(size_raw)
                 if size is None:
                     continue
-                directories[Path(path)] = size
+                size_new = try_int(size_new_raw)
+                if size_new is None:
+                    continue
+                directories[Path(path)] = Directory(
+                    size=size,
+                    size_new=size_new,
+                )
     return directories
 
 
@@ -52,9 +66,9 @@ def write_cache(cache_path: Path, directories: TDirectories):
     with cache_path.open('w') as f:
         writer = csv.writer(f)
         writer.writerows(
-            (str(path), size)
-            for path, size in directories.items()
-            if path and size is not None
+            (str(path), d.size, d.size_new)
+            for path, d in directories.items()
+            if path and d.size is not None and d.size_new is not None
         )
 
 
@@ -62,8 +76,8 @@ def merge_directories(a: TDirectories, b: TDirectories) -> TDirectories:
     if not a or not b:
         return a
     return {
-        path: b.get(path, size)
-        for path, size in a.items()
+        path: b.get(path, d)
+        for path, d in a.items()
     }
 
 
@@ -84,17 +98,29 @@ def scan_directory(path: Path,
                    event_stop: Event,
                    test: bool = False):
     logger.info('Calculating size %s', path)
+    thirty_days_ago = time.time() - 30 * 24 * 3600
     time_start = time.time()
-    size = filesystem.calc_dir_size(str(path), event_stop)
+    size, size_new = filesystem.calc_dir_size(
+        str(path),
+        thirty_days_ago,
+        event_stop
+    )
     time_duration = time.time() - time_start
-    logger.info('Calculated size %s = %d in %f s', path, size, time_duration)
+    logger.info(
+        'Calculated size %s = %d (%d) in %f s',
+        path,
+        size,
+        size_new,
+        time_duration
+    )
     if test:
         for _ in range(random.randint(1, 20)):
             if event_stop.is_set():
                 logger.warn('Stopping test sleep')
                 break
             time.sleep(1)
-    callback(path, size)
+    directory = Directory(size=size, size_new=size_new)
+    callback(path, directory)
 
 
 def scan_directories(directories: TDirectories,

@@ -3,7 +3,7 @@ import os
 import stat
 from pathlib import Path
 from threading import Event
-from typing import List
+from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -25,21 +25,32 @@ def list_dirs(path: Path) -> List[Path]:
     )
 
 
-def calc_dir_size(path: str, event_stop: Event) -> int:
-    """See https://stackoverflow.com/a/37367965"""
-    total = 0
+def calc_dir_size(path: str,
+                  threshold: float,
+                  event_stop: Event) -> Tuple[int, int]:
     try:
         entries = os.scandir(path)
     except PermissionError:
         logger.info('Permission error %s', path)
-        return 0
+        return 0, 0
+    total_size = 0
+    total_size_new = 0
     for entry in entries:
         if event_stop.is_set():
             logger.warn('Stopping calculation')
-            return 0
+            return 0, 0
         if not entry.is_symlink():
             if entry.is_file():
-                total += entry.stat().st_size
+                stat_result = entry.stat()
+                total_size += stat_result.st_size
+                if stat_result.st_mtime > threshold:
+                    total_size_new += stat_result.st_size
             elif entry.is_dir():
-                total += calc_dir_size(entry.path, event_stop)
-    return total
+                sub_size, sub_size_new = calc_dir_size(
+                    entry.path,
+                    threshold,
+                    event_stop
+                )
+                total_size += sub_size
+                total_size_new += sub_size_new
+    return total_size, total_size_new

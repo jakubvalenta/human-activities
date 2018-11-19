@@ -3,13 +3,13 @@ import sys
 from pathlib import Path
 from threading import Event, Thread
 from time import sleep
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import gi
 
 from lidske_aktivity import ui
 from lidske_aktivity.config import CACHE_PATH, load_config
-from lidske_aktivity.scan import init_directories, scan_directories
+from lidske_aktivity.scan import Directory, init_directories, scan_directories
 
 gi.require_version('Gtk', '3.0')
 
@@ -43,12 +43,16 @@ class Window(Gtk.ApplicationWindow):
         self.vbox = ui.create_vbox()
         self.add(self.vbox)
 
-        self.vbox_size, self.vbox_activity = ui.create_stack(self.vbox)
+        self.vboxes = ui.create_stack(self.vbox)
 
-        self.progress_bars = ui.create_progress_bars(
-            self.application.directories
-        )
-        ui.add_progress_bars(self.vbox_size, self.progress_bars)
+        self.progress_bars = {}
+        for i, field in enumerate(['size', 'size_new']):
+            progress_bars = ui.create_progress_bars(
+                self.application.directories,
+                field
+            )
+            ui.add_progress_bars(self.vboxes[i], progress_bars)
+            self.progress_bars[field] = progress_bars
 
         self.size_remember()
         self.spinner = ui.create_spinner()
@@ -75,12 +79,14 @@ class Window(Gtk.ApplicationWindow):
             sleep(1)
 
     def on_tick(self):
-        ui.update_progress_bars(
-            self.progress_bars,
-            self.application.directories,
-            self.application.pending,
-            self.on_scan_finished
-        )
+        for field, progress_bars in self.progress_bars.items():
+            ui.update_progress_bars(
+                progress_bars,
+                self.application.directories,
+                self.application.pending,
+                field,
+                self.on_scan_finished
+            )
 
     def on_scan_finished(self):
         self.spinner.hide()
@@ -143,8 +149,8 @@ class Application(Gtk.Application):
         self.scan_thread.join()
         logger.info('Scan stopped')
 
-    def on_scan(self, path: Path, size: Optional[int]):
-        self.directories[path] = size
+    def on_scan(self, path: Path, directory: Directory):
+        self.directories[path] = directory
         self.pending[path] = False
 
     def on_main_menu(self, status_icon: Gtk.StatusIcon):
