@@ -60,35 +60,15 @@ def create_vbox() -> Gtk.Box:
     return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
 
-def create_stack(vbox: Gtk.Box) -> Tuple[Gtk.Box, Gtk.Box]:
-    stack = Gtk.Stack()
-    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
-    stack.set_transition_duration(1000)
-
-    vbox_size = create_vbox()
-    stack.add_titled(vbox_size, 'size', 'size')
-
-    vbox_activity = create_vbox()
-    stack.add_titled(vbox_activity, 'activity', 'activity')
-
-    stack_switcher = Gtk.StackSwitcher()
-    stack_switcher.set_stack(stack)
-
-    vbox_add(vbox, stack_switcher)
-    vbox_add(vbox, stack)
-
-    return vbox_size, vbox_activity
-
-
 def create_progress_bars(directories: TDirectories,
-                         field: str) -> TProgressBars:
+                         size_field: str) -> TProgressBars:
     if not directories:
         return {}
-    total_size = sum_size(directories, field)
+    total_size = sum_size(directories, size_field)
     return {
         path: create_progress_bar(
             text=path.name,
-            fraction=calc_fraction(getattr(d, field), total_size)
+            fraction=calc_fraction(getattr(d, size_field), total_size)
         )
         for path, d in directories.items()
     }
@@ -106,14 +86,14 @@ def add_progress_bars(vbox: Gtk.Box, progress_bars: TProgressBars):
 def update_progress_bars(progress_bars: TProgressBars,
                          directories: TDirectories,
                          pending: TPending,
-                         field: str,
+                         size_field: str,
                          on_finished: Callable[[], None]):
     logger.info('Updating progress bars')
     some_pending = False
     if directories:
-        total_size = sum_size(directories, field)
+        total_size = sum_size(directories, size_field)
         for path, d in directories.items():
-            val = getattr(d, field)
+            val = getattr(d, size_field)
             if val is None:
                 progress_bars[path].pulse()
             else:

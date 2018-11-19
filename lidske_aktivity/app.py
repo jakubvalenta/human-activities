@@ -20,11 +20,19 @@ logger = logging.getLogger(__name__)
 GLib.set_application_name('Lidské aktivity')
 
 
+SIZE_MODES = {
+    'size': 'by size',
+    'size_new': 'by activity',
+}
+
+
 class AppError(Exception):
     pass
 
 
 class Window(Gtk.ApplicationWindow):
+
+    active_size_field = 'size'
 
     def __init__(self, application, *args, **kwargs):
         super().__init__(
@@ -43,16 +51,28 @@ class Window(Gtk.ApplicationWindow):
         self.vbox = ui.create_vbox()
         self.add(self.vbox)
 
-        self.vboxes = ui.create_stack(self.vbox)
+        self.hbox = Gtk.Box()
+        Gtk.StyleContext.add_class(self.hbox.get_style_context(), 'linked')
+        ui.vbox_add(self.vbox, self.hbox)
 
-        self.progress_bars = {}
-        for i, field in enumerate(['size', 'size_new']):
-            progress_bars = ui.create_progress_bars(
-                self.application.directories,
-                field
+        group = None
+        for size_field, size_label in SIZE_MODES.items():
+            button = Gtk.RadioButton.new_with_label_from_widget(
+                group,
+                size_label
             )
-            ui.add_progress_bars(self.vboxes[i], progress_bars)
-            self.progress_bars[field] = progress_bars
+            button.set_mode(False)
+            if not group:
+                group = button
+            button.set_active(size_field == self.active_size_field)
+            button.connect('toggled', self.on_mode_toggled, size_field)
+            ui.vbox_add(self.hbox, button)
+
+        self.progress_bars = ui.create_progress_bars(
+            self.application.directories,
+            self.active_size_field
+        )
+        ui.add_progress_bars(self.vbox, self.progress_bars)
 
         self.size_remember()
         self.spinner = ui.create_spinner()
@@ -61,6 +81,10 @@ class Window(Gtk.ApplicationWindow):
         self.connect('focus-out-event', self.on_focus_out)
 
         self.tick_start()
+
+    def on_mode_toggled(self, button: Gtk.Button, size_field: str):
+        self.active_size_field = size_field
+        self.on_tick()
 
     def tick_start(self):
         self.tick_event_stop = Event()
@@ -79,14 +103,13 @@ class Window(Gtk.ApplicationWindow):
             sleep(1)
 
     def on_tick(self):
-        for field, progress_bars in self.progress_bars.items():
-            ui.update_progress_bars(
-                progress_bars,
-                self.application.directories,
-                self.application.pending,
-                field,
-                self.on_scan_finished
-            )
+        ui.update_progress_bars(
+            self.progress_bars,
+            self.application.directories,
+            self.application.pending,
+            self.active_size_field,
+            self.on_scan_finished
+        )
 
     def on_scan_finished(self):
         self.spinner.hide()
