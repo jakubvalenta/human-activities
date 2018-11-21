@@ -12,6 +12,7 @@ click = "*"
 mypy = "*"
 isort = "*"
 pytest = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,4 +1,4 @@
-.PHONY: run run-debug install dist clean test unit-test lint help
+.PHONY: run run-debug install dist clean clean-cache test unit-test lint help
 
 run:  ## Start the app
 	pipenv run python -m lidske_aktivity
@@ -10,9 +10,17 @@ install:  ## Install required packages
 	sudo pacman -S gobject-introspection
 
 dist:  ## Build distribution package
-	@echo "TODO"
+	pipenv run pyinstaller \
+		--windowed \
+		--name=lidske-aktivity \
+		--specpath=install \
+		lidske_aktivity/__main__.py
 
-clean:  ## Remove cache
+clean:  ## Clean distribution package
+	-rm -r build
+	-rm -r dist
+
+clean-cache:  ## Clean cache
 	pipenv run python -m lidske_aktivity --verbose --clean
 
 test:  ## Run unit tests and linting
