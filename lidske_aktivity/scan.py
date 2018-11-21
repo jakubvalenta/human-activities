@@ -161,6 +161,9 @@ def scan_directory(path: Path,
         size_new,
         time_duration
     )
+    if size is None or size_new is None:
+        logger.warn('Size of %s is None, not using the result.', path)
+        return
     if test:
         for _ in range(random.randint(1, 20)):
             if event_stop.is_set():
