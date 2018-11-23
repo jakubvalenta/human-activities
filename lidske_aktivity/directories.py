@@ -6,9 +6,9 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Thread
-from typing import Any, Callable, Dict, Optional
+from typing import Callable, Dict, Optional
 
-from lidske_aktivity import filesystem
+from lidske_aktivity.utils import filesystem, math
 
 logger = logging.getLogger(__name__)
 
@@ -20,71 +20,10 @@ class Directory:
 
 
 TDirectories = Dict[Path, Directory]
-TPending = Dict[Path, bool]
-TCallback = Callable[[Path, Directory], None]
-TFractions = Dict[Path, float]
-
-
-@dataclass
-class SizeMode:
-    label: str
-    tooltip: str
-    calc_fractions: Callable[[TDirectories], TFractions]
-
-
-TSizeModes = Dict[str, SizeMode]
-
-
-def safe_div(a: Optional[int], b: Optional[int]) -> float:
-    if a and b:
-        return a / b
-    return 0
-
-
-def calc_size_fractions(directories: TDirectories) -> TFractions:
-    total_size = sum(d.size or 0 for d in directories.values())
-    return {
-        path: safe_div(directory.size, total_size)
-        for path, directory in directories.items()
-    }
-
-
-def calc_size_new_fractions(directories: TDirectories) -> TFractions:
-    return {
-        path: safe_div(directory.size_new, directory.size)
-        for path, directory in directories.items()
-    }
-
-
-SIZE_MODES: TSizeModes = {
-    'size': SizeMode(
-        label='by size',
-        tooltip=(
-            'Each bar shows the fraction of the total root directory size '
-            'that the given directory occupies.'
-        ),
-        calc_fractions=calc_size_fractions
-    ),
-    'size_new': SizeMode(
-        label='by activity',
-        tooltip=(
-            'Each bar shows the fraction of the size of the given directory '
-            'that was modified in the last 30 days.'
-        ),
-        calc_fractions=calc_size_new_fractions
-    ),
-}
 
 
 def read_directories(root_path: Path) -> TDirectories:
     return {path: Directory() for path in filesystem.list_dirs(root_path)}
-
-
-def try_int(val: Any) -> Optional[int]:
-    try:
-        return int(val)
-    except (TypeError, ValueError):
-        return None
 
 
 def read_cached_directories(cache_path: Path) -> TDirectories:
@@ -95,10 +34,10 @@ def read_cached_directories(cache_path: Path) -> TDirectories:
                 if len(row) != 3:
                     continue
                 path, size_raw, size_new_raw = row
-                size = try_int(size_raw)
+                size = math.try_int(size_raw)
                 if size is None:
                     continue
-                size_new = try_int(size_new_raw)
+                size_new = math.try_int(size_new_raw)
                 if size_new is None:
                     continue
                 directories[Path(path)] = Directory(
@@ -140,9 +79,11 @@ def init_directories(cache_path: Path,
     )
 
 
+TScanCallback = Callable[[Path, Directory], None]
+
+
 def scan_directory(path: Path,
-                   directories: TDirectories,
-                   callback: TCallback,
+                   callback: TScanCallback,
                    event_stop: Event,
                    test: bool = False):
     logger.info('Calculating size %s', path)
@@ -150,12 +91,12 @@ def scan_directory(path: Path,
     time_start = time.time()
     size, size_new = filesystem.calc_dir_size(
         str(path),
-        thirty_days_ago,
-        event_stop
+        threshold=thirty_days_ago,
+        event_stop=event_stop
     )
     time_duration = time.time() - time_start
     logger.info(
-        'Calculated size %s = %d (%d) in %f s',
+        'Calculated size %s = %s (%s) in %f s',
         path,
         size,
         size_new,
@@ -176,7 +117,7 @@ def scan_directory(path: Path,
 
 def scan_directories(directories: TDirectories,
                      cache_path: Path,
-                     callback: TCallback,
+                     callback: TScanCallback,
                      event_stop: Event,
                      test: bool = False) -> Thread:
     def orchestrator():
@@ -185,7 +126,6 @@ def scan_directories(directories: TDirectories,
                 executor.submit(
                     scan_directory,
                     path,
-                    directories,
                     callback,
                     event_stop,
                     test
