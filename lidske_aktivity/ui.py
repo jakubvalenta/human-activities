@@ -222,7 +222,7 @@ class Window(Gtk.ApplicationWindow):
 
     def on_radio_toggled(self, button: Gtk.Button, mode: str):
         self.store.set_active_mode(mode)
-        self.on_tick()
+        self.on_tick(pulse=False)
 
     def tick_start(self):
         self.tick_event_stop = Event()
@@ -240,12 +240,13 @@ class Window(Gtk.ApplicationWindow):
             GLib.idle_add(self.on_tick)
             sleep(1)
 
-    def on_tick(self):
+    def on_tick(self, pulse: bool = True):
         logger.info('Updating progress bars')
         if self.store.directories:
             for path, d in self.store.directories.items():
                 if d.size is None:
-                    self.progress_bars[path].pulse()
+                    if pulse:
+                        self.progress_bars[path].pulse()
                 else:
                     self.progress_bars[path].set_fraction(
                         self.store.fractions[path]
