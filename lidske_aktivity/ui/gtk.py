@@ -268,6 +268,7 @@ class Window(Gtk.ApplicationWindow):
 class Application(Gtk.Application):
     window: Gtk.ApplicationWindow = None
     store: Store
+    on_quit: Callable
     context_menu: Gtk.Menu
     status_icon: Gtk.StatusIcon
 
