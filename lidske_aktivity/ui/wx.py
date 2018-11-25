@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
-from typing import Callable, Iterable
+from functools import partial
+from typing import Callable, Iterable, Iterator
 
 import wx
 
@@ -24,17 +25,35 @@ def create_sizer(parent: wx.Window, orientation) -> wx.BoxSizer:
     return sizer
 
 
+def on_radio_update_ui(event):
+    button = event.GetEventObject()
+    value = button.GetValue()
+    event.Enable(not value)
+    logger.warn('Update UI, value = %s', value)
+
+
 def create_radio_buttons(window: wx.Window,
                          parent: wx.Window,
                          configs: Iterable[RadioButtonConfig],
                          active_name: str,
-                         on_toggled: Callable):
+                         on_toggled: Callable) -> Iterator[wx.ToggleButton]:
     grid = wx.GridSizer(cols=2)
     for config in configs:
-        button = wx.ToggleButton(parent=window, label=config.label)
+        button = wx.ToggleButton(
+            parent=window,
+            label=config.label,
+        )
         button.SetValue(config.name == active_name)
-        button.Bind(wx.EVT_TOGGLEBUTTON, lambda event: on_toggled(config.name))
+        button.Bind(
+            wx.EVT_TOGGLEBUTTON,
+            partial(on_toggled, button=button, mode=config.name)
+        )
+        button.Bind(
+            wx.EVT_UPDATE_UI,
+            on_radio_update_ui,
+        )
         grid.Add(button)
+        yield button
     parent.Add(grid)
 
 
@@ -123,13 +142,13 @@ class Frame(wx.Frame):
                 )
             ),
         ]
-        radio_buttons = create_radio_buttons(
+        self.radio_buttons = list(create_radio_buttons(
             window=self,
             parent=self.sizer,
             configs=radio_button_configs,
             active_name=self.store.active_mode,
             on_toggled=self.on_radio_toggled
-        )
+        ))
 
     def init_progress_bars(self):
         pass
@@ -140,8 +159,12 @@ class Frame(wx.Frame):
     def tick_start(self):
         pass
 
-    def on_radio_toggled(self, mode: str):
+    def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
+        logger.warn('Toogled %s = %s', button, mode)
         self.store.set_active_mode(mode)
+        for other_button in self.radio_buttons:
+            if other_button != button:
+                other_button.SetValue(False)
 
     def on_menu_about(self, event):
         show_about_dialog()
