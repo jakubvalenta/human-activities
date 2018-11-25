@@ -1,11 +1,41 @@
 import logging
-from typing import Callable
+from dataclasses import dataclass
+from typing import Callable, Iterable
 
 import wx
 
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class RadioButtonConfig:
+    name: str
+    label: str
+    tooltip: str
+
+
+def create_sizer(parent: wx.Window, orientation) -> wx.BoxSizer:
+    sizer = wx.BoxSizer(orientation)
+    parent.SetSizer(sizer)
+    parent.SetAutoLayout(1)
+    sizer.Fit(parent)
+    return sizer
+
+
+def create_radio_buttons(window: wx.Window,
+                         parent: wx.Window,
+                         configs: Iterable[RadioButtonConfig],
+                         active_name: str,
+                         on_toggled: Callable):
+    grid = wx.GridSizer(cols=2)
+    for config in configs:
+        button = wx.ToggleButton(parent=window, label=config.label)
+        button.SetValue(config.name == active_name)
+        button.Bind(wx.EVT_TOGGLEBUTTON, lambda event: on_toggled(config.name))
+        grid.Add(button)
+    parent.Add(grid)
 
 
 def create_menu_item(menu: wx.Menu,
@@ -71,14 +101,35 @@ class Frame(wx.Frame):
         self.tick_start()
 
     def init_window(self):
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.SetSizer(self.sizer)
-        self.SetAutoLayout(1)
-        self.sizer.Fit(self)
+        self.sizer = create_sizer(self, wx.VERTICAL)
         self.Show()
 
     def init_radio(self):
-        pass
+        radio_button_configs = [
+            RadioButtonConfig(
+                name=SIZE_MODE_SIZE,
+                label='by size',
+                tooltip=(
+                    'Each bar shows the fraction of the total root directory '
+                    'size that the given directory occupies.'
+                )
+            ),
+            RadioButtonConfig(
+                name=SIZE_MODE_SIZE_NEW,
+                label='by activity',
+                tooltip=(
+                    'Each bar shows the fraction of the size of the given '
+                    'directory that was modified in the last 30 days.'
+                )
+            ),
+        ]
+        radio_buttons = create_radio_buttons(
+            window=self,
+            parent=self.sizer,
+            configs=radio_button_configs,
+            active_name=self.store.active_mode,
+            on_toggled=self.on_radio_toggled
+        )
 
     def init_progress_bars(self):
         pass
@@ -88,6 +139,9 @@ class Frame(wx.Frame):
 
     def tick_start(self):
         pass
+
+    def on_radio_toggled(self, mode: str):
+        self.store.set_active_mode(mode)
 
     def on_menu_about(self, event):
         show_about_dialog()
