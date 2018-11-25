@@ -1,1 +1,1 @@
-from lidske_aktivity.ui.gtk import *  # noqa: F401,F403
+from lidske_aktivity.ui.wx import *  # noqa: F401,F403
