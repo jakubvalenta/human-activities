@@ -1,7 +1,9 @@
 import logging
 from dataclasses import dataclass
 from functools import partial
-from typing import Callable, Iterable, Iterator
+from threading import Event, Thread
+from time import sleep
+from typing import Callable, Iterable, Iterator, Optional
 
 import wx
 
@@ -29,7 +31,17 @@ def on_radio_update_ui(event):
     button = event.GetEventObject()
     value = button.GetValue()
     event.Enable(not value)
-    logger.warn('Update UI, value = %s', value)
+
+
+def create_progress_bar(parent: wx.Window,
+                        text: str,
+                        fraction: Optional[float] = None) -> wx.Gauge:
+    progress_bar = wx.Gauge(parent=parent, range=100)
+    if fraction is not None:
+        progress_bar.SetValue(round(fraction * 100))
+    # progress_bar.set_show_text(True)
+    # progress_bar.set_pulse_step(1)
+    return progress_bar
 
 
 def create_radio_buttons(window: wx.Window,
@@ -151,13 +163,53 @@ class Frame(wx.Frame):
         ))
 
     def init_progress_bars(self):
-        pass
+        self.progress_bars = {}
+        if not self.store.directories:
+            label = wx.StaticText(self, label='No directories found')
+            self.sizer.Add(label)
+            return
+        for path, d in self.store.directories.items():
+            progress_bar = create_progress_bar(
+                parent=self,
+                text=path.name,
+                fraction=self.store.fractions[path]
+            )
+            self.sizer.Add(progress_bar)
+            self.progress_bars[path] = progress_bar
 
     def init_spinner(self):
         pass
 
     def tick_start(self):
-        pass
+        self.tick_event_stop = Event()
+        self.tick_thread = Thread(target=self.tick)
+        self.tick_thread.start()
+
+    def tick_stop(self):
+        self.tick_event_stop.set()
+        self.tick_thread.join()
+        logger.info('Tick stopped')
+
+    def tick(self):
+        while not self.tick_event_stop.is_set():
+            self.on_tick()
+            sleep(1)
+
+    def on_tick(self, pulse: bool = True):
+        logger.info('Updating progress bars')
+        if self.store.directories:
+            for path, d in self.store.directories.items():
+                if d.size is None:
+                    if pulse:
+                        self.progress_bars[path].Pulse()
+                else:
+                    self.progress_bars[path].SetValue(
+                        round(self.store.fractions[path] * 100)
+                    )
+        if not any(self.store.pending.values()):
+            pass
+            # self.spinner.Hide()
+            # self.size_restore()
 
     def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
         logger.warn('Toogled %s = %s', button, mode)
@@ -165,6 +217,7 @@ class Frame(wx.Frame):
         for other_button in self.radio_buttons:
             if other_button != button:
                 other_button.SetValue(False)
+        self.on_tick(pulse=False)
 
     def on_menu_about(self, event):
         show_about_dialog()
