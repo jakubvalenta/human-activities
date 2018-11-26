@@ -6,6 +6,7 @@ from time import sleep
 from typing import Callable, Iterable, Iterator, Optional
 
 import wx
+import wx.adv
 
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
@@ -105,6 +106,25 @@ def create_context_menu(frame: wx.Frame,
     return context_menu
 
 
+class TaskBarIcon(wx.adv.TaskBarIcon):
+
+    def __init__(self, frame: wx.Frame):
+        self.frame = frame
+        super().__init__()
+
+    def CreatePopupMenu(self) -> wx.Menu:
+        return create_context_menu(self.frame, self.on_about, self.on_quit)
+
+    def on_about(self, event):
+        logger.warn('About')
+        show_about_dialog()
+
+    def on_quit(self, event):
+        logger.warn('Quit')
+        self.frame.on_quit()
+        self.frame.Close(True)
+
+
 def show_about_dialog():
     wx.MessageBox(
         'This is a wxPython Hello World sample About Hello World 2',
@@ -122,11 +142,6 @@ class Frame(wx.Frame):
         super().__init__(*args, parent=None, title='Lidské aktivity', **kwargs)
         self.store = store
         self.on_quit = on_quit
-        self.context_menu = create_context_menu(
-            frame=self,
-            on_about=self.on_menu_about,
-            on_quit=self.on_menu_quit
-        )
         self.init_window()
         self.init_radio()
         self.init_progress_bars()
@@ -223,16 +238,17 @@ class Frame(wx.Frame):
                 other_button.SetValue(False)
         self.on_tick(pulse=False)
 
-    def on_menu_about(self, event):
-        show_about_dialog()
-
-    def on_menu_quit(self, event):
-        self.on_quit()
-        self.Close(True)
+    def on_main_menu(self, event):
+        logger.warn('Main menu', self)
+        self.Show()
 
 
 def run_app(store: Store, on_quit: Callable):
     app = wx.App()
     frame = Frame(store, on_quit)
-    frame.Show()
+    task_bar_icon = TaskBarIcon(frame)
+    task_bar_icon.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, frame.on_main_menu)
+    icon = wx.Icon()
+    icon.LoadFile('/usr/share/icons/Adwaita/16x16/actions/go-home.png')
+    task_bar_icon.SetIcon(icon)
     app.MainLoop()
