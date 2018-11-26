@@ -181,7 +181,9 @@ class Frame(wx.Frame):
             self.progress_bars[path] = progress_bar
 
     def init_spinner(self):
-        pass
+        label = create_label(self, 'Processing...')
+        self.sizer.Add(label)
+        return label
 
     def tick_start(self):
         self.tick_event_stop = Event()
@@ -210,8 +212,7 @@ class Frame(wx.Frame):
                         round(self.store.fractions[path] * 100)
                     )
         if not any(self.store.pending.values()):
-            pass
-            # self.spinner.Hide()
+            self.spinner.Hide()
             # self.size_restore()
 
     def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
