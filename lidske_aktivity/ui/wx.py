@@ -33,13 +33,15 @@ def on_radio_update_ui(event):
     event.Enable(not value)
 
 
+def create_label(parent: wx.Window, text: str) -> wx.StaticText:
+    return wx.StaticText(parent, label=text)
+
+
 def create_progress_bar(parent: wx.Window,
-                        text: str,
                         fraction: Optional[float] = None) -> wx.Gauge:
     progress_bar = wx.Gauge(parent=parent, range=100)
     if fraction is not None:
         progress_bar.SetValue(round(fraction * 100))
-    # progress_bar.set_show_text(True)
     # progress_bar.set_pulse_step(1)
     return progress_bar
 
@@ -165,15 +167,16 @@ class Frame(wx.Frame):
     def init_progress_bars(self):
         self.progress_bars = {}
         if not self.store.directories:
-            label = wx.StaticText(self, label='No directories found')
+            label = create_label(self, 'No directories found')
             self.sizer.Add(label)
             return
         for path, d in self.store.directories.items():
+            label = create_label(self, path.name)
             progress_bar = create_progress_bar(
                 parent=self,
-                text=path.name,
                 fraction=self.store.fractions[path]
             )
+            self.sizer.Add(label)
             self.sizer.Add(progress_bar)
             self.progress_bars[path] = progress_bar
 
