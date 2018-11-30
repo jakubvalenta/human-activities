@@ -46,12 +46,37 @@ def create_label(parent: wx.Window, text: str) -> wx.StaticText:
     return wx.StaticText(parent, label=text)
 
 
+class Gauge(wx.Window):
+    fraction: float = 0
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, size=(-1, 5), **kwargs)
+        self.Bind(wx.EVT_PAINT, self.on_paint)
+
+    def set_fraction(self, fraction: float):
+        self.fraction = fraction
+        self.Refresh()
+
+    def pulse(self):
+        pass  # TODO: Add pulse support
+
+    def on_paint(self, event):
+        w, h = self.GetSize()
+        dc = wx.PaintDC(self)
+        dc.SetPen(wx.Pen('#ffffff', 1, wx.TRANSPARENT))
+        w_fg = round(w * self.fraction)
+        w_bg = w - w_fg
+        dc.SetBrush(wx.Brush('#268bd2'))
+        dc.DrawRectangle(0, 0, w_fg, h)
+        dc.SetBrush(wx.Brush('#93a1a1'))
+        dc.DrawRectangle(w_fg, 0, w_bg, h)
+
+
 def create_progress_bar(parent: wx.Window,
-                        fraction: Optional[float] = None) -> wx.Gauge:
-    progress_bar = wx.Gauge(parent=parent, range=100)
+                        fraction: Optional[float] = None) -> Gauge:
+    progress_bar = Gauge(parent=parent)
     if fraction is not None:
-        progress_bar.SetValue(round(fraction * 100))
-    # progress_bar.set_pulse_step(1)
+        progress_bar.set_fraction(fraction)
     return progress_bar
 
 
@@ -107,7 +132,7 @@ class AboutBox(wx.Dialog):
     def __init__(self, parent: wx.Window):
         super().__init__()
         self.Create(parent, id=-1, title='About Lidské aktivity')
-        # TODO: Icon
+        # TODO: Add about icon
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -119,7 +144,8 @@ class AboutBox(wx.Dialog):
         sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         label = create_label(self, __version__)
         sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
-        label = create_label(self, 'https://www.example.com')  # TODO
+        # TODO: Fill website
+        label = create_label(self, 'https://www.example.com')
         sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
         button_sizer = wx.StdDialogButtonSizer()
@@ -202,20 +228,21 @@ class Window(wx.PopupTransientWindow):
             label = create_label(self, 'No directories found')
             self.sizer.Add(label)
             return
-        for path, d in self.store.directories.items():
+        self.sizer.AddSpacer(5)
+        paths = self.store.directories.keys()
+        for i, path in enumerate(paths):
             label = create_label(self, path.name)
             progress_bar = create_progress_bar(
                 parent=self,
                 fraction=self.store.fractions[path]
             )
-            self.sizer.Add(label, flag=wx.EXPAND)
-            self.sizer.Add(progress_bar, flag=wx.EXPAND)
+            self.sizer.Add(label, flag=wx.EXPAND | wx.BOTTOM, border=3)
+            self.sizer.Add(progress_bar, flag=wx.EXPAND | wx.BOTTOM, border=5)
             self.progress_bars[path] = progress_bar
 
     def init_spinner(self):
-        self.size_remember()
         self.spinner = create_label(self, 'Processing...')
-        self.sizer.Add(self.spinner)
+        self.sizer.Add(self.spinner, flag=wx.TOP, border=5)
 
     def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
         logger.warn('Toogled %s = %s', button, mode)
@@ -246,22 +273,14 @@ class Window(wx.PopupTransientWindow):
             for path, d in self.store.directories.items():
                 if d.size is None:
                     if pulse:
-                        self.progress_bars[path].Pulse()
+                        self.progress_bars[path].pulse()
                 else:
-                    self.progress_bars[path].SetValue(
-                        round(self.store.fractions[path] * 100)
+                    self.progress_bars[path].set_fraction(
+                        self.store.fractions[path]
                     )
         if not any(self.store.pending.values()):
             self.spinner.Hide()
-            self.size_restore()
-
-    def size_remember(self):
-        pass
-        # self.size = self.get_size()  # TODO
-
-    def size_restore(self):
-        pass
-        # self.resize(*self.size)  # TODO
+            self.fit()
 
     def ProcessLeftDown(self, evt):
         logger.warn('ProcessLeftDown: %s' % evt.GetPosition())
