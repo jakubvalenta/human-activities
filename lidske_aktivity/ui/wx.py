@@ -288,7 +288,7 @@ class Application(wx.App):
         # import ipdb; ipdb.set_trace()
         # position = status_icon.ClientToScreen((0, 0))
         # logger.warn('Position: %s x %s', *position)
-        self.window.Show(True)
+        self.window.Popup()
 
     def on_menu_about(self, event):
         logger.warn('About')
