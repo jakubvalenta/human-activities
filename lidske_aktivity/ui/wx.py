@@ -1,4 +1,5 @@
 import logging
+import sys
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -264,7 +265,7 @@ class Window(wx.PopupTransientWindow):
 
     def tick(self):
         while not self.tick_event_stop.is_set():
-            self.on_tick()
+            wx.CallAfter(self.on_tick)
             sleep(1)
 
     def on_tick(self, pulse: bool = True):
@@ -335,8 +336,16 @@ class Application(wx.App):
 
     def on_menu_quit(self, event):
         logger.warn('Quit')
+        self.status_icon.Destroy()
+        self.window.Destroy()
+        self.frame.Destroy()
+
+    def OnExit(self):
+        logger.warn('On Exit')
         self.on_quit()
-        wx.CallAfter(self.frame.Close)
+        self.window.tick_stop()
+        super().OnExit()
+        return True
 
 
 def run_app(store: Store, on_quit: Callable):
