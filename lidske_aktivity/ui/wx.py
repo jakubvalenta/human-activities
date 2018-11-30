@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from functools import partial
+from pathlib import Path
 from threading import Event, Thread
 from time import sleep
 from typing import Callable, Dict, Iterable, Iterator, List, Optional
@@ -145,7 +146,7 @@ class Window(wx.PopupTransientWindow):
     store: Store
     sizer: wx.BoxSizer
     radio_buttons: List[wx.RadioButton]
-    progress_bars: Dict[str, wx.Gauge]
+    progress_bars: Dict[Path, wx.Gauge]
 
     def __init__(self,
                  store: Store,
