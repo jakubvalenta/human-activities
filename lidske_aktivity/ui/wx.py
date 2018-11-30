@@ -208,8 +208,8 @@ class Window(wx.PopupTransientWindow):
                 parent=self,
                 fraction=self.store.fractions[path]
             )
-            self.sizer.Add(label)
-            self.sizer.Add(progress_bar)
+            self.sizer.Add(label, flag=wx.EXPAND)
+            self.sizer.Add(progress_bar, flag=wx.EXPAND)
             self.progress_bars[path] = progress_bar
 
     def init_spinner(self):
