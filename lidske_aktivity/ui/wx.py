@@ -9,6 +9,7 @@ from typing import Callable, Dict, Iterable, Iterator, List, Optional
 import wx
 import wx.adv
 
+from lidske_aktivity import __version__
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -73,73 +74,59 @@ def create_radio_buttons(window: wx.Window,
     parent.Add(grid)
 
 
-def create_menu_item(menu: wx.Menu,
-                     frame: wx.Frame,
-                     id_: str,
-                     label: str,
-                     tooltip: str,
-                     callback: Callable = None):
-    menu_item = menu.Append(id_, label, tooltip)
-    if callback:
-        frame.Bind(wx.EVT_MENU, callback, menu_item)
-
-
-def create_context_menu(frame: wx.Frame,
-                        on_about: Callable,
-                        on_quit: Callable) -> wx.Menu:
-    context_menu = wx.Menu()
-    create_menu_item(
-        menu=context_menu,
-        frame=frame,
-        id_=wx.ID_ABOUT,
-        label='&About',
-        tooltip=' Information about this program',
-        callback=on_about
-    )
-    create_menu_item(
-        menu=context_menu,
-        frame=frame,
-        id_=wx.ID_EXIT,
-        label='E&xit',
-        tooltip=' Terminate the program',
-        callback=on_about
-    )
-    return context_menu
-
-
 class TaskBarIcon(wx.adv.TaskBarIcon):
-
     def __init__(self,
-                 parent: wx.Window,
+                 on_main_menu: Callable,
                  on_about: Callable,
                  on_quit: Callable):
-        super().__init__()
-        self.parent = parent
-        self.on_about = on_about
-        self.on_quit = on_quit
+        super().__init__(wx.adv.TBI_DOCK)
+
+        icon = wx.Icon()
+        icon.LoadFile('/usr/share/icons/Adwaita/16x16/actions/go-home.png')
+        self.SetIcon(icon)
+
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_main_menu)
+        self.Bind(wx.EVT_MENU, on_about, id=wx.ID_ABOUT)
+        self.Bind(wx.EVT_MENU, on_quit, id=wx.ID_EXIT)
 
     def CreatePopupMenu(self) -> wx.Menu:
         logger.warn('Create popup menu')
-        return create_context_menu(self.parent, self.on_about, self.on_quit)
+        menu = wx.Menu()
+        menu.Append(wx.ID_ABOUT, '&About', ' Information about this program')
+        menu.Append(wx.ID_EXIT, 'E&xit', ' Terminate the program')
+        return menu
 
 
-def create_status_icon(parent: wx.Window,
-                       on_main_menu: Callable,
-                       on_about: Callable,
-                       on_quit: Callable) -> wx.adv.TaskBarIcon:
-    icon = wx.Icon()
-    icon.LoadFile('/usr/share/icons/Adwaita/16x16/actions/go-home.png')
-    status_icon = TaskBarIcon(parent, on_about, on_quit)
-    status_icon.SetIcon(icon)
-    status_icon.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_main_menu)
-    return status_icon
+class AboutBox(wx.Dialog):
+    def __init__(self, parent: wx.Window):
+        super().__init__()
+        self.Create(parent, id=-1, title='About Lidské aktivity')
+        # TODO: Icon
 
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-def show_about_dialog():
-    wx.MessageBox(
-        'This is a wxPython Hello World sample About Hello World 2',
-        wx.OK | wx.ICON_INFORMATION
-    )
+        label = create_label(self, text='Lidské aktivity')
+        sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        label = create_label(self, '\u00a9 2018 Jakub Valena, Jiří Skála')
+        sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        label = create_label(self, 'License: GNU General Public License')
+        sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        label = create_label(self, __version__)
+        sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        label = create_label(self, 'https://www.example.com')  # TODO
+        sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+
+        button_sizer = wx.StdDialogButtonSizer()
+        button = wx.Button(self, wx.ID_OK)
+        button.SetDefault()
+        button_sizer.AddButton(button)
+        button = wx.Button(self, wx.ID_CANCEL)
+        button_sizer.AddButton(button)
+        button_sizer.Realize()
+        sizer.Add(button_sizer, 0, wx.ALL, 5)
+
+        self.SetSizer(sizer)
+        sizer.Fit(self)
 
 
 class Window(wx.PopupTransientWindow):
@@ -286,10 +273,9 @@ class Application(wx.App):
         super().__init__(False, *args, **kwargs)
 
     def OnInit(self) -> bool:
-        parent = wx.Frame(parent=None, title='Foo')
-        self.window = Window(store=self.store, parent=parent)
-        self.status_icon = create_status_icon(
-            parent=parent,
+        self.frame = wx.Frame(parent=None, title='Foo')
+        self.window = Window(store=self.store, parent=self.frame)
+        self.status_icon = TaskBarIcon(
             on_main_menu=self.on_main_menu,
             on_about=self.on_menu_about,
             on_quit=self.on_menu_quit
@@ -306,12 +292,14 @@ class Application(wx.App):
 
     def on_menu_about(self, event):
         logger.warn('About')
-        show_about_dialog()
+        about = AboutBox(self.frame)
+        about.ShowModal()
+        about.Destroy()
 
-    def on_menu_quit(self, event, on_quit):
+    def on_menu_quit(self, event):
         logger.warn('Quit')
-        on_quit()
-        self.window.Close(True)
+        self.on_quit()
+        wx.CallAfter(self.frame.Close)
 
 
 def run_app(store: Store, on_quit: Callable):
