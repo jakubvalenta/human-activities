@@ -4,7 +4,7 @@ import os.path
 import platform
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Union
+from typing import List, Union
 
 logger = logging.getLogger(__name__)
 
@@ -44,11 +44,20 @@ CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 class Config:
     root_path: Path
     test: bool
+    mode: str
+    custom_dirs: List[str]
+
+
+MODE_HOME = 'home'
+MODE_CUSTOM = 'custom'
+MODES = [MODE_HOME, MODE_CUSTOM]
 
 
 def load_config() -> Config:
     root_path = Path.home()
     test = False
+    mode = MODE_HOME
+    custom_dirs = ['aaa', 'bbb']
     if CONFIG_PATH.is_file():
         with CONFIG_PATH.open() as f:
             config_json = json.load(f)
@@ -56,7 +65,19 @@ def load_config() -> Config:
             root_path = Path(config_json['root_path']).expanduser()
         if type(config_json.get('test')) == bool:
             test = config_json['test']
-    return Config(root_path=root_path, test=test)
+        mode_ = config_json.get('mode')
+        if type(mode_) == str and mode_ in MODES:
+            mode = mode_
+        custom_dirs_ = config_json.get('custom_dirs')
+        if (type(custom_dirs_) == list
+                and all(type(x) == 'str' for x in custom_dirs_)):
+            custom_dirs = custom_dirs_
+    return Config(
+        root_path=root_path,
+        test=test,
+        mode=mode,
+        custom_dirs=custom_dirs,
+    )
 
 
 def clean_cache():

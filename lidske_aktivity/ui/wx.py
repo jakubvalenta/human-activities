@@ -10,7 +10,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.config import Config
+from lidske_aktivity.config import MODE_CUSTOM, MODE_HOME, Config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -45,6 +45,29 @@ def on_radio_update_ui(event):
 
 def create_label(parent: wx.Window, text: str) -> wx.StaticText:
     return wx.StaticText(parent, label=text)
+
+
+def create_button(parent: wx.Window,
+                  panel: wx.Panel,
+                  label: str,
+                  callback: Callable) -> wx.Button:
+    button = wx.Button(panel, wx.ID_ANY, label)
+    parent.Bind(wx.EVT_BUTTON, callback, id=button.GetId())
+    return button
+
+
+def choose_dir(parent: wx.Window, callback: Callable[[str], None]):
+    logger.warn('Choose dir')
+    dialog = wx.DirDialog(
+        parent,
+        'Choose a directory:',
+        style=wx.DD_DIR_MUST_EXIST
+        # TODO: Fill in current dir
+    )
+    if dialog.ShowModal() == wx.ID_OK:
+        path = dialog.GetPath()
+        logger.warn('Selected %s', path)
+        callback(path)
 
 
 class Gauge(wx.Window):
@@ -166,31 +189,76 @@ class AboutBox(wx.Dialog):
 
 
 class Settings(wx.Dialog):
+    grid_: None = Optional[wx.GridSizer]
+
     def __init__(self, parent: wx.Frame, config: Config):
         super().__init__()
         self.Create(parent, id=-1, title='Settings of Lidské aktivity')
-
         self.config = config
-        panel = wx.Panel(self)
-        sizer = create_sizer(panel)
+        self.init_window()
+        self.init_mode()
+        self.init_custom_dirs()
+        self.init_dialog_buttons()
+        self.fit()
 
+    def init_window(self):
+        self.panel = wx.Panel(self)
+        self.border_sizer = create_sizer(self.panel)
+        self.sizer = create_sizer(
+            self.border_sizer,
+            flag=wx.EXPAND | wx.ALL,
+            border=10
+        )
+
+    def init_mode(self):
         label = create_label(self, 'Mode')
-        sizer.Add(label, flag=wx.ALL, border=5)
+        self.sizer.Add(label, flag=wx.ALL, border=5)
         self.radio_mode_home = wx.RadioButton(
-            panel,
+            self.panel,
             label='Home',
             style=wx.RB_GROUP
         )
-        sizer.Add(self.radio_mode_home, flag=wx.ALL, border=5)
+        self.sizer.Add(self.radio_mode_home, flag=wx.ALL, border=5)
         self.radio_mode_custom = wx.RadioButton(
-            panel,
+            self.panel,
             label='Custom'
         )
-        sizer.Add(self.radio_mode_custom, flag=wx.ALL, border=5)
+        self.sizer.Add(self.radio_mode_custom, flag=wx.ALL, border=5)
 
         self.radio_mode_home.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
         self.radio_mode_custom.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
 
+    def init_custom_dirs(self):
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.init_custom_dirs_listbox()
+        hbox.Add(self.listbox, wx.ID_ANY, flag=wx.EXPAND | wx.RIGHT, border=10)
+        self.init_custom_dirs_buttons()
+        hbox.Add(self.button_panel, proportion=0.6, flag=wx.EXPAND)
+        self.sizer.Add(hbox, flag=wx.EXPAND)
+
+    def init_custom_dirs_listbox(self):
+        self.listbox = wx.ListBox(self.panel)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.on_custom_dir_change)
+        for custom_dir in self.config.custom_dirs:
+            self.listbox.Append(custom_dir)
+
+    def init_custom_dirs_buttons(self):
+        self.button_panel = wx.Panel(self.panel)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        for i, (label, callback) in enumerate([
+                ('New', self.on_custom_dir_new),
+                ('Change', self.on_custom_dir_change),
+                ('Delete', self.on_custom_dir_delete),
+                ('Clear', self.on_custom_dirs_clear),
+        ]):
+            button = create_button(self, self.button_panel, label, callback)
+            if i == 0:
+                vbox.Add(button)
+            else:
+                vbox.Add(button, 0, flag=wx.TOP, border=5)
+        self.button_panel.SetSizer(vbox)
+
+    def init_dialog_buttons(self):
         button_sizer = wx.StdDialogButtonSizer()
         button = wx.Button(self, wx.ID_OK)
         button.SetDefault()
@@ -198,15 +266,57 @@ class Settings(wx.Dialog):
         button = wx.Button(self, wx.ID_CANCEL)
         button_sizer.AddButton(button)
         button_sizer.Realize()
-        sizer.Add(button_sizer, flag=wx.ALL, border=5)
+        self.sizer.Add(button_sizer, flag=wx.TOP, border=10)
 
-        sizer.Fit(panel)
-        sizer.Fit(self)
+    def fit(self):
+        self.border_sizer.Fit(self.panel)
+        self.border_sizer.Fit(self)
+        self.Layout()
+        self.Centre()
 
     def on_radio_toggle(self, event):
         logger.warn('On settings radio')
-        logger.warn('Home %s', self.radio_mode_home.GetValue())
-        logger.warn('Custom %s', self.radio_mode_custom.GetValue())
+        if self.radio_mode_home.GetValue():
+            self.config.mode = MODE_HOME
+        elif self.radio_mode_custom.GetValue():
+            self.config.mode = MODE_CUSTOM
+        else:
+            raise ValueError('Unknown radio button pressed')
+
+    def on_custom_dir_change(self, event):
+        logger.warn('On settings choose dir')
+
+        def callback(path: str):
+            sel = self.listbox.GetSelection()
+            self.listbox.Delete(sel)
+            item_id = self.listbox.Insert(path, sel)
+            self.config.custom_dirs[sel] = path
+            self.listbox.SetSelection(item_id)
+
+        choose_dir(self, callback)
+
+    def on_custom_dir_new(self, event):
+        logger.warn('On settings new dir')
+
+        def callback(path: str):
+            self.config.custom_dirs.append(path)
+            self.listbox.Append(path)
+
+        choose_dir(self, callback)
+
+    def on_custom_dir_delete(self, event):
+        logger.warn('On settings delete')
+
+        sel = self.listbox.GetSelection()
+        if sel != -1:
+            del self.config.custom_dirs[sel]
+            self.listbox.Delete(sel)
+
+    def on_custom_dirs_clear(self, event):
+        logger.warn('On settings clear')
+
+        self.config.custom_dirs[:] = []
+        self.listbox.Clear()
 
 
 class Window(wx.PopupTransientWindow):
@@ -364,6 +474,9 @@ class Application(wx.App):
             on_about=self.on_menu_about,
             on_quit=self.on_menu_quit
         )
+
+        self.on_menu_settings(None)  # TODO: Temporary
+
         return True
 
     def on_main_menu(self, event):
