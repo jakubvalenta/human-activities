@@ -254,11 +254,11 @@ class Window(wx.PopupTransientWindow):
         # self.resize(*self.size)  # TODO
 
     def ProcessLeftDown(self, evt):
-        logger.warn("ProcessLeftDown: %s\n" % evt.GetPosition())
+        logger.warn('ProcessLeftDown: %s' % evt.GetPosition())
         return wx.PopupTransientWindow.ProcessLeftDown(self, evt)
 
     def OnDismiss(self):
-        logger.warn("OnDismiss\n")
+        logger.warn('Dismiss')
 
 
 class Application(wx.App):
@@ -284,10 +284,18 @@ class Application(wx.App):
 
     def on_main_menu(self, event):
         logger.warn('Main menu')
-        # status_icon = event.GetEventObject()
-        # import ipdb; ipdb.set_trace()
-        # position = status_icon.ClientToScreen((0, 0))
-        # logger.warn('Position: %s x %s', *position)
+        mouse_x, mouse_y = wx.GetMousePosition()
+        display_id = wx.Display.GetFromWindow(self.window)
+        display = wx.Display(display_id)
+        _, _, screen_w, screen_h = display.GetClientArea()
+        window_w, window_h = self.window.GetSize()
+        window_x = min(mouse_x, max(screen_w - window_w, 0))
+        window_y = min(mouse_y, max(screen_h - window_h, 0))
+        logger.warn('Mouse: x=%d, y=%d', mouse_x, mouse_y)
+        logger.warn('Screen: w=%d, h=%d', screen_w, screen_h)
+        logger.warn('Window: w=%d, h=%d', window_w, window_h)
+        logger.warn('Window: x=%d, y=%d', window_x, window_y)
+        self.window.SetPosition((window_x, window_y))
         self.window.Popup()
 
     def on_menu_about(self, event):
