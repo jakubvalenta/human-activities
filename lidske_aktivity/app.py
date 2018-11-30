@@ -27,4 +27,4 @@ def main():
         scan_thread.join()
         logger.info('Scan stopped')
 
-    ui.run_app(store, on_quit)
+    ui.run_app(store, on_quit, config)

@@ -1,5 +1,4 @@
 import logging
-import sys
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -11,6 +10,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
+from lidske_aktivity.config import Config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -109,6 +109,7 @@ def create_radio_buttons(window: wx.Window,
 class TaskBarIcon(wx.adv.TaskBarIcon):
     def __init__(self,
                  on_main_menu: Callable,
+                 on_settings: Callable,
                  on_about: Callable,
                  on_quit: Callable):
         super().__init__(wx.adv.TBI_DOCK)
@@ -118,19 +119,21 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.SetIcon(icon)
 
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_main_menu)
+        self.Bind(wx.EVT_MENU, on_settings, id=wx.ID_SETUP)
         self.Bind(wx.EVT_MENU, on_about, id=wx.ID_ABOUT)
         self.Bind(wx.EVT_MENU, on_quit, id=wx.ID_EXIT)
 
     def CreatePopupMenu(self) -> wx.Menu:
         logger.warn('Create popup menu')
         menu = wx.Menu()
+        menu.Append(wx.ID_SETUP, '&Settings', ' Configure this program')
         menu.Append(wx.ID_ABOUT, '&About', ' Information about this program')
         menu.Append(wx.ID_EXIT, 'E&xit', ' Terminate the program')
         return menu
 
 
 class AboutBox(wx.Dialog):
-    def __init__(self, parent: wx.Window):
+    def __init__(self, parent: wx.Frame):
         super().__init__()
         self.Create(parent, id=-1, title='About Lidské aktivity')
         # TODO: Add about icon
@@ -160,6 +163,50 @@ class AboutBox(wx.Dialog):
 
         self.SetSizer(sizer)
         sizer.Fit(self)
+
+
+class Settings(wx.Dialog):
+    def __init__(self, parent: wx.Frame, config: Config):
+        super().__init__()
+        self.Create(parent, id=-1, title='Settings of Lidské aktivity')
+
+        self.config = config
+        panel = wx.Panel(self)
+        sizer = create_sizer(panel)
+
+        label = create_label(self, 'Mode')
+        sizer.Add(label, flag=wx.ALL, border=5)
+        self.radio_mode_home = wx.RadioButton(
+            panel,
+            label='Home',
+            style=wx.RB_GROUP
+        )
+        sizer.Add(self.radio_mode_home, flag=wx.ALL, border=5)
+        self.radio_mode_custom = wx.RadioButton(
+            panel,
+            label='Custom'
+        )
+        sizer.Add(self.radio_mode_custom, flag=wx.ALL, border=5)
+
+        self.radio_mode_home.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
+        self.radio_mode_custom.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
+
+        button_sizer = wx.StdDialogButtonSizer()
+        button = wx.Button(self, wx.ID_OK)
+        button.SetDefault()
+        button_sizer.AddButton(button)
+        button = wx.Button(self, wx.ID_CANCEL)
+        button_sizer.AddButton(button)
+        button_sizer.Realize()
+        sizer.Add(button_sizer, flag=wx.ALL, border=5)
+
+        sizer.Fit(panel)
+        sizer.Fit(self)
+
+    def on_radio_toggle(self, event):
+        logger.warn('On settings radio')
+        logger.warn('Home %s', self.radio_mode_home.GetValue())
+        logger.warn('Custom %s', self.radio_mode_custom.GetValue())
 
 
 class Window(wx.PopupTransientWindow):
@@ -297,9 +344,15 @@ class Application(wx.App):
     on_quit: Callable
     status_icon: wx.adv.TaskBarIcon
 
-    def __init__(self, store: Store, on_quit: Callable, *args, **kwargs):
+    def __init__(self,
+                 store: Store,
+                 on_quit: Callable,
+                 config: Config,
+                 *args,
+                 **kwargs):
         self.store = store
         self.on_quit = on_quit
+        self.config = config
         super().__init__(False, *args, **kwargs)
 
     def OnInit(self) -> bool:
@@ -307,6 +360,7 @@ class Application(wx.App):
         self.window = Window(store=self.store, parent=self.frame)
         self.status_icon = TaskBarIcon(
             on_main_menu=self.on_main_menu,
+            on_settings=self.on_menu_settings,
             on_about=self.on_menu_about,
             on_quit=self.on_menu_quit
         )
@@ -335,6 +389,12 @@ class Application(wx.App):
         self.window.SetPosition((window_x, window_y))
         self.window.Popup()
 
+    def on_menu_settings(self, event):
+        logger.warn('Settings')
+        settings = Settings(self.frame, self.config)
+        settings.ShowModal()
+        settings.Destroy()
+
     def on_menu_about(self, event):
         logger.warn('About')
         about = AboutBox(self.frame)
@@ -355,6 +415,6 @@ class Application(wx.App):
         return True
 
 
-def run_app(store: Store, on_quit: Callable):
-    app = Application(store, on_quit)
+def run_app(store: Store, on_quit: Callable, config: Config):
+    app = Application(store, on_quit, config)
     app.MainLoop()
