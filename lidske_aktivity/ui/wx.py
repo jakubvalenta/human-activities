@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from functools import partial
 from threading import Event, Thread
 from time import sleep
-from typing import Callable, Iterable, Iterator, Optional
+from typing import Callable, Dict, Iterable, Iterator, List, Optional
 
 import wx
 import wx.adv
@@ -108,21 +108,30 @@ def create_context_menu(frame: wx.Frame,
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
 
-    def __init__(self, frame: wx.Frame):
-        self.frame = frame
+    def __init__(self,
+                 parent: wx.Window,
+                 on_about: Callable,
+                 on_quit: Callable):
         super().__init__()
+        self.parent = parent
+        self.on_about = on_about
+        self.on_quit = on_quit
 
     def CreatePopupMenu(self) -> wx.Menu:
-        return create_context_menu(self.frame, self.on_about, self.on_quit)
+        logger.warn('Create popup menu')
+        return create_context_menu(self.parent, self.on_about, self.on_quit)
 
-    def on_about(self, event):
-        logger.warn('About')
-        show_about_dialog()
 
-    def on_quit(self, event):
-        logger.warn('Quit')
-        self.frame.on_quit()
-        self.frame.Close(True)
+def create_status_icon(parent: wx.Window,
+                       on_main_menu: Callable,
+                       on_about: Callable,
+                       on_quit: Callable) -> wx.adv.TaskBarIcon:
+    icon = wx.Icon()
+    icon.LoadFile('/usr/share/icons/Adwaita/16x16/actions/go-home.png')
+    status_icon = TaskBarIcon(parent, on_about, on_quit)
+    status_icon.SetIcon(icon)
+    status_icon.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_main_menu)
+    return status_icon
 
 
 def show_about_dialog():
@@ -132,25 +141,35 @@ def show_about_dialog():
     )
 
 
-class Frame(wx.Frame):
+class Window(wx.PopupTransientWindow):
     store: Store
-    on_quit: Callable
-
     sizer: wx.BoxSizer
+    radio_buttons: List[wx.RadioButton]
+    progress_bars: Dict[str, wx.Gauge]
 
-    def __init__(self, store: Store, on_quit: Callable, *args, **kwargs):
-        super().__init__(*args, parent=None, title='Lidské aktivity', **kwargs)
+    def __init__(self,
+                 store: Store,
+                 parent: wx.Window,
+                 *args, **kwargs):
+        super().__init__(*args, parent=parent, **kwargs)
         self.store = store
-        self.on_quit = on_quit
         self.init_window()
         self.init_radio()
         self.init_progress_bars()
         self.init_spinner()
         self.tick_start()
+        self.fit()
+        logger.warn('Done')
 
     def init_window(self):
+        self.panel = wx.Panel(self)
         self.sizer = create_sizer(self, wx.VERTICAL)
-        self.Show()
+        self.panel.SetSizer(self.sizer)
+
+    def fit(self):
+        self.sizer.Fit(self.panel)
+        self.sizer.Fit(self)
+        self.Layout()
 
     def init_radio(self):
         radio_button_configs = [
@@ -196,9 +215,17 @@ class Frame(wx.Frame):
             self.progress_bars[path] = progress_bar
 
     def init_spinner(self):
-        label = create_label(self, 'Processing...')
-        self.sizer.Add(label)
-        return label
+        self.size_remember()
+        self.spinner = create_label(self, 'Processing...')
+        self.sizer.Add(self.spinner)
+
+    def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
+        logger.warn('Toogled %s = %s', button, mode)
+        self.store.set_active_mode(mode)
+        for other_button in self.radio_buttons:
+            if other_button != button:
+                other_button.SetValue(False)
+        self.on_tick(pulse=False)
 
     def tick_start(self):
         self.tick_event_stop = Event()
@@ -228,27 +255,64 @@ class Frame(wx.Frame):
                     )
         if not any(self.store.pending.values()):
             self.spinner.Hide()
-            # self.size_restore()
+            self.size_restore()
 
-    def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
-        logger.warn('Toogled %s = %s', button, mode)
-        self.store.set_active_mode(mode)
-        for other_button in self.radio_buttons:
-            if other_button != button:
-                other_button.SetValue(False)
-        self.on_tick(pulse=False)
+    def size_remember(self):
+        pass
+        # self.size = self.get_size()  # TODO
+
+    def size_restore(self):
+        pass
+        # self.resize(*self.size)  # TODO
+
+    def ProcessLeftDown(self, evt):
+        logger.warn("ProcessLeftDown: %s\n" % evt.GetPosition())
+        return wx.PopupTransientWindow.ProcessLeftDown(self, evt)
+
+    def OnDismiss(self):
+        logger.warn("OnDismiss\n")
+
+
+class Application(wx.App):
+    window: Window
+    store: Store
+    on_quit: Callable
+    status_icon: wx.adv.TaskBarIcon
+
+    def __init__(self, store: Store, on_quit: Callable, *args, **kwargs):
+        self.store = store
+        self.on_quit = on_quit
+        super().__init__(False, *args, **kwargs)
+
+    def OnInit(self) -> bool:
+        parent = wx.Frame(parent=None, title='Foo')
+        self.window = Window(store=self.store, parent=parent)
+        self.status_icon = create_status_icon(
+            parent=parent,
+            on_main_menu=self.on_main_menu,
+            on_about=self.on_menu_about,
+            on_quit=self.on_menu_quit
+        )
+        return True
 
     def on_main_menu(self, event):
-        logger.warn('Main menu', self)
-        self.Show()
+        logger.warn('Main menu')
+        # status_icon = event.GetEventObject()
+        # import ipdb; ipdb.set_trace()
+        # position = status_icon.ClientToScreen((0, 0))
+        # logger.warn('Position: %s x %s', *position)
+        self.window.Show(True)
+
+    def on_menu_about(self, event):
+        logger.warn('About')
+        show_about_dialog()
+
+    def on_menu_quit(self, event, on_quit):
+        logger.warn('Quit')
+        on_quit()
+        self.window.Close(True)
 
 
 def run_app(store: Store, on_quit: Callable):
-    app = wx.App()
-    frame = Frame(store, on_quit)
-    task_bar_icon = TaskBarIcon(frame)
-    task_bar_icon.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, frame.on_main_menu)
-    icon = wx.Icon()
-    icon.LoadFile('/usr/share/icons/Adwaita/16x16/actions/go-home.png')
-    task_bar_icon.SetIcon(icon)
+    app = Application(store, on_quit)
     app.MainLoop()

@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from threading import Event, Thread
 from time import sleep
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Dict, Iterable, Optional
 
 import gi
 
@@ -148,6 +148,7 @@ def on_about_response(dialog: Gtk.Dialog, response_id: int):
 class Window(Gtk.ApplicationWindow):
     store: Store
     vbox: Gtk.Box
+    progress_bars: Dict[str, Gtk.ProgressBar]
 
     def __init__(self,
                  application: Gtk.Application,
