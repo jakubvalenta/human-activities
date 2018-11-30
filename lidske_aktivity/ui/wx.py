@@ -22,11 +22,17 @@ class RadioButtonConfig:
     tooltip: str
 
 
-def create_sizer(parent: wx.Window, orientation) -> wx.BoxSizer:
+def create_sizer(parent: wx.Window,
+                 orientation: int = wx.VERTICAL,
+                 *args,
+                 **kwargs) -> wx.BoxSizer:
     sizer = wx.BoxSizer(orientation)
-    parent.SetSizer(sizer)
-    parent.SetAutoLayout(1)
-    sizer.Fit(parent)
+    if isinstance(parent, wx.Sizer):
+        parent.Add(sizer, *args, **kwargs)
+    else:
+        parent.SetSizer(sizer)
+        parent.SetAutoLayout(1)
+        sizer.Fit(parent)
     return sizer
 
 
@@ -151,12 +157,16 @@ class Window(wx.PopupTransientWindow):
 
     def init_window(self):
         self.panel = wx.Panel(self)
-        self.sizer = create_sizer(self, wx.VERTICAL)
-        self.panel.SetSizer(self.sizer)
+        self.border_sizer = create_sizer(self.panel)
+        self.sizer = create_sizer(
+            self.border_sizer,
+            flag=wx.EXPAND | wx.ALL,
+            border=10
+        )
 
     def fit(self):
-        self.sizer.Fit(self.panel)
-        self.sizer.Fit(self)
+        self.border_sizer.Fit(self.panel)
+        self.border_sizer.Fit(self)
         self.Layout()
 
     def init_radio(self):
