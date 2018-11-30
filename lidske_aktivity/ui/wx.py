@@ -319,8 +319,15 @@ class Application(wx.App):
         display = wx.Display(display_id)
         _, _, screen_w, screen_h = display.GetClientArea()
         window_w, window_h = self.window.GetSize()
-        window_x = min(mouse_x, max(screen_w - window_w, 0))
-        window_y = min(mouse_y, max(screen_h - window_h, 0))
+        SCREEN_MARGIN = 10
+        window_x = min(
+            mouse_x,
+            max(screen_w - window_w - SCREEN_MARGIN, SCREEN_MARGIN)
+        )
+        window_y = min(
+            mouse_y,
+            max(screen_h - window_h - SCREEN_MARGIN, SCREEN_MARGIN)
+        )
         logger.warn('Mouse: x=%d, y=%d', mouse_x, mouse_y)
         logger.warn('Screen: w=%d, h=%d', screen_w, screen_h)
         logger.warn('Window: w=%d, h=%d', window_w, window_h)
