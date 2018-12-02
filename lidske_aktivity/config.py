@@ -47,6 +47,15 @@ class Config:
     mode: str
     custom_dirs: List[str]
 
+    def to_json(self) -> str:
+        d = {
+            'root_path': str(self.root_path),
+            'test': self.test,
+            'mode': self.mode,
+            'custom_dirs': self.custom_dirs,
+        }
+        return json.dumps(d, indent=2)
+
 
 MODE_HOME = 'home'
 MODE_CUSTOM = 'custom'
@@ -78,6 +87,12 @@ def load_config() -> Config:
         mode=mode,
         custom_dirs=custom_dirs,
     )
+
+
+def save_config(config: Config):
+    config_json = config.to_json()
+    logger.info('Writing config %s', config_json)
+    # CONFIG_PATH.write_text()
 
 
 def clean_cache():
