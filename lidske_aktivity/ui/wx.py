@@ -470,9 +470,6 @@ class Application(wx.App):
             on_about=self.on_menu_about,
             on_quit=self.on_menu_quit
         )
-
-        self.on_menu_settings(None)  # TODO: Temporary
-
         return True
 
     def on_main_menu(self, event):
