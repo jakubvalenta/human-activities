@@ -10,7 +10,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.config import MODE_CUSTOM, MODE_HOME, Config
+from lidske_aktivity.config import MODE_CUSTOM, MODE_HOME, Config, save_config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -505,7 +505,10 @@ class Application(wx.App):
     def on_menu_settings(self, event):
         logger.warn('Settings')
         settings = Settings(self.frame, self.config)
-        settings.ShowModal()
+        val = settings.ShowModal()
+        if val == wx.ID_OK:
+            self.config = settings.config
+            save_config(self.config)
         settings.Destroy()
 
     def on_menu_about(self, event):
