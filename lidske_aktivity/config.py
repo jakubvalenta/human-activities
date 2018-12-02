@@ -80,7 +80,7 @@ def load_config() -> Config:
         custom_dirs_ = config_json.get('custom_dirs')
         if type(custom_dirs_) == list:
             for custom_dir in custom_dirs_:
-                if type(custom_dir) == 'str':
+                if type(custom_dir) == str:
                     custom_dirs.append(custom_dir)
     return Config(
         root_path=root_path,
@@ -93,7 +93,7 @@ def load_config() -> Config:
 def save_config(config: Config):
     config_json = config.to_json()
     logger.info('Writing config %s', config_json)
-    # CONFIG_PATH.write_text()
+    CONFIG_PATH.write_text(config_json)
 
 
 def clean_cache():
