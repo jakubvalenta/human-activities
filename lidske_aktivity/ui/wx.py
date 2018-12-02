@@ -10,7 +10,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.config import MODE_CUSTOM, MODE_HOME, Config, save_config
+from lidske_aktivity.config import MODES, Config, save_config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -190,6 +190,7 @@ class AboutBox(wx.Dialog):
 
 class Settings(wx.Dialog):
     grid_: None = Optional[wx.GridSizer]
+    mode_radios: Dict[str, wx.RadioButton]
 
     def __init__(self, parent: wx.Frame, config: Config):
         super().__init__()
@@ -211,22 +212,20 @@ class Settings(wx.Dialog):
         )
 
     def init_mode(self):
-        label = create_label(self, 'Mode')
+        label = create_label(self, 'Scan mode')
         self.sizer.Add(label, flag=wx.ALL, border=5)
-        self.radio_mode_home = wx.RadioButton(
-            self.panel,
-            label='Home',
-            style=wx.RB_GROUP
-        )
-        self.sizer.Add(self.radio_mode_home, flag=wx.ALL, border=5)
-        self.radio_mode_custom = wx.RadioButton(
-            self.panel,
-            label='Custom'
-        )
-        self.sizer.Add(self.radio_mode_custom, flag=wx.ALL, border=5)
-
-        self.radio_mode_home.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
-        self.radio_mode_custom.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
+        self.mode_radios = {}
+        for i, (mode, label) in enumerate(MODES.items()):
+            if i == 0:
+                kwargs = {'style': wx.RB_GROUP}
+            else:
+                kwargs = {}
+            radio = wx.RadioButton(self.panel, label=label, **kwargs)
+            radio.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
+            if mode == self.config.mode:
+                radio.SetValue(True)
+            self.sizer.Add(radio, flag=wx.ALL, border=5)
+            self.mode_radios[mode] = radio
 
     def init_custom_dirs(self):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -276,12 +275,9 @@ class Settings(wx.Dialog):
 
     def on_radio_toggle(self, event):
         logger.warn('On settings radio')
-        if self.radio_mode_home.GetValue():
-            self.config.mode = MODE_HOME
-        elif self.radio_mode_custom.GetValue():
-            self.config.mode = MODE_CUSTOM
-        else:
-            raise ValueError('Unknown radio button pressed')
+        for mode, radio in self.mode_radios.items():
+            if radio.GetValue():
+                self.config.mode = mode
 
     def on_custom_dir_change(self, event):
         logger.warn('On settings choose dir')

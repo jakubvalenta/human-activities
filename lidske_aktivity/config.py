@@ -59,7 +59,10 @@ class Config:
 
 MODE_HOME = 'home'
 MODE_CUSTOM = 'custom'
-MODES = [MODE_HOME, MODE_CUSTOM]
+MODES = {
+    MODE_HOME: 'Home directory',
+    MODE_CUSTOM: 'Custom directories',
+}
 
 
 def load_config() -> Config:
@@ -75,7 +78,7 @@ def load_config() -> Config:
         if type(config_json.get('test')) == bool:
             test = config_json['test']
         mode_ = config_json.get('mode')
-        if type(mode_) == str and mode_ in MODES:
+        if type(mode_) == str and mode_ in MODES.keys():
             mode = mode_
         custom_dirs_ = config_json.get('custom_dirs')
         if type(custom_dirs_) == list:
