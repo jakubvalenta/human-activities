@@ -66,7 +66,7 @@ def load_config() -> Config:
     root_path = Path.home()
     test = False
     mode = MODE_HOME
-    custom_dirs = ['aaa', 'bbb']
+    custom_dirs = []
     if CONFIG_PATH.is_file():
         with CONFIG_PATH.open() as f:
             config_json = json.load(f)
@@ -78,9 +78,10 @@ def load_config() -> Config:
         if type(mode_) == str and mode_ in MODES:
             mode = mode_
         custom_dirs_ = config_json.get('custom_dirs')
-        if (type(custom_dirs_) == list
-                and all(type(x) == 'str' for x in custom_dirs_)):
-            custom_dirs = custom_dirs_
+        if type(custom_dirs_) == list:
+            for custom_dir in custom_dirs_:
+                if type(custom_dir) == 'str':
+                    custom_dirs.append(custom_dir)
     return Config(
         root_path=root_path,
         test=test,
