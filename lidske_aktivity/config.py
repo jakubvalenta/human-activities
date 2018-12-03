@@ -4,7 +4,7 @@ import os.path
 import platform
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import List, Union
+from typing import List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -52,24 +52,26 @@ class Config:
             'root_path': str(self.root_path),
             'test': self.test,
             'mode': self.mode,
-            'custom_dirs': self.custom_dirs,
+            'custom_dirs': [str(path_str) for path_str in self.custom_dirs],
         }
         return json.dumps(d, indent=2)
 
 
 MODE_HOME = 'home'
+MODE_PATH = 'path'
 MODE_CUSTOM = 'custom'
 MODES = {
-    MODE_HOME: 'Home directory',
+    MODE_HOME: 'All directories in the home directory',
+    MODE_PATH: 'All directories in selected directory',
     MODE_CUSTOM: 'Custom directories',
 }
 
 
 def load_config() -> Config:
-    root_path = Path.home()
+    root_path: Optional[Path] = None
     test = False
     mode = MODE_HOME
-    custom_dirs = []
+    custom_dirs: List[Path] = []
     if CONFIG_PATH.is_file():
         with CONFIG_PATH.open() as f:
             config_json = json.load(f)
@@ -84,7 +86,7 @@ def load_config() -> Config:
         if type(custom_dirs_) == list:
             for custom_dir in custom_dirs_:
                 if type(custom_dir) == str:
-                    custom_dirs.append(custom_dir)
+                    custom_dirs.append(Path(custom_dir))
     return Config(
         root_path=root_path,
         test=test,

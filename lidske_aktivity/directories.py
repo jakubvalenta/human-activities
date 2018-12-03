@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Thread
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Optional, Sequence
 
 from lidske_aktivity.utils import filesystem, math
 
@@ -20,10 +20,6 @@ class Directory:
 
 
 TDirectories = Dict[Path, Directory]
-
-
-def read_directories(root_path: Path) -> TDirectories:
-    return {path: Directory() for path in filesystem.list_dirs(root_path)}
 
 
 def read_cached_directories(cache_path: Path) -> TDirectories:
@@ -68,15 +64,20 @@ def merge_directories(a: TDirectories, b: TDirectories) -> TDirectories:
     }
 
 
-def init_directories(cache_path: Path,
-                     root_path: Path = Path.home()) -> TDirectories:
+def init_directories_from_root_path(cache_path: Path,
+                                    root_path: Path) -> TDirectories:
     if not root_path.is_dir():
         logger.error('Path %s is not a directory', root_path)
         return {}
-    return merge_directories(
-        read_directories(root_path),
-        read_cached_directories(cache_path),
-    )
+    paths = filesystem.list_dirs(root_path)
+    directories = {path: Directory() for path in paths}
+    return merge_directories(directories, read_cached_directories(cache_path))
+
+
+def init_directories_from_paths(cache_path: Path,
+                                paths: Sequence[Path] = ()) -> TDirectories:
+    directories = {path: Directory() for path in paths}
+    return merge_directories(directories, read_cached_directories(cache_path))
 
 
 TScanCallback = Callable[[Path, Directory], None]

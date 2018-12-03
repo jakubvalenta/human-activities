@@ -250,7 +250,7 @@ class Settings(wx.Dialog):
         self.listbox = wx.ListBox(self.panel)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.on_custom_dir_change)
         for custom_dir in self.config.custom_dirs:
-            self.listbox.Append(custom_dir)
+            self.listbox.Append(str(custom_dir))
 
     def init_custom_dirs_buttons(self):
         self.button_panel = wx.Panel(self.panel)
@@ -291,19 +291,19 @@ class Settings(wx.Dialog):
         self.toggle_custom_dirs()
 
     def on_custom_dir_change(self, event):
-        def callback(path: str):
+        def callback(path_str: str):
             sel = self.listbox.GetSelection()
             self.listbox.Delete(sel)
-            item_id = self.listbox.Insert(path, sel)
-            self.config.custom_dirs[sel] = path
+            item_id = self.listbox.Insert(path_str, sel)
+            self.config.custom_dirs[sel] = Path(path_str)
             self.listbox.SetSelection(item_id)
 
         choose_dir(self, callback)
 
     def on_custom_dir_new(self, event):
-        def callback(path: str):
-            self.config.custom_dirs.append(path)
-            self.listbox.Append(path)
+        def callback(path_str: str):
+            self.config.custom_dirs.append(Path(path_str))
+            self.listbox.Append(path_str)
 
         choose_dir(self, callback)
 
