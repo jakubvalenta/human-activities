@@ -57,7 +57,6 @@ def create_button(parent: wx.Window,
 
 
 def choose_dir(parent: wx.Window, callback: Callable[[str], None]):
-    logger.warn('Choose dir')
     dialog = wx.DirDialog(
         parent,
         'Choose a directory:',
@@ -66,7 +65,6 @@ def choose_dir(parent: wx.Window, callback: Callable[[str], None]):
     )
     if dialog.ShowModal() == wx.ID_OK:
         path = dialog.GetPath()
-        logger.warn('Selected %s', path)
         callback(path)
 
 
@@ -147,7 +145,6 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.Bind(wx.EVT_MENU, on_quit, id=wx.ID_EXIT)
 
     def CreatePopupMenu(self) -> wx.Menu:
-        logger.warn('Create popup menu')
         menu = wx.Menu()
         menu.Append(wx.ID_SETUP, '&Settings', ' Configure this program')
         menu.Append(wx.ID_ABOUT, '&About', ' Information about this program')
@@ -274,14 +271,11 @@ class Settings(wx.Dialog):
         self.Centre()
 
     def on_radio_toggle(self, event):
-        logger.warn('On settings radio')
         for mode, radio in self.mode_radios.items():
             if radio.GetValue():
                 self.config.mode = mode
 
     def on_custom_dir_change(self, event):
-        logger.warn('On settings choose dir')
-
         def callback(path: str):
             sel = self.listbox.GetSelection()
             self.listbox.Delete(sel)
@@ -292,8 +286,6 @@ class Settings(wx.Dialog):
         choose_dir(self, callback)
 
     def on_custom_dir_new(self, event):
-        logger.warn('On settings new dir')
-
         def callback(path: str):
             self.config.custom_dirs.append(path)
             self.listbox.Append(path)
@@ -301,16 +293,12 @@ class Settings(wx.Dialog):
         choose_dir(self, callback)
 
     def on_custom_dir_delete(self, event):
-        logger.warn('On settings delete')
-
         sel = self.listbox.GetSelection()
         if sel != -1:
             del self.config.custom_dirs[sel]
             self.listbox.Delete(sel)
 
     def on_custom_dirs_clear(self, event):
-        logger.warn('On settings clear')
-
         self.config.custom_dirs[:] = []
         self.listbox.Clear()
 
@@ -333,7 +321,6 @@ class Window(wx.PopupTransientWindow):
         self.init_spinner()
         self.tick_start()
         self.fit()
-        logger.warn('Done')
 
     def init_window(self):
         self.panel = wx.Panel(self)
@@ -399,7 +386,6 @@ class Window(wx.PopupTransientWindow):
         self.sizer.Add(self.spinner, flag=wx.TOP, border=5)
 
     def on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
-        logger.warn('Toogled %s = %s', button, mode)
         self.store.set_active_mode(mode)
         for other_button in self.radio_buttons:
             if other_button != button:
@@ -437,11 +423,8 @@ class Window(wx.PopupTransientWindow):
             self.fit()
 
     def ProcessLeftDown(self, evt):
-        logger.warn('ProcessLeftDown: %s' % evt.GetPosition())
+        logger.info('ProcessLeftDown: %s' % evt.GetPosition())
         return wx.PopupTransientWindow.ProcessLeftDown(self, evt)
-
-    def OnDismiss(self):
-        logger.warn('Dismiss')
 
 
 class Application(wx.App):
@@ -473,7 +456,6 @@ class Application(wx.App):
         return True
 
     def on_main_menu(self, event):
-        logger.warn('Main menu')
         mouse_x, mouse_y = wx.GetMousePosition()
         display_id = wx.Display.GetFromWindow(self.window)
         display = wx.Display(display_id)
@@ -488,15 +470,10 @@ class Application(wx.App):
             mouse_y,
             max(screen_h - window_h - SCREEN_MARGIN, SCREEN_MARGIN)
         )
-        logger.warn('Mouse: x=%d, y=%d', mouse_x, mouse_y)
-        logger.warn('Screen: w=%d, h=%d', screen_w, screen_h)
-        logger.warn('Window: w=%d, h=%d', window_w, window_h)
-        logger.warn('Window: x=%d, y=%d', window_x, window_y)
         self.window.SetPosition((window_x, window_y))
         self.window.Popup()
 
     def on_menu_settings(self, event):
-        logger.warn('Settings')
         settings = Settings(self.frame, self.config)
         val = settings.ShowModal()
         if val == wx.ID_OK:
@@ -505,19 +482,16 @@ class Application(wx.App):
         settings.Destroy()
 
     def on_menu_about(self, event):
-        logger.warn('About')
         about = AboutBox(self.frame)
         about.ShowModal()
         about.Destroy()
 
     def on_menu_quit(self, event):
-        logger.warn('Quit')
         self.status_icon.Destroy()
         self.window.Destroy()
         self.frame.Destroy()
 
     def OnExit(self):
-        logger.warn('On Exit')
         self.on_quit()
         self.window.tick_stop()
         super().OnExit()
