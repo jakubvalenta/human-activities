@@ -10,7 +10,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.config import MODES, Config, save_config
+from lidske_aktivity.config import MODE_CUSTOM, MODES, Config, save_config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -187,7 +187,12 @@ class AboutBox(wx.Dialog):
 
 class Settings(wx.Dialog):
     grid_: None = Optional[wx.GridSizer]
+    panel: wx.Panel
+    sizer: wx.Sizer
+    border_sizer: wx.Sizer
     mode_radios: Dict[str, wx.RadioButton]
+    list_box: wx.ListBox
+    button_panel: wx.Panel
 
     def __init__(self, parent: wx.Frame, config: Config):
         super().__init__()
@@ -231,6 +236,15 @@ class Settings(wx.Dialog):
         self.init_custom_dirs_buttons()
         hbox.Add(self.button_panel, proportion=0.6, flag=wx.EXPAND)
         self.sizer.Add(hbox, flag=wx.EXPAND)
+        self.toggle_custom_dirs()
+
+    def toggle_custom_dirs(self):
+        if self.config.mode == MODE_CUSTOM:
+            self.listbox.Enable()
+            self.button_panel.Enable()
+        else:
+            self.listbox.Disable()
+            self.button_panel.Disable()
 
     def init_custom_dirs_listbox(self):
         self.listbox = wx.ListBox(self.panel)
@@ -274,6 +288,7 @@ class Settings(wx.Dialog):
         for mode, radio in self.mode_radios.items():
             if radio.GetValue():
                 self.config.mode = mode
+        self.toggle_custom_dirs()
 
     def on_custom_dir_change(self, event):
         def callback(path: str):
@@ -443,6 +458,7 @@ class Application(wx.App):
         self.on_quit = on_quit
         self.config = config
         super().__init__(False, *args, **kwargs)
+        self.on_menu_settings(None)
 
     def OnInit(self) -> bool:
         self.frame = wx.Frame(parent=None, title='Foo')
