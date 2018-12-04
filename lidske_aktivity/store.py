@@ -1,8 +1,12 @@
+import logging
 from pathlib import Path
-from typing import Dict
+from typing import Callable, Dict, Optional
 
+from lidske_aktivity.config import Config
 from lidske_aktivity.directories import Directory, TDirectories
 from lidske_aktivity.utils import math
+
+logger = logging.getLogger(__name__)
 
 TPending = Dict[Path, bool]
 TFractions = Dict[Path, float]
@@ -33,15 +37,19 @@ CALC_FRACTIONS = {
 
 
 class Store:
-    directories: TDirectories
+    _config: Config
+    _directories: TDirectories
     pending: TPending
     fractions: TFractions
     active_mode: str = SIZE_MODE_SIZE
+    on_config_change: Optional[Callable] = None
 
-    def __init__(self, directories: TDirectories):
-        self.directories = directories
-        self.pending = {path: True for path in self.directories.keys()}
-        self.fractions = {path: 0 for path in self.directories.keys()}
+    def __init__(self, config: Config, on_config_change: Callable):
+        self._config = config
+        self._directories = {}
+        self.pending = {}
+        self.fractions = {}
+        self.on_config_change = on_config_change
 
     def calc_fractions(self):
         self.fractions = CALC_FRACTIONS[self.active_mode](self.directories)
@@ -54,3 +62,24 @@ class Store:
     def set_active_mode(self, mode: str):
         self.active_mode = mode
         self.calc_fractions()
+
+    @property
+    def config(self) -> Config:
+        return self._config
+
+    @config.setter
+    def config(self, value: Config):
+        logger.info('Config changed')
+        self._config = value
+        if self.on_config_change:
+            self.on_config_change()
+
+    @property
+    def directories(self) -> TDirectories:
+        return self._directories
+
+    @directories.setter
+    def directories(self, value: TDirectories):
+        self._directories = value
+        self.pending = {path: True for path in value.keys()}
+        self.fractions = {path: 0 for path in value.keys()}

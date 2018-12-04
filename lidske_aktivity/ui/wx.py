@@ -502,18 +502,15 @@ class Application(wx.App):
     def __init__(self,
                  store: Store,
                  on_quit: Callable,
-                 config: Config,
                  *args,
                  **kwargs):
         self.store = store
         self.on_quit = on_quit
-        self.config = config
         super().__init__(False, *args, **kwargs)
-        self.on_menu_settings(None)
 
     def OnInit(self) -> bool:
         self.frame = wx.Frame(parent=None, title='Foo')
-        self.window = Window(store=self.store, parent=self.frame)
+        self.init_window()
         self.status_icon = TaskBarIcon(
             on_main_menu=self.on_main_menu,
             on_settings=self.on_menu_settings,
@@ -521,6 +518,13 @@ class Application(wx.App):
             on_quit=self.on_menu_quit
         )
         return True
+
+    def init_window(self):
+        self.window = Window(store=self.store, parent=self.frame)
+
+    def destroy_window(self):
+        self.window.Destroy()
+        self.window.tick_stop()
 
     def on_main_menu(self, event):
         mouse_x, mouse_y = wx.GetMousePosition()
@@ -541,11 +545,13 @@ class Application(wx.App):
         self.window.Popup()
 
     def on_menu_settings(self, event):
-        settings = Settings(self.frame, self.config)
+        settings = Settings(self.frame, self.store.config)
         val = settings.ShowModal()
         if val == wx.ID_OK:
-            self.config = settings.config
-            save_config(self.config)
+            self.store.config = settings.config
+            self.destroy_window()
+            self.init_window()
+            save_config(self.store.config)
         settings.Destroy()
 
     def on_menu_about(self, event):
@@ -565,6 +571,6 @@ class Application(wx.App):
         return True
 
 
-def run_app(store: Store, on_quit: Callable, config: Config):
-    app = Application(store, on_quit, config)
+def run_app(store: Store, on_quit: Callable):
+    app = Application(store, on_quit)
     app.MainLoop()

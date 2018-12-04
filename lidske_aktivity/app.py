@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from threading import Event
+from threading import Event, Thread
 
 from lidske_aktivity import ui
 from lidske_aktivity.config import (
@@ -19,38 +19,61 @@ class AppError(Exception):
     pass
 
 
-def main():
-    config = load_config()
-    if config.mode == MODE_HOME:
-        directories = init_directories_from_root_path(
-            CACHE_PATH,
-            Path.home()
-        )
-    elif config.mode == MODE_PATH:
-        directories = init_directories_from_root_path(
-            CACHE_PATH,
-            config.root_path
-        )
-    elif config.mode == MODE_CUSTOM:
-        directories = init_directories_from_paths(
-            CACHE_PATH,
-            config.custom_dirs
-        )
-    else:
-        raise AppError(f'Invalid mode config.mode')
-    store = Store(directories=directories)
-    scan_event_stop = Event()
-    scan_thread = scan_directories(
-        store.directories,
-        cache_path=CACHE_PATH,
-        callback=store.update,
-        event_stop=scan_event_stop,
-        test=config.test
-    )
+class Application:
+    store: Store
+    scan_event_stop: Event
+    scan_thread: Thread
 
-    def on_quit():
-        scan_event_stop.set()
-        scan_thread.join()
+    def __init__(self):
+        config = load_config()
+        self.store = Store(
+            config=config,
+            on_config_change=self.on_config_change
+        )
+        self.load_directories()
+        self.scan_start()
+        ui.run_app(self.store, self.scan_stop)
+
+    def load_directories(self):
+        if self.store.config.mode == MODE_HOME:
+            directories = init_directories_from_root_path(
+                CACHE_PATH,
+                Path.home()
+            )
+        elif self.store.config.mode == MODE_PATH:
+            directories = init_directories_from_root_path(
+                CACHE_PATH,
+                self.store.config.root_path
+            )
+        elif self.store.config.mode == MODE_CUSTOM:
+            directories = init_directories_from_paths(
+                CACHE_PATH,
+                self.store.config.custom_dirs
+            )
+        else:
+            raise AppError(f'Invalid mode config.mode')
+        self.store.directories = directories
+
+    def on_config_change(self):
+        self.scan_stop()
+        self.load_directories()
+        self.scan_start()
+
+    def scan_start(self):
+        self.scan_event_stop = Event()
+        self.scan_thread = scan_directories(
+            self.store.directories,
+            cache_path=CACHE_PATH,
+            callback=self.store.update,
+            event_stop=self.scan_event_stop,
+            test=self.store.config.test
+        )
+
+    def scan_stop(self):
+        self.scan_event_stop.set()
+        self.scan_thread.join()
         logger.info('Scan stopped')
 
-    ui.run_app(store, on_quit, config)
+
+def main():
+    Application()

@@ -42,14 +42,14 @@ CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
 @dataclass
 class Config:
-    root_path: Path
+    root_path: Optional[Path]
     test: bool
     mode: str
-    custom_dirs: List[str]
+    custom_dirs: List[Path]
 
     def to_json(self) -> str:
         d = {
-            'root_path': str(self.root_path),
+            'root_path': str(self.root_path) if self.root_path else None,
             'test': self.test,
             'mode': self.mode,
             'custom_dirs': [str(path_str) for path_str in self.custom_dirs],
