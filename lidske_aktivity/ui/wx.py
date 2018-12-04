@@ -201,6 +201,7 @@ class Settings(wx.Dialog):
     sizer: wx.Sizer
     border_sizer: wx.Sizer
     mode_radios: Dict[str, wx.RadioButton]
+    root_path_panel: wx.Sizer
     root_path_control: wx.TextCtrl
     list_box: wx.ListBox
     button_panel: wx.Panel
@@ -217,6 +218,7 @@ class Settings(wx.Dialog):
         self.add_mode_radio(MODE_CUSTOM)
         self.init_custom_dirs()
         self.init_dialog_buttons()
+        self.toggle_controls()
         self.fit()
 
     def init_window(self):
@@ -247,12 +249,23 @@ class Settings(wx.Dialog):
         self.sizer.Add(self.mode_radios[mode], flag=wx.ALL, border=5)
 
     def init_root_path_control(self):
+        self.root_path_panel = wx.Panel(self.panel)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.root_path_control = create_text_control(
-            self.panel,
+            self.root_path_panel,
             value=str(self.config.root_path),
-            callback=self.on_root_path_change
+            callback=self.on_root_path_text
         )
-        self.sizer.Add(self.root_path_control, flag=wx.EXPAND)
+        hbox.Add(self.root_path_control, flag=wx.EXPAND | wx.RIGHT, border=10)
+        button = create_button(
+            self,
+            self.root_path_panel,
+            'Choose',
+            self.on_root_path_button
+        )
+        hbox.Add(button, proportion=0.6, flag=wx.EXPAND)
+        self.root_path_panel.SetSizer(hbox)
+        self.sizer.Add(self.root_path_panel, flag=wx.EXPAND)
 
     def init_custom_dirs(self):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -261,13 +274,12 @@ class Settings(wx.Dialog):
         self.init_custom_dirs_buttons()
         hbox.Add(self.button_panel, proportion=0.6, flag=wx.EXPAND)
         self.sizer.Add(hbox, flag=wx.EXPAND)
-        self.toggle_controls()
 
     def toggle_controls(self):
         if self.config.mode == MODE_PATH:
-            self.root_path_control.Enable()
+            self.root_path_panel.Enable()
         else:
-            self.root_path_control.Disable()
+            self.root_path_panel.Disable()
         if self.config.mode == MODE_CUSTOM:
             self.listbox.Enable()
             self.button_panel.Enable()
@@ -319,8 +331,15 @@ class Settings(wx.Dialog):
                 self.config.mode = mode
         self.toggle_controls()
 
-    def on_root_path_change(self, event):
+    def on_root_path_text(self, event):
         self.config.root_path = Path(event.GetString())
+
+    def on_root_path_button(self, event):
+        def callback(path_str: str):
+            self.config.root_path = Path(path_str)
+            self.root_path_control.SetValue(path_str)
+
+        choose_dir(self, callback)
 
     def on_custom_dir_change(self, event):
         def callback(path_str: str):
