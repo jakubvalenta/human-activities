@@ -10,7 +10,9 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.config import MODE_CUSTOM, MODES, Config, save_config
+from lidske_aktivity.config import (
+    MODE_CUSTOM, MODE_HOME, MODE_PATH, MODES, Config, save_config,
+)
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 
 logger = logging.getLogger(__name__)
@@ -54,6 +56,14 @@ def create_button(parent: wx.Window,
     button = wx.Button(panel, wx.ID_ANY, label)
     parent.Bind(wx.EVT_BUTTON, callback, id=button.GetId())
     return button
+
+
+def create_text_control(parent: wx.Window,
+                        value: str,
+                        callback: Callable) -> wx.TextCtrl:
+    text_control = wx.TextCtrl(parent, value=value)
+    parent.Bind(wx.EVT_TEXT, callback, text_control)
+    return text_control
 
 
 def choose_dir(parent: wx.Window, callback: Callable[[str], None]):
@@ -191,6 +201,7 @@ class Settings(wx.Dialog):
     sizer: wx.Sizer
     border_sizer: wx.Sizer
     mode_radios: Dict[str, wx.RadioButton]
+    root_path_control: wx.TextCtrl
     list_box: wx.ListBox
     button_panel: wx.Panel
 
@@ -199,7 +210,11 @@ class Settings(wx.Dialog):
         self.Create(parent, id=-1, title='Settings of Lidské aktivity')
         self.config = config
         self.init_window()
-        self.init_mode()
+        self.create_mode_radios()
+        self.add_mode_radio(MODE_HOME)
+        self.add_mode_radio(MODE_PATH)
+        self.init_root_path_control()
+        self.add_mode_radio(MODE_CUSTOM)
         self.init_custom_dirs()
         self.init_dialog_buttons()
         self.fit()
@@ -213,7 +228,7 @@ class Settings(wx.Dialog):
             border=10
         )
 
-    def init_mode(self):
+    def create_mode_radios(self):
         label = create_label(self, 'Scan mode')
         self.sizer.Add(label, flag=wx.ALL, border=5)
         self.mode_radios = {}
@@ -226,8 +241,18 @@ class Settings(wx.Dialog):
             radio.Bind(wx.EVT_RADIOBUTTON, self.on_radio_toggle)
             if mode == self.config.mode:
                 radio.SetValue(True)
-            self.sizer.Add(radio, flag=wx.ALL, border=5)
             self.mode_radios[mode] = radio
+
+    def add_mode_radio(self, mode: str):
+        self.sizer.Add(self.mode_radios[mode], flag=wx.ALL, border=5)
+
+    def init_root_path_control(self):
+        self.root_path_control = create_text_control(
+            self.panel,
+            value=str(self.config.root_path),
+            callback=self.on_root_path_change
+        )
+        self.sizer.Add(self.root_path_control, flag=wx.EXPAND)
 
     def init_custom_dirs(self):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -236,9 +261,13 @@ class Settings(wx.Dialog):
         self.init_custom_dirs_buttons()
         hbox.Add(self.button_panel, proportion=0.6, flag=wx.EXPAND)
         self.sizer.Add(hbox, flag=wx.EXPAND)
-        self.toggle_custom_dirs()
+        self.toggle_controls()
 
-    def toggle_custom_dirs(self):
+    def toggle_controls(self):
+        if self.config.mode == MODE_PATH:
+            self.root_path_control.Enable()
+        else:
+            self.root_path_control.Disable()
         if self.config.mode == MODE_CUSTOM:
             self.listbox.Enable()
             self.button_panel.Enable()
@@ -288,7 +317,10 @@ class Settings(wx.Dialog):
         for mode, radio in self.mode_radios.items():
             if radio.GetValue():
                 self.config.mode = mode
-        self.toggle_custom_dirs()
+        self.toggle_controls()
+
+    def on_root_path_change(self, event):
+        self.config.root_path = Path(event.GetString())
 
     def on_custom_dir_change(self, event):
         def callback(path_str: str):
