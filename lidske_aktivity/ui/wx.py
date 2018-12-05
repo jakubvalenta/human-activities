@@ -223,6 +223,16 @@ class BaseDialog(wx.Dialog):
             border=10
         )
 
+    def init_dialog_buttons(self):
+        button_sizer = wx.StdDialogButtonSizer()
+        button = wx.Button(self, wx.ID_OK)
+        button.SetDefault()
+        button_sizer.AddButton(button)
+        button = wx.Button(self, wx.ID_CANCEL)
+        button_sizer.AddButton(button)
+        button_sizer.Realize()
+        self.sizer.Add(button_sizer, flag=wx.TOP, border=10)
+
     def fit(self):
         self.border_sizer.Fit(self.panel)
         self.border_sizer.Fit(self)
@@ -330,16 +340,6 @@ class Settings(BaseDialog):
                 vbox.Add(button, 0, flag=wx.TOP, border=5)
         self.button_panel.SetSizer(vbox)
 
-    def init_dialog_buttons(self):
-        button_sizer = wx.StdDialogButtonSizer()
-        button = wx.Button(self, wx.ID_OK)
-        button.SetDefault()
-        button_sizer.AddButton(button)
-        button = wx.Button(self, wx.ID_CANCEL)
-        button_sizer.AddButton(button)
-        button_sizer.Realize()
-        self.sizer.Add(button_sizer, flag=wx.TOP, border=10)
-
     def on_radio_toggle(self, event):
         for mode, radio in self.mode_radios.items():
             if radio.GetValue():
@@ -408,6 +408,7 @@ class Setup(BaseDialog):
         super().__init__(*args, **kwargs)
         self.init_text()
         self.init_controls()
+        self.init_dialog_buttons()
         self.fit()
 
     def init_text(self):
