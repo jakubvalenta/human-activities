@@ -379,6 +379,16 @@ class Settings(BaseDialog):
         self.listbox.Clear()
 
 
+class Setup(BaseDialog):
+    title = 'Lidské aktivity setup'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def init_info(self):
+        pass
+
+
 class Window(wx.PopupTransientWindow):
     store: Store
     sizer: wx.BoxSizer
