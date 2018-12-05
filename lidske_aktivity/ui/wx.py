@@ -195,31 +195,19 @@ class AboutBox(wx.Dialog):
         sizer.Fit(self)
 
 
-class Settings(wx.Dialog):
-    grid_: None = Optional[wx.GridSizer]
+class BaseDialog(wx.Dialog):
+    title: str
+    config: Config
+
     panel: wx.Panel
     sizer: wx.Sizer
     border_sizer: wx.Sizer
-    mode_radios: Dict[str, wx.RadioButton]
-    root_path_panel: wx.Sizer
-    root_path_control: wx.TextCtrl
-    list_box: wx.ListBox
-    button_panel: wx.Panel
 
     def __init__(self, parent: wx.Frame, config: Config):
         super().__init__()
-        self.Create(parent, id=-1, title='Settings of Lidské aktivity')
+        self.Create(parent, id=-1, title=self.title)
         self.config = config
         self.init_window()
-        self.create_mode_radios()
-        self.add_mode_radio(MODE_HOME)
-        self.add_mode_radio(MODE_PATH)
-        self.init_root_path_control()
-        self.add_mode_radio(MODE_CUSTOM)
-        self.init_custom_dirs()
-        self.init_dialog_buttons()
-        self.toggle_controls()
-        self.fit()
 
     def init_window(self):
         self.panel = wx.Panel(self)
@@ -229,6 +217,34 @@ class Settings(wx.Dialog):
             flag=wx.EXPAND | wx.ALL,
             border=10
         )
+
+    def fit(self):
+        self.border_sizer.Fit(self.panel)
+        self.border_sizer.Fit(self)
+        self.Layout()
+        self.Centre()
+
+
+class Settings(BaseDialog):
+    title = 'Lidské aktivity advanced settings'
+
+    mode_radios: Dict[str, wx.RadioButton]
+    root_path_panel: wx.Sizer
+    root_path_control: wx.TextCtrl
+    list_box: wx.ListBox
+    button_panel: wx.Panel
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.create_mode_radios()
+        self.add_mode_radio(MODE_HOME)
+        self.add_mode_radio(MODE_PATH)
+        self.init_root_path_control()
+        self.add_mode_radio(MODE_CUSTOM)
+        self.init_custom_dirs()
+        self.init_dialog_buttons()
+        self.toggle_controls()
+        self.fit()
 
     def create_mode_radios(self):
         label = create_label(self, 'Scan mode')
@@ -318,12 +334,6 @@ class Settings(wx.Dialog):
         button_sizer.AddButton(button)
         button_sizer.Realize()
         self.sizer.Add(button_sizer, flag=wx.TOP, border=10)
-
-    def fit(self):
-        self.border_sizer.Fit(self.panel)
-        self.border_sizer.Fit(self)
-        self.Layout()
-        self.Centre()
 
     def on_radio_toggle(self, event):
         for mode, radio in self.mode_radios.items():
