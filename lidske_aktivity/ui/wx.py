@@ -138,8 +138,11 @@ def create_radio_buttons(window: wx.Window,
 
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
+    id_setup = wx.NewIdRef()
+
     def __init__(self,
                  on_main_menu: Callable,
+                 on_setup: Callable,
                  on_settings: Callable,
                  on_about: Callable,
                  on_quit: Callable):
@@ -150,15 +153,17 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.SetIcon(icon)
 
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_main_menu)
+        self.Bind(wx.EVT_MENU, on_setup, id=self.id_setup)
         self.Bind(wx.EVT_MENU, on_settings, id=wx.ID_SETUP)
         self.Bind(wx.EVT_MENU, on_about, id=wx.ID_ABOUT)
         self.Bind(wx.EVT_MENU, on_quit, id=wx.ID_EXIT)
 
     def CreatePopupMenu(self) -> wx.Menu:
         menu = wx.Menu()
-        menu.Append(wx.ID_SETUP, '&Settings', ' Configure this program')
-        menu.Append(wx.ID_ABOUT, '&About', ' Information about this program')
-        menu.Append(wx.ID_EXIT, 'E&xit', ' Terminate the program')
+        menu.Append(self.id_setup, '&Setup')
+        menu.Append(wx.ID_SETUP, 'Advanced &configuration')
+        menu.Append(wx.ID_ABOUT, '&About')
+        menu.Append(wx.ID_EXIT, 'E&xit')
         return menu
 
 
@@ -172,7 +177,7 @@ class AboutBox(wx.Dialog):
 
         label = create_label(self, text='Lidské aktivity')
         sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
-        label = create_label(self, '\u00a9 2018 Jakub Valena, Jiří Skála')
+        label = create_label(self, '\u00a9 2018 Jakub Valenta, Jiří Skála')
         sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         label = create_label(self, 'License: GNU General Public License')
         sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
@@ -379,13 +384,50 @@ class Settings(BaseDialog):
         self.listbox.Clear()
 
 
+def add_text_heading(parent: wx.Window, sizer: wx.Sizer, text: str):
+    label = create_label(parent, text)
+    sizer.Add(label, flag=wx.BOTTOM, border=10)
+
+
+def add_text_paragraph(parent: wx.Window, sizer: wx.Sizer, text: str):
+    label = create_label(parent, text)
+    sizer.Add(label, flag=wx.BOTTOM, border=5)
+
+
+def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
+    for item in items:
+        label = create_label(parent, f'\N{BULLET} {item}')
+        sizer.Add(label)
+    sizer.AddSpacer(5)
+
+
 class Setup(BaseDialog):
     title = 'Lidské aktivity setup'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.init_text()
+        self.init_controls()
+        self.fit()
 
-    def init_info(self):
+    def init_text(self):
+        add_text_heading(self, self.sizer, 'Lidské aktivity setup')
+        add_text_paragraph(
+            self,
+            self.sizer,
+            'Please adjust your OS settings like this:'
+        )
+        add_text_list(
+            self,
+            self.sizer,
+            [
+                'first do this',
+                'than that',
+                'and finally something different',
+            ]
+        )
+
+    def init_controls(self):
         pass
 
 
@@ -533,6 +575,7 @@ class Application(wx.App):
         self.init_window()
         self.status_icon = TaskBarIcon(
             on_main_menu=self.on_main_menu,
+            on_setup=self.on_menu_setup,
             on_settings=self.on_menu_settings,
             on_about=self.on_menu_about,
             on_quit=self.on_menu_quit
@@ -563,6 +606,16 @@ class Application(wx.App):
         )
         self.window.SetPosition((window_x, window_y))
         self.window.Popup()
+
+    def on_menu_setup(self, event):
+        setup = Setup(self.frame, self.store.config)
+        val = setup.ShowModal()
+        if val == wx.ID_OK:
+            self.store.config = setup.config
+            self.destroy_window()
+            self.init_window()
+            save_config(self.store.config)
+        setup.Destroy()
 
     def on_menu_settings(self, event):
         settings = Settings(self.frame, self.store.config)
