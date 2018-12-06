@@ -277,7 +277,7 @@ class Application(Gtk.Application):
     def __init__(self, store: Store, on_quit: Callable, *args, **kwargs):
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
         self.store = store
-        self.on_quit = on_quit
+        self.on_quit = on_quit  # type: ignore
 
     def do_startup(self):
         Gtk.Application.do_startup(self)

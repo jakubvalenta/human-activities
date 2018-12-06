@@ -1,1 +1,1 @@
-from lidske_aktivity.ui.wx import run_app  # noqa: F401
+from lidske_aktivity.ui.wx.app import run_app  # noqa: F401
