@@ -1,4 +1,6 @@
+from functools import partial
 from pathlib import Path
+from typing import List
 
 import wx
 
@@ -19,6 +21,7 @@ PREDEFINED_DIRS = [
 
 class Setup(BaseDialog):
     title = 'Lidské aktivity setup'
+    text_controls: List[wx.TextCtrl]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,31 +48,33 @@ class Setup(BaseDialog):
         )
 
     def init_controls(self):
-        for s in PREDEFINED_DIRS:
-            hbox = wx.BoxSizer(wx.HORIZONTAL)
-            label = create_label(self, s)
-            hbox.Add(label, flag=wx.RIGHT, border=10)
+        self.text_controls = []
+        sizer = wx.FlexGridSizer(cols=3, vgap=5, hgap=10)
+        for i, s in enumerate(PREDEFINED_DIRS):
+            label = create_label(self.panel, s)
+            sizer.Add(label)
             text_control = create_text_control(
                 self.panel,
                 value='',  # TODO
-                callback=self.on_prefedined_dir_text
+                callback=partial(self.on_prefedined_dir_text, i)
             )
-            hbox.Add(text_control, flag=wx.EXPAND | wx.RIGHT, border=10)
+            sizer.Add(text_control)
             button = create_button(
                 self,
                 self.panel,
                 'Choose',
-                self.on_prefedined_dir_button
+                partial(self.on_prefedined_dir_button, i)
             )
-            hbox.Add(button, proportion=0.6, flag=wx.EXPAND)
-            self.sizer.Add(hbox, flag=wx.EXPAND)
+            sizer.Add(button)
+            self.text_controls.append(text_control)
+        self.sizer.Add(sizer)
 
-    def on_prefedined_dir_text(self, event):
-        self.config.root_path = Path(event.GetString())
+    def on_prefedined_dir_text(self, i: int, event):
+        self.config.custom_dirs[i] = Path(event.GetString())
 
-    def on_prefedined_dir_button(self, event):
+    def on_prefedined_dir_button(self, i: int, event):
         def callback(path_str: str):
-            self.config.root_path = Path(path_str)
-            self.root_path_control.SetValue(path_str)
+            self.config.custom_dirs[i] = Path(path_str)
+            self.text_controls[i].SetValue(path_str)
 
         choose_dir(self, callback)
