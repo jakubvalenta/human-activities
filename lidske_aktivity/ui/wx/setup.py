@@ -1,6 +1,6 @@
 from functools import partial
 from pathlib import Path
-from typing import List
+from typing import Dict
 
 import wx
 
@@ -10,18 +10,10 @@ from lidske_aktivity.ui.wx.lib import (
     create_button, create_label, create_text_control,
 )
 
-PREDEFINED_DIRS = [
-    'Honorovaná práce',
-    'Nehonorovaná práce',
-    'Volný čas',
-    'Zábava',
-    'Stažené soubory',
-]
-
 
 class Setup(BaseDialog):
     title = 'Lidské aktivity setup'
-    text_controls: List[wx.TextCtrl]
+    text_controls: Dict[str, wx.TextCtrl]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,33 +40,33 @@ class Setup(BaseDialog):
         )
 
     def init_controls(self):
-        self.text_controls = []
+        self.text_controls = {}
         sizer = wx.FlexGridSizer(cols=3, vgap=5, hgap=10)
-        for i, s in enumerate(PREDEFINED_DIRS):
-            label = create_label(self.panel, s)
+        for name, path_str in self.config.named_dirs.items():
+            label = create_label(self.panel, name)
             sizer.Add(label)
             text_control = create_text_control(
                 self.panel,
-                value='',  # TODO
-                callback=partial(self.on_prefedined_dir_text, i)
+                value=path_str or '',
+                callback=partial(self.on_named_dir_text, name)
             )
             sizer.Add(text_control)
             button = create_button(
                 self,
                 self.panel,
                 'Choose',
-                partial(self.on_prefedined_dir_button, i)
+                partial(self.on_named_dir_button, name)
             )
             sizer.Add(button)
-            self.text_controls.append(text_control)
+            self.text_controls[name] = text_control
         self.sizer.Add(sizer)
 
-    def on_prefedined_dir_text(self, i: int, event):
-        self.config.custom_dirs[i] = Path(event.GetString())
+    def on_named_dir_text(self, name: str, event):
+        self.config.named_dirs[name] = Path(event.GetString())
 
-    def on_prefedined_dir_button(self, i: int, event):
+    def on_named_dir_button(self, name: str, event):
         def callback(path_str: str):
-            self.config.custom_dirs[i] = Path(path_str)
-            self.text_controls[i].SetValue(path_str)
+            self.config.named_dirs[name] = Path(path_str)
+            self.text_controls[name].SetValue(path_str)
 
         choose_dir(self, callback)

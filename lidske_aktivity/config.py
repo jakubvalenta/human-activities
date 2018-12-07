@@ -48,6 +48,13 @@ MODES = {
     MODE_PATH: 'All directories in selected directory',
     MODE_CUSTOM: 'Custom directories',
 }
+DEFAULT_NAMED_DIRS = {
+    'Honorovaná práce': None,
+    'Nehonorovaná práce': None,
+    'Volný čas': None,
+    'Zábava': None,
+    'Stažené soubory': None,
+}
 
 
 @dataclass
@@ -56,7 +63,9 @@ class Config:
     test: bool = False
     mode: str = MODE_HOME
     custom_dirs: List[Path] = field(default_factory=list)
-    named_dirs: Dict[str, Path] = field(default_factory=dict)
+    named_dirs: Dict[str, Optional[Path]] = field(
+        default_factory=lambda: DEFAULT_NAMED_DIRS
+    )
 
     def to_json(self) -> str:
         d = {
