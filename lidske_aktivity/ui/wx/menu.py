@@ -276,7 +276,7 @@ class Menu(wx.PopupTransientWindow):
         logger.info('ProcessLeftDown: %s' % event.GetPosition())
         return wx.PopupTransientWindow.ProcessLeftDown(self, event)
 
-    def OnExit(self):
+    def Destroy(self) -> bool:
+        logger.info('Menu Destroy')
         self._tick_stop()
-        super().OnExit()
-        return True
+        return super().Destroy()

@@ -1,3 +1,4 @@
+import logging
 from typing import Callable
 
 import wx
@@ -9,6 +10,8 @@ from lidske_aktivity.ui.wx.about import About
 from lidske_aktivity.ui.wx.menu import Menu
 from lidske_aktivity.ui.wx.settings import Settings
 from lidske_aktivity.ui.wx.setup import Setup
+
+logger = logging.getLogger(__name__)
 
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
@@ -95,11 +98,13 @@ class Application(wx.App):
         about.Destroy()
 
     def on_menu_quit(self, event):
+        logger.info('Menu quit')
         self.status_icon.Destroy()
         self.menu.Destroy()
         self.frame.Destroy()
 
     def OnExit(self):
+        logger.info('App OnExit')
         self.on_quit()
         super().OnExit()
         return True
