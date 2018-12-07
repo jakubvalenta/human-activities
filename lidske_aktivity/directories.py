@@ -74,9 +74,10 @@ def init_directories_from_root_path(cache_path: Path,
     return merge_directories(directories, read_cached_directories(cache_path))
 
 
-def init_directories_from_paths(cache_path: Path,
-                                paths: Sequence[Path] = ()) -> TDirectories:
-    directories = {path: Directory() for path in paths}
+def init_directories_from_paths(
+        cache_path: Path,
+        paths: Sequence[Optional[Path]] = ()) -> TDirectories:
+    directories = {path: Directory() for path in paths if path}
     return merge_directories(directories, read_cached_directories(cache_path))
 
 

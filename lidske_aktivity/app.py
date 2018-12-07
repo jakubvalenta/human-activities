@@ -4,7 +4,7 @@ from threading import Event, Thread
 
 from lidske_aktivity import ui
 from lidske_aktivity.config import (
-    CACHE_PATH, MODE_CUSTOM, MODE_HOME, MODE_PATH, load_config,
+    CACHE_PATH, MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, load_config,
 )
 from lidske_aktivity.directories import (
     init_directories_from_paths, init_directories_from_root_path,
@@ -49,6 +49,11 @@ class Application:
             directories = init_directories_from_paths(
                 CACHE_PATH,
                 self.store.config.custom_dirs
+            )
+        elif self.store.config.mode == MODE_NAMED:
+            directories = init_directories_from_paths(
+                CACHE_PATH,
+                self.store.config.named_dirs.values()
             )
         else:
             raise AppError(f'Invalid mode config.mode')

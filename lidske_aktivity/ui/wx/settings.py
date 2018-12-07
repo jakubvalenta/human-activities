@@ -3,7 +3,9 @@ from typing import Dict
 
 import wx
 
-from lidske_aktivity.config import MODE_CUSTOM, MODE_HOME, MODE_PATH, MODES
+from lidske_aktivity.config import (
+    MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES,
+)
 from lidske_aktivity.ui.wx.dialog import BaseDialog
 from lidske_aktivity.ui.wx.lib import (
     choose_dir, create_button, create_label, create_text_control,
@@ -27,6 +29,7 @@ class Settings(BaseDialog):
         self.init_root_path_control()
         self.add_mode_radio(MODE_CUSTOM)
         self.init_custom_dirs()
+        self.add_mode_radio(MODE_NAMED)
         self.init_dialog_buttons()
         self.toggle_controls()
         self.fit()

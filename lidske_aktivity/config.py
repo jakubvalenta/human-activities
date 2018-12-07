@@ -43,10 +43,12 @@ CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 MODE_HOME = 'home'
 MODE_PATH = 'path'
 MODE_CUSTOM = 'custom'
+MODE_NAMED = 'named'
 MODES = {
     MODE_HOME: 'All directories in the home directory',
     MODE_PATH: 'All directories in selected directory',
     MODE_CUSTOM: 'Custom directories',
+    MODE_NAMED: 'Predefined directories',
 }
 DEFAULT_NAMED_DIRS = {
     'Honorovaná práce': None,
