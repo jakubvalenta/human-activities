@@ -58,7 +58,6 @@ class Application(wx.App):
 
     def OnInit(self) -> bool:
         self.frame = wx.Frame(parent=None, title='Foo')
-        self.init_menu()
         self.status_icon = TaskBarIcon(
             on_main_menu=self.on_main_menu,
             on_setup=self.on_menu_setup,
@@ -66,40 +65,18 @@ class Application(wx.App):
             on_about=self.on_menu_about,
             on_quit=self.on_menu_quit
         )
+        self.menu = Menu(store=self.store, parent=self.frame)
         return True
 
-    def init_menu(self):
-        self.menu = Menu(store=self.store, parent=self.frame)
-
-    def destroy_menu(self):
-        self.menu.Destroy()
-        self.menu.tick_stop()
-
     def on_main_menu(self, event):
-        mouse_x, mouse_y = wx.GetMousePosition()
-        display_id = wx.Display.GetFromWindow(self.menu)
-        display = wx.Display(display_id)
-        _, _, screen_w, screen_h = display.GetClientArea()
-        window_w, window_h = self.menu.GetSize()
-        SCREEN_MARGIN = 10
-        window_x = min(
-            mouse_x,
-            max(screen_w - window_w - SCREEN_MARGIN, SCREEN_MARGIN)
-        )
-        window_y = min(
-            mouse_y,
-            max(screen_h - window_h - SCREEN_MARGIN, SCREEN_MARGIN)
-        )
-        self.menu.SetPosition((window_x, window_y))
-        self.menu.Popup()
+        self.menu.popup_at(*wx.GetMousePosition())
 
     def on_menu_setup(self, event):
         setup = Setup(self.frame, self.store.config)
         val = setup.ShowModal()
         if val == wx.ID_OK:
             self.store.config = setup.config
-            self.destroy_menu()
-            self.init_menu()
+            self.menu.refresh()
             save_config(self.store.config)
         setup.Destroy()
 
@@ -108,8 +85,7 @@ class Application(wx.App):
         val = settings.ShowModal()
         if val == wx.ID_OK:
             self.store.config = settings.config
-            self.destroy_menu()
-            self.init_menu()
+            self.menu.refresh()
             save_config(self.store.config)
         settings.Destroy()
 
@@ -125,7 +101,6 @@ class Application(wx.App):
 
     def OnExit(self):
         self.on_quit()
-        self.menu.tick_stop()
         super().OnExit()
         return True
 
