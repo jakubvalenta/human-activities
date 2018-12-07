@@ -65,3 +65,10 @@ def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
         label = create_label(parent, f'\N{BULLET} {item}')
         sizer.Add(label)
     sizer.AddSpacer(5)
+
+
+def set_pen(dc: wx.PaintDC, *args, **kwargs):
+    pen = wx.Pen(*args, **kwargs)
+    pen.SetJoin(wx.JOIN_MITER)
+    pen.SetCap(wx.CAP_BUTT)
+    dc.SetPen(pen)

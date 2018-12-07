@@ -10,7 +10,9 @@ import wx
 
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
-from lidske_aktivity.ui.wx.lib import create_button, create_label, create_sizer
+from lidske_aktivity.ui.wx.lib import (
+    create_button, create_label, create_sizer, set_pen,
+)
 from lidske_aktivity.ui.wx.setup import Setup
 
 logger = logging.getLogger(__name__)
@@ -25,28 +27,33 @@ class RadioButtonConfig:
 
 class Gauge(wx.Window):
     fraction: float = 0
+    is_pulse: bool = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, size=(-1, 5), **kwargs)
         self.Bind(wx.EVT_PAINT, self.on_paint)
 
     def set_fraction(self, fraction: float):
+        self.is_pulse = False
         self.fraction = fraction
         self.Refresh()
 
     def pulse(self):
-        pass  # TODO: Add pulse support
+        self.is_pulse = True
+        self.Refresh()
 
     def on_paint(self, event):
         w, h = self.GetSize()
         dc = wx.PaintDC(self)
-        dc.SetPen(wx.Pen('#ffffff', 1, wx.TRANSPARENT))
-        w_fg = round(w * self.fraction)
-        w_bg = w - w_fg
-        dc.SetBrush(wx.Brush('#268bd2'))
-        dc.DrawRectangle(0, 0, w_fg, h)
-        dc.SetBrush(wx.Brush('#93a1a1'))
-        dc.DrawRectangle(w_fg, 0, w_bg, h)
+        if self.is_pulse:
+            set_pen(dc, '#93a1a1', width=h, style=wx.PENSTYLE_SHORT_DASH)
+            dc.DrawLine(0, 0, w, 0)
+        else:
+            w_fg = round(w * self.fraction)
+            set_pen(dc, '#268bd2', width=h)
+            dc.DrawLine(0, 0, w_fg, 0)
+            set_pen(dc, '#93a1a1', width=h)
+            dc.DrawLine(w_fg, 0, w, 0)
 
 
 def create_progress_bar(parent: wx.Window,
@@ -98,8 +105,8 @@ class Menu(wx.PopupTransientWindow):
     spinner: wx.StaticText
     tick_event_stop: Optional[Event] = None
     tick_thread: Optional[Thread] = None
-    mouse_x: int
-    mouse_y: int
+    mouse_x: int = 0
+    mouse_y: int = 0
 
     def __init__(self,
                  store: Store,
