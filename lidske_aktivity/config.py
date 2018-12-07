@@ -50,7 +50,7 @@ MODES = {
     MODE_CUSTOM: 'Custom directories',
     MODE_NAMED: 'Predefined directories',
 }
-DEFAULT_NAMED_DIRS = {
+DEFAULT_NAMED_DIRS: Dict[str, Optional[Path]] = {
     'Honorovaná práce': None,
     'Nehonorovaná práce': None,
     'Volný čas': None,

@@ -8,8 +8,10 @@ from typing import Callable, Dict, Iterable, Iterator, List, Optional
 
 import wx
 
+from lidske_aktivity.config import save_config
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
-from lidske_aktivity.ui.wx.lib import create_label, create_sizer
+from lidske_aktivity.ui.wx.lib import create_button, create_label, create_sizer
+from lidske_aktivity.ui.wx.setup import Setup
 
 logger = logging.getLogger(__name__)
 
@@ -109,10 +111,13 @@ class Menu(wx.PopupTransientWindow):
 
     def _init(self):
         self._init_window()
+        if self.store.directories:
             self._init_radio()
             self._init_progress_bars()
             self._init_spinner()
             self._tick_start()
+        else:
+            self._init_empty()
         self._fit()
 
     def _init_window(self):
@@ -151,12 +156,19 @@ class Menu(wx.PopupTransientWindow):
             on_toggled=self._on_radio_toggled
         ))
 
+    def _init_empty(self):
+        label = create_label(self.panel, 'No directories configured')
+        self.sizer.Add(label, flag=wx.BOTTOM, border=5)
+        button = create_button(
+            self,
+            self.panel,
+            'Open app setup',
+            callback=self._on_setup_button
+        )
+        self.sizer.Add(button, flag=wx.EXPAND)
+
     def _init_progress_bars(self):
         self.progress_bars = {}
-        if not self.store.directories:
-            label = create_label(self, 'No directories found')
-            self.sizer.Add(label)
-            return
         self.sizer.AddSpacer(5)
         for i, path in enumerate(self.store.directories.keys()):
             label = create_label(self, path.name)
@@ -250,6 +262,16 @@ class Menu(wx.PopupTransientWindow):
         if not any(self.store.pending.values()):
             self.spinner.Hide()
             self._fit()
+
+    def _on_setup_button(self, event):
+        self.Hide()
+        setup = Setup(self, self.store.config)
+        val = setup.ShowModal()
+        if val == wx.ID_OK:
+            self.store.config = setup.config
+            self.refresh()
+            save_config(self.store.config)
+        self.Show()
 
     def ProcessLeftDown(self, event):
         logger.info('ProcessLeftDown: %s' % event.GetPosition())

@@ -53,7 +53,7 @@ class Application(wx.App):
                  *args,
                  **kwargs):
         self.store = store
-        self.on_quit = on_quit
+        self.on_quit = on_quit  # type: ignore
         super().__init__(False, *args, **kwargs)
 
     def OnInit(self) -> bool:
