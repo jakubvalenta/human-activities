@@ -64,10 +64,9 @@ def create_progress_bar(parent: wx.Window,
     return progress_bar
 
 
-def on_radio_update_ui(event):
-    button = event.GetEventObject()
-    value = button.GetValue()
-    event.Enable(not value)
+class ToggleButton(wx.ToggleButton):
+    def SetValue(self):
+        logger.warn('Toggled')
 
 
 def create_radio_buttons(window: wx.Window,
@@ -75,7 +74,7 @@ def create_radio_buttons(window: wx.Window,
                          configs: Iterable[RadioButtonConfig],
                          active_name: str,
                          on_toggled: Callable) -> Iterator[wx.ToggleButton]:
-    grid = wx.GridSizer(cols=2)
+    grid = wx.GridSizer(cols=2, vgap=0, hgap=10)
     for config in configs:
         button = wx.ToggleButton(
             parent=window,
@@ -85,10 +84,6 @@ def create_radio_buttons(window: wx.Window,
         button.Bind(
             wx.EVT_TOGGLEBUTTON,
             partial(on_toggled, button=button, mode=config.name)
-        )
-        button.Bind(
-            wx.EVT_UPDATE_UI,
-            on_radio_update_ui,
         )
         grid.Add(button)
         yield button
@@ -188,7 +183,7 @@ class Menu(wx.PopupTransientWindow):
             self.progress_bars[path] = progress_bar
 
     def _init_spinner(self):
-        self.spinner = create_label(self, 'Processing...')
+        self.spinner = create_label(self, 'calculating...')
         self.sizer.Add(self.spinner, flag=wx.TOP, border=5)
 
     def _fit(self):
@@ -232,6 +227,9 @@ class Menu(wx.PopupTransientWindow):
         self.SetPosition((window_x, window_y))
 
     def _on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
+        if self.store.active_mode == mode:
+            button.SetValue(True)
+            return
         self.store.set_active_mode(mode)
         for other_button in self.radio_buttons:
             if other_button != button:
