@@ -2,9 +2,9 @@ import json
 import logging
 import os.path
 import platform
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -40,23 +40,6 @@ CACHE_PATH = Path(get_cache_dir()) / 'cache.csv'
 CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
 
-@dataclass
-class Config:
-    root_path: Optional[Path]
-    test: bool
-    mode: str
-    custom_dirs: List[Path]
-
-    def to_json(self) -> str:
-        d = {
-            'root_path': str(self.root_path) if self.root_path else None,
-            'test': self.test,
-            'mode': self.mode,
-            'custom_dirs': [str(path_str) for path_str in self.custom_dirs],
-        }
-        return json.dumps(d, indent=2)
-
-
 MODE_HOME = 'home'
 MODE_PATH = 'path'
 MODE_CUSTOM = 'custom'
@@ -67,32 +50,71 @@ MODES = {
 }
 
 
-def load_config() -> Config:
+@dataclass
+class Config:
     root_path: Optional[Path] = None
-    test = False
-    mode = MODE_HOME
-    custom_dirs: List[Path] = []
+    test: bool = False
+    mode: str = MODE_HOME
+    custom_dirs: List[Path] = field(default_factory=list)
+    named_dirs: Dict[str, Path] = field(default_factory=dict)
+
+    def to_json(self) -> str:
+        d = {
+            'root_path': str(self.root_path) if self.root_path else None,
+            'test': self.test,
+            'mode': self.mode,
+            'custom_dirs': [str(path_str) for path_str in self.custom_dirs],
+            'named_dirs': {
+                name: str(path_str)
+                for name, path_str in self.named_dirs.items()
+            }
+        }
+        return json.dumps(d, indent=2)
+
+
+def _load_config_root_path(config_json: Any, config: Config):
+    config.root_path = Path(config_json['root_path']).expanduser()
+
+
+def _load_config_test(config_json: Any, config: Config):
+    config.test = bool(config_json['test'])
+
+
+def _load_config_mode(config_json: Any, config: Config):
+    if config_json['mode'] in MODES.keys():
+        config.mode = config_json['mode']
+
+
+def _load_config_custom_dirs(config_json: Any, config: Config):
+    config.custom_dirs = [
+        Path(path_str)
+        for path_str in config_json['custom_dirs']
+    ]
+
+
+def _load_config_named_dirs(config_json: Any, config: Config):
+    config.named_dirs = {
+        str(name): Path(path_str)
+        for name, path_str in config_json['named_dirs'].items()
+    }
+
+
+def load_config() -> Config:
+    config = Config()
     if CONFIG_PATH.is_file():
         with CONFIG_PATH.open() as f:
             config_json = json.load(f)
-        if type(config_json.get('root_path')) == str:
-            root_path = Path(config_json['root_path']).expanduser()
-        if type(config_json.get('test')) == bool:
-            test = config_json['test']
-        mode_ = config_json.get('mode')
-        if type(mode_) == str and mode_ in MODES.keys():
-            mode = mode_
-        custom_dirs_ = config_json.get('custom_dirs')
-        if type(custom_dirs_) == list:
-            for custom_dir in custom_dirs_:
-                if type(custom_dir) == str:
-                    custom_dirs.append(Path(custom_dir))
-    return Config(
-        root_path=root_path,
-        test=test,
-        mode=mode,
-        custom_dirs=custom_dirs,
-    )
+            for fn in [
+                _load_config_root_path,
+                _load_config_test,
+                _load_config_mode,
+                _load_config_custom_dirs,
+            ]:
+                try:
+                    fn(config_json, config)
+                except (KeyError, AttributeError, TypeError):
+                    logger.error('Error while loading config %s', fn.__name__)
+    return config
 
 
 def save_config(config: Config):
