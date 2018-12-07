@@ -194,7 +194,7 @@ class Menu(wx.PopupTransientWindow):
             self.panel.PopEventHandler(deleteHandler=True)
         except wx.wxAssertionError:
             pass
-        self.panel.Destroy()
+        self.DestroyChildren()
 
     def refresh(self):
         self._tick_stop()
@@ -264,14 +264,13 @@ class Menu(wx.PopupTransientWindow):
             self._fit()
 
     def _on_setup_button(self, event):
-        self.Hide()
+        self.Dismiss()
         setup = Setup(self, self.store.config)
         val = setup.ShowModal()
         if val == wx.ID_OK:
             self.store.config = setup.config
             self.refresh()
             save_config(self.store.config)
-        self.Show()
 
     def ProcessLeftDown(self, event):
         logger.info('ProcessLeftDown: %s' % event.GetPosition())
