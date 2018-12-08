@@ -4,9 +4,9 @@ from typing import Callable
 import wx
 import wx.adv
 
+from lidske_aktivity import __version__
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store
-from lidske_aktivity.ui.wx.about import About
 from lidske_aktivity.ui.wx.menu import Menu
 from lidske_aktivity.ui.wx.settings import Settings
 from lidske_aktivity.ui.wx.setup import Setup
@@ -96,9 +96,14 @@ class Application(wx.App):
         settings.Destroy()
 
     def show_about(self):
-        about = About(self.frame)
-        about.show()
-        about.Destroy()
+        info = wx.adv.AboutDialogInfo()
+        # TODO: info.Icon = ''
+        info.Name = "Lidské aktivity"
+        info.Version = __version__
+        info.Copyright = '\u00a9 2018 Jakub Valena, Jiří Skála'
+        info.WebSite = 'https://www.example.com'  # TODO
+        info.Developers = ['Jakub Valenta', 'Jiří Skála']
+        wx.adv.AboutBox(info)
 
     def quit(self):
         logger.info('Menu quit')
