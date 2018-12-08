@@ -1,10 +1,9 @@
 import logging
-from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from threading import Event, Thread
 from time import sleep
-from typing import Callable, Dict, Iterable, Iterator, List, Optional
+from typing import Dict, List, Optional
 
 import wx
 
@@ -16,13 +15,6 @@ from lidske_aktivity.ui.wx.lib import (
 from lidske_aktivity.ui.wx.setup import Setup
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class RadioButtonConfig:
-    name: str
-    label: str
-    tooltip: str
 
 
 class Gauge(wx.Window):
@@ -56,40 +48,6 @@ class Gauge(wx.Window):
             dc.DrawLine(w_fg, 0, w, 0)
 
 
-def create_progress_bar(parent: wx.Window,
-                        fraction: Optional[float] = None) -> Gauge:
-    progress_bar = Gauge(parent=parent)
-    if fraction is not None:
-        progress_bar.set_fraction(fraction)
-    return progress_bar
-
-
-class ToggleButton(wx.ToggleButton):
-    def SetValue(self):
-        logger.warn('Toggled')
-
-
-def create_radio_buttons(window: wx.Window,
-                         parent: wx.Window,
-                         configs: Iterable[RadioButtonConfig],
-                         active_name: str,
-                         on_toggled: Callable) -> Iterator[wx.ToggleButton]:
-    grid = wx.GridSizer(cols=2, vgap=0, hgap=10)
-    for config in configs:
-        button = wx.ToggleButton(
-            parent=window,
-            label=config.label,
-        )
-        button.SetValue(config.name == active_name)
-        button.Bind(
-            wx.EVT_TOGGLEBUTTON,
-            partial(on_toggled, button=button, mode=config.name)
-        )
-        grid.Add(button)
-        yield button
-    parent.Add(grid)
-
-
 class Menu(wx.PopupTransientWindow):
     store: Store
     panel: wx.Panel
@@ -103,10 +61,7 @@ class Menu(wx.PopupTransientWindow):
     mouse_x: int = 0
     mouse_y: int = 0
 
-    def __init__(self,
-                 store: Store,
-                 parent: wx.Window,
-                 *args, **kwargs):
+    def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
         super().__init__(*args, parent=parent, **kwargs)
         self.store = store
         self._init()
@@ -114,7 +69,7 @@ class Menu(wx.PopupTransientWindow):
     def _init(self):
         self._init_window()
         if self.store.directories:
-            self._init_radio()
+            self._init_radio_buttons()
             self._init_progress_bars()
             self._init_spinner()
             self._tick_start()
@@ -131,32 +86,36 @@ class Menu(wx.PopupTransientWindow):
             border=10
         )
 
-    def _init_radio(self):
-        radio_button_configs = [
-            RadioButtonConfig(
-                name=SIZE_MODE_SIZE,
-                label='by size',
-                tooltip=(
+    def _init_radio_buttons(self):
+        self.radio_buttons = []
+        grid = wx.GridSizer(cols=2, vgap=0, hgap=10)
+        for name, label, tooltip in [
+            (
+                SIZE_MODE_SIZE,
+                'by size',
+                (
                     'Each bar shows the fraction of the total root directory '
                     'size that the given directory occupies.'
                 )
             ),
-            RadioButtonConfig(
-                name=SIZE_MODE_SIZE_NEW,
-                label='by activity',
-                tooltip=(
+            (
+                SIZE_MODE_SIZE_NEW,
+                'by activity',
+                (
                     'Each bar shows the fraction of the size of the given '
                     'directory that was modified in the last 30 days.'
                 )
             ),
-        ]
-        self.radio_buttons = list(create_radio_buttons(
-            window=self,
-            parent=self.sizer,
-            configs=radio_button_configs,
-            active_name=self.store.active_mode,
-            on_toggled=self._on_radio_toggled
-        ))
+        ]:
+            button = wx.ToggleButton(parent=self, label=label)
+            button.SetValue(name == self.store.active_mode)
+            button.Bind(
+                wx.EVT_TOGGLEBUTTON,
+                partial(self._on_radio_toggled, button=button, mode=name)
+            )
+            grid.Add(button)
+            self.radio_buttons.append(button)
+        self.sizer.Add(grid)
 
     def _init_empty(self):
         label = create_label(self.panel, 'No directories configured')
@@ -174,10 +133,10 @@ class Menu(wx.PopupTransientWindow):
         self.sizer.AddSpacer(5)
         for i, path in enumerate(self.store.directories.keys()):
             label = create_label(self, path.name)
-            progress_bar = create_progress_bar(
-                parent=self,
-                fraction=self.store.fractions[path]
-            )
+            progress_bar = Gauge(parent=self)
+            fraction = self.store.fractions[path]
+            if fraction is not None:
+                progress_bar.set_fraction(fraction)
             self.sizer.Add(label, flag=wx.EXPAND | wx.BOTTOM, border=3)
             self.sizer.Add(progress_bar, flag=wx.EXPAND | wx.BOTTOM, border=5)
             self.progress_bars[path] = progress_bar

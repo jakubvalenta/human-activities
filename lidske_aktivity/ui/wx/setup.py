@@ -4,23 +4,20 @@ from typing import Dict
 
 import wx
 
-from lidske_aktivity.ui.wx.dialog import BaseDialog
+from lidske_aktivity.ui.wx.dialog import BaseConfigDialog
 from lidske_aktivity.ui.wx.lib import (
     add_text_heading, add_text_list, add_text_paragraph, choose_dir,
     create_button, create_label, create_text_control,
 )
 
 
-class Setup(BaseDialog):
+class Setup(BaseConfigDialog):
     title = 'Lidské aktivity setup'
     text_controls: Dict[str, wx.TextCtrl]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def init_content(self):
         self.init_text()
         self.init_controls()
-        self.init_dialog_buttons()
-        self.fit()
 
     def init_text(self):
         add_text_heading(self, self.sizer, 'Lidské aktivity setup')

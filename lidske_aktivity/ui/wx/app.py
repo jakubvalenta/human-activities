@@ -94,8 +94,7 @@ class Application(wx.App):
 
     def on_menu_about(self, event):
         about = About(self.frame)
-        about.Centre()
-        about.ShowModal()
+        about.show()
         about.Destroy()
 
     def on_menu_quit(self, event):
