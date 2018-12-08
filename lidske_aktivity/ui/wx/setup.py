@@ -4,6 +4,7 @@ from typing import Dict
 
 import wx
 
+from lidske_aktivity.config import MODE_NAMED
 from lidske_aktivity.ui.wx.dialog import BaseConfigDialog
 from lidske_aktivity.ui.wx.lib import (
     add_text_heading, add_text_list, add_text_paragraph, choose_dir,
@@ -16,6 +17,7 @@ class Setup(BaseConfigDialog):
     text_controls: Dict[str, wx.TextCtrl]
 
     def init_content(self):
+        self.config.mode = MODE_NAMED
         self.init_text()
         self.init_controls()
 
