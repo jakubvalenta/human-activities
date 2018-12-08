@@ -68,6 +68,7 @@ class Config:
     named_dirs: Dict[Path, str] = field(
         default_factory=lambda: DEFAULT_NAMED_DIRS
     )
+    show_setup: bool = True
 
     def to_json(self) -> str:
         d = {
@@ -77,7 +78,8 @@ class Config:
             'custom_dirs': [str(path) for path in self.custom_dirs],
             'named_dirs': {
                 str(path): name for path, name in self.named_dirs.items()
-            }
+            },
+            'show_setup': self.show_setup,
         }
         return json.dumps(d, indent=2)
 
@@ -109,6 +111,10 @@ def _load_config_named_dirs(config_json: Any, config: Config):
     }
 
 
+def _load_config_show_setup(config_json: Any, config: Config):
+    config.show_setup = bool(config_json['show_setup'])
+
+
 def load_config() -> Config:
     config = Config()
     if CONFIG_PATH.is_file():
@@ -120,6 +126,7 @@ def load_config() -> Config:
                 _load_config_mode,
                 _load_config_custom_dirs,
                 _load_config_named_dirs,
+                _load_config_show_setup,
             ]:
                 try:
                     fn(config_json, config)

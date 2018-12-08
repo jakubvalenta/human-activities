@@ -130,7 +130,7 @@ class Menu(wx.PopupTransientWindow):
 
     def _init_progress_bars(self):
         self.progress_bars = {}
-        self.sizer.AddSpacer(5)
+        self.sizer.AddSpacer(10)
         for i, path in enumerate(self.store.directories.keys()):
             if (self.store.config.mode == MODE_NAMED
                     and path in self.store.config.named_dirs):

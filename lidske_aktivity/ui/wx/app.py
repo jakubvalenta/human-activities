@@ -18,7 +18,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     id_setup = wx.NewIdRef()
 
     def __init__(self,
-                 on_main_menu: Callable,
+                 on_menu: Callable,
                  on_setup: Callable,
                  on_settings: Callable,
                  on_about: Callable,
@@ -29,7 +29,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         icon.LoadFile('/usr/share/icons/Adwaita/16x16/actions/go-home.png')
         self.SetIcon(icon)
 
-        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_main_menu)
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, on_menu)
         self.Bind(wx.EVT_MENU, on_setup, id=self.id_setup)
         self.Bind(wx.EVT_MENU, on_settings, id=wx.ID_SETUP)
         self.Bind(wx.EVT_MENU, on_about, id=wx.ID_ABOUT)
@@ -62,19 +62,22 @@ class Application(wx.App):
     def OnInit(self) -> bool:
         self.frame = wx.Frame(parent=None, title='Foo')
         self.status_icon = TaskBarIcon(
-            on_main_menu=self.on_main_menu,
-            on_setup=self.on_menu_setup,
-            on_settings=self.on_menu_settings,
-            on_about=self.on_menu_about,
-            on_quit=self.on_menu_quit
+            on_menu=lambda event: self.show_menu(),
+            on_setup=lambda event: self.show_setup(),
+            on_settings=lambda event: self.show_settings(),
+            on_about=lambda event: self.show_about(),
+            on_quit=lambda event: self.quit()
         )
         self.menu = Menu(store=self.store, parent=self.frame)
+        if self.store.config.show_setup:
+            self.store.config.show_setup = False
+            self.show_setup()
         return True
 
-    def on_main_menu(self, event):
+    def show_menu(self):
         self.menu.popup_at(*wx.GetMousePosition())
 
-    def on_menu_setup(self, event):
+    def show_setup(self):
         setup = Setup(self.frame, self.store.config)
         val = setup.show()
         if val == wx.ID_OK:
@@ -83,7 +86,7 @@ class Application(wx.App):
             save_config(self.store.config)
         setup.Destroy()
 
-    def on_menu_settings(self, event):
+    def show_settings(self):
         settings = Settings(self.frame, self.store.config)
         val = settings.show()
         if val == wx.ID_OK:
@@ -92,12 +95,12 @@ class Application(wx.App):
             save_config(self.store.config)
         settings.Destroy()
 
-    def on_menu_about(self, event):
+    def show_about(self):
         about = About(self.frame)
         about.show()
         about.Destroy()
 
-    def on_menu_quit(self, event):
+    def quit(self):
         logger.info('Menu quit')
         self.status_icon.Destroy()
         self.menu.Destroy()
