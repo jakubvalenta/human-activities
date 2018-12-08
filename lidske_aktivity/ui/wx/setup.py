@@ -5,7 +5,7 @@ from typing import Dict, List
 import wx
 import wx.adv
 
-from lidske_aktivity.config import MODE_NAMED, Config
+from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
 from lidske_aktivity.ui.wx.lib import (
     add_text_heading, add_text_list, add_text_paragraph, choose_dir,
     create_button, create_label, create_text_control,
@@ -28,6 +28,8 @@ class Setup(wx.adv.Wizard):
     def __init__(self, parent: wx.Frame, config: Config):
         self.config = config
         self.config.mode = MODE_NAMED
+        if not self.config.named_dirs:
+            self.config.named_dirs = DEFAULT_NAMED_DIRS
         self.named_dirs_by_name = dict(zip(
             self.config.named_dirs.values(),
             self.config.named_dirs.keys(),

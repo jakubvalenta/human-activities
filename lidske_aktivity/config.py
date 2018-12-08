@@ -63,11 +63,9 @@ DEFAULT_NAMED_DIRS: Dict[Path, str] = {
 class Config:
     root_path: Optional[Path] = None
     test: bool = False
-    mode: str = MODE_HOME
+    mode: str = MODE_NAMED
     custom_dirs: List[Path] = field(default_factory=list)
-    named_dirs: Dict[Path, str] = field(
-        default_factory=lambda: DEFAULT_NAMED_DIRS
-    )
+    named_dirs: Dict[Path, str] = field(default_factory=dict)
     show_setup: bool = True
 
     def to_json(self) -> str:
