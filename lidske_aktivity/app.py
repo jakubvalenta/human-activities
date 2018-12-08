@@ -53,7 +53,7 @@ class Application:
         elif self.store.config.mode == MODE_NAMED:
             directories = init_directories_from_paths(
                 CACHE_PATH,
-                self.store.config.named_dirs.values()
+                self.store.config.named_dirs.keys()
             )
         else:
             raise AppError(f'Invalid mode config.mode')

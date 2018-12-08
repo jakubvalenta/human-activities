@@ -15,9 +15,14 @@ from lidske_aktivity.ui.wx.lib import (
 class Setup(BaseConfigDialog):
     title = 'Lidské aktivity setup'
     text_controls: Dict[str, wx.TextCtrl]
+    named_dirs_by_name: Dict[str, Path]
 
     def init_content(self):
         self.config.mode = MODE_NAMED
+        self.named_dirs_by_name = dict(zip(
+            self.config.named_dirs.values(),
+            self.config.named_dirs.keys(),
+        ))
         self.init_text()
         self.init_controls()
 
@@ -41,12 +46,12 @@ class Setup(BaseConfigDialog):
     def init_controls(self):
         self.text_controls = {}
         sizer = wx.FlexGridSizer(cols=3, vgap=5, hgap=10)
-        for name, path_str in self.config.named_dirs.items():
+        for path, name in self.config.named_dirs.items():
             label = create_label(self.panel, name)
             sizer.Add(label)
             text_control = create_text_control(
                 self.panel,
-                value=path_str or '',
+                value=str(path) or '',
                 callback=partial(self.on_named_dir_text, name)
             )
             sizer.Add(text_control)
@@ -60,12 +65,19 @@ class Setup(BaseConfigDialog):
             self.text_controls[name] = text_control
         self.sizer.Add(sizer)
 
+    def _update_named_dirs(self, name: str, path: Path):
+        self.named_dirs_by_name[name] = path
+        self.config.named_dirs = dict(zip(
+            self.named_dirs_by_name.values(),
+            self.named_dirs_by_name.keys()
+        ))
+
     def on_named_dir_text(self, name: str, event):
-        self.config.named_dirs[name] = Path(event.GetString())
+        self._update_named_dirs(name, Path(event.GetString()))
 
     def on_named_dir_button(self, name: str, event):
         def callback(path_str: str):
-            self.config.named_dirs[name] = Path(path_str)
+            self._update_named_dirs(name, Path(path_str))
             self.text_controls[name].SetValue(path_str)
 
         choose_dir(self, callback)

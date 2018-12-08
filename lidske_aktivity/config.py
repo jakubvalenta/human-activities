@@ -50,12 +50,12 @@ MODES = {
     MODE_CUSTOM: 'Custom directories',
     MODE_NAMED: 'Predefined directories',
 }
-DEFAULT_NAMED_DIRS: Dict[str, Optional[Path]] = {
-    'Honorovaná práce': None,
-    'Nehonorovaná práce': None,
-    'Volný čas': None,
-    'Zábava': None,
-    'Stažené soubory': None,
+DEFAULT_NAMED_DIRS: Dict[Path, str] = {
+    Path('~/Paid work').expanduser(): 'Honorovaná práce',
+    Path('~/Unpaid work').expanduser(): 'Nehonorovaná práce',
+    Path('~/Free time').expanduser(): 'Volný čas',
+    Path('~/Fun').expanduser(): 'Zábava',
+    Path('~/Downloads').expanduser(): 'Stažené soubory',
 }
 
 
@@ -65,7 +65,7 @@ class Config:
     test: bool = False
     mode: str = MODE_HOME
     custom_dirs: List[Path] = field(default_factory=list)
-    named_dirs: Dict[str, Optional[Path]] = field(
+    named_dirs: Dict[Path, str] = field(
         default_factory=lambda: DEFAULT_NAMED_DIRS
     )
 
@@ -74,10 +74,9 @@ class Config:
             'root_path': str(self.root_path) if self.root_path else None,
             'test': self.test,
             'mode': self.mode,
-            'custom_dirs': [str(path_str) for path_str in self.custom_dirs],
+            'custom_dirs': [str(path) for path in self.custom_dirs],
             'named_dirs': {
-                name: str(path_str)
-                for name, path_str in self.named_dirs.items()
+                str(path): name for path, name in self.named_dirs.items()
             }
         }
         return json.dumps(d, indent=2)
@@ -105,8 +104,8 @@ def _load_config_custom_dirs(config_json: Any, config: Config):
 
 def _load_config_named_dirs(config_json: Any, config: Config):
     config.named_dirs = {
-        str(name): Path(path_str)
-        for name, path_str in config_json['named_dirs'].items()
+        Path(path_str): str(name)
+        for path_str, name in config_json['named_dirs'].items()
     }
 
 
@@ -120,6 +119,7 @@ def load_config() -> Config:
                 _load_config_test,
                 _load_config_mode,
                 _load_config_custom_dirs,
+                _load_config_named_dirs,
             ]:
                 try:
                     fn(config_json, config)
