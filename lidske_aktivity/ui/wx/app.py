@@ -76,7 +76,7 @@ class Application(wx.App):
 
     def on_menu_setup(self, event):
         setup = Setup(self.frame, self.store.config)
-        val = setup.ShowModal()
+        val = setup.show()
         if val == wx.ID_OK:
             self.store.config = setup.config
             self.menu.refresh()
@@ -85,7 +85,7 @@ class Application(wx.App):
 
     def on_menu_settings(self, event):
         settings = Settings(self.frame, self.store.config)
-        val = settings.ShowModal()
+        val = settings.show()
         if val == wx.ID_OK:
             self.store.config = settings.config
             self.menu.refresh()
@@ -94,6 +94,7 @@ class Application(wx.App):
 
     def on_menu_about(self, event):
         about = About(self.frame)
+        about.Centre()
         about.ShowModal()
         about.Destroy()
 
