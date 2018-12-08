@@ -41,9 +41,9 @@ class BaseDialog(wx.Dialog):
         button_sizer.Realize()
         self.sizer.Add(button_sizer, flag=wx.TOP, border=10)
 
-    def show(self):
+    def show(self) -> int:
         self.Centre()
-        self.ShowModal()
+        return self.ShowModal()
 
     def fit(self):
         self.border_sizer.Fit(self.panel)
