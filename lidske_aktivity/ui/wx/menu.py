@@ -235,8 +235,7 @@ class Menu(wx.PopupTransientWindow):
     def _on_setup_button(self, event):
         self.Dismiss()
         setup = Setup(self, self.store.config)
-        val = setup.show()
-        if val == wx.ID_OK:
+        if setup.run():
             self.store.config = setup.config
             self.refresh()
             save_config(self.store.config)

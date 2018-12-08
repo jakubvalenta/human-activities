@@ -79,12 +79,10 @@ class Application(wx.App):
 
     def show_setup(self):
         setup = Setup(self.frame, self.store.config)
-        val = setup.show()
-        if val == wx.ID_OK:
+        if setup.run():
             self.store.config = setup.config
             self.menu.refresh()
             save_config(self.store.config)
-        setup.Destroy()
 
     def show_settings(self):
         settings = Settings(self.frame, self.store.config)
