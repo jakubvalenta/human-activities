@@ -66,7 +66,7 @@ class Menu(wx.PopupTransientWindow):
     spinner: wx.StaticText
     mouse_x: int = 0
     mouse_y: int = 0
-    last_directories: Optional[TDirectories] = None
+    last_fractions: Optional[TDirectories] = None
 
     def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
         super().__init__(*args, parent=parent, **kwargs)
@@ -176,8 +176,8 @@ class Menu(wx.PopupTransientWindow):
 
     def update(self, pulse: bool = False):
         if (self.store.directories
-                and self.store.directories != self.last_directories):
-            self.last_directories = self.store.directories
+                and self.store.fractions != self.last_fractions):
+            self.last_fractions = self.store.fractions
             for path, d in self.store.directories.items():
                 if d.size is None:
                     if pulse:
