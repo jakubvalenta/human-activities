@@ -1,13 +1,12 @@
 import logging
 from functools import partial
 from pathlib import Path
-from threading import Event, Thread
-from time import sleep
 from typing import Dict, List, Optional
 
 import wx
 
 from lidske_aktivity.config import MODE_NAMED, save_config
+from lidske_aktivity.directories import TDirectories
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
 from lidske_aktivity.ui.wx.lib import (
     create_button, create_label, create_sizer, set_pen,
@@ -56,10 +55,9 @@ class Menu(wx.PopupTransientWindow):
     radio_buttons: List[wx.RadioButton]
     progress_bars: Dict[Path, wx.Gauge]
     spinner: wx.StaticText
-    tick_event_stop: Optional[Event] = None
-    tick_thread: Optional[Thread] = None
     mouse_x: int = 0
     mouse_y: int = 0
+    last_directories: Optional[TDirectories] = None
 
     def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
         super().__init__(*args, parent=parent, **kwargs)
@@ -72,7 +70,6 @@ class Menu(wx.PopupTransientWindow):
             self._init_radio_buttons()
             self._init_progress_bars()
             self._init_spinner()
-            self._tick_start()
         else:
             self._init_empty()
         self._fit()
@@ -163,10 +160,26 @@ class Menu(wx.PopupTransientWindow):
         self.DestroyChildren()
 
     def refresh(self):
-        self._tick_stop()
+        # self._tick_stop()  # TODO
         self._empty()
         self._init()
         self._position()
+
+    def update(self, pulse: bool = False):
+        if (self.store.directories
+                and self.store.directories != self.last_directories):
+            self.last_directories = self.store.directories
+            for path, d in self.store.directories.items():
+                if d.size is None:
+                    if pulse:
+                        self.progress_bars[path].pulse()
+                else:
+                    self.progress_bars[path].set_fraction(
+                        self.store.fractions[path]
+                    )
+        if not any(self.store.pending.values()):
+            self.spinner.Hide()
+            self._fit()
 
     def popup_at(self, mouse_x: int, mouse_y: int):
         self.mouse_x = mouse_x
@@ -198,39 +211,7 @@ class Menu(wx.PopupTransientWindow):
         for other_button in self.radio_buttons:
             if other_button != button:
                 other_button.SetValue(False)
-        self._on_tick(pulse=False)
-
-    def _tick_start(self):
-        self.tick_event_stop = Event()
-        self.tick_thread = Thread(target=self._tick)
-        self.tick_thread.start()
-
-    def _tick_stop(self):
-        if self.tick_event_stop is not None:
-            self.tick_event_stop.set()
-        if self.tick_thread is not None:
-            self.tick_thread.join()
-        logger.info('Tick stopped')
-
-    def _tick(self):
-        while not self.tick_event_stop.is_set():
-            wx.CallAfter(self._on_tick)
-            sleep(1)
-
-    def _on_tick(self, pulse: bool = True):
-        logger.info('Updating progress bars')
-        if self.store.directories:
-            for path, d in self.store.directories.items():
-                if d.size is None:
-                    if pulse:
-                        self.progress_bars[path].pulse()
-                else:
-                    self.progress_bars[path].set_fraction(
-                        self.store.fractions[path]
-                    )
-        if not any(self.store.pending.values()):
-            self.spinner.Hide()
-            self._fit()
+        self.update(pulse=False)
 
     def _on_setup_button(self, event):
         self.Dismiss()
@@ -243,8 +224,3 @@ class Menu(wx.PopupTransientWindow):
     def ProcessLeftDown(self, event):
         logger.info('ProcessLeftDown: %s' % event.GetPosition())
         return wx.PopupTransientWindow.ProcessLeftDown(self, event)
-
-    def Destroy(self) -> bool:
-        logger.info('Menu Destroy')
-        self._tick_stop()
-        return super().Destroy()
