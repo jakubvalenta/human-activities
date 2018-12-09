@@ -55,10 +55,10 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         slices_frac = list(self.store.fractions.values())
         logger.info('Updating icon with slices %s', slices_frac)
         image = draw_pie_chart(22, slices_frac)  # TODO: Size depending on OS
-        f = tempfile.NamedTemporaryFile(suffix='.png')  # TODO: Clean tmp file
-        image.save(f.name)
-        icon = wx.Icon(name=f.name, type=wx.BITMAP_TYPE_PNG)
-        self.SetIcon(icon)
+        with tempfile.NamedTemporaryFile(suffix='.png') as f:
+            image.save(f.name)
+            icon = wx.Icon(name=f.name, type=wx.BITMAP_TYPE_PNG)
+            self.SetIcon(icon)
 
 
 class Application(wx.App):
