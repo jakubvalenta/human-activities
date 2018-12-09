@@ -170,7 +170,6 @@ class Menu(wx.PopupTransientWindow):
         self.DestroyChildren()
 
     def refresh(self):
-        # self._tick_stop()  # TODO
         self._empty()
         self._init()
         self._position()

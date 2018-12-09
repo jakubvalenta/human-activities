@@ -148,17 +148,14 @@ class Application(wx.App):
 
     def quit(self):
         logger.info('Menu quit')
+        self._tick_stop()
         self.status_icon.Destroy()
         self.menu.Destroy()
         self.frame.Destroy()
 
-    def Destroy(self) -> bool:
-        logger.info('App Destroy')
-        self._tick_stop()
-        return super().Destroy()
-
     def OnExit(self):
         logger.info('App OnExit')
+        self._tick_stop()
         self.on_quit()
         super().OnExit()
         return True
