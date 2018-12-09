@@ -1,6 +1,8 @@
+import io
 from typing import Callable, List
 
 import wx
+from PIL import Image
 
 
 def create_sizer(parent: wx.Window,
@@ -72,3 +74,12 @@ def set_pen(dc: wx.PaintDC, *args, **kwargs):
     pen.SetJoin(wx.JOIN_MITER)
     pen.SetCap(wx.CAP_BUTT)
     dc.SetPen(pen)
+
+
+def create_icon_from_image(image: Image) -> wx.Icon:
+    with io.BytesIO() as f:
+        image.save(f, format='PNG')
+        f.seek(0)
+        image = wx.Image(f)
+        icon = wx.Icon(image.ConvertToBitmap())
+    return icon

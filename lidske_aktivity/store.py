@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
-from lidske_aktivity.config import Config
+from lidske_aktivity.config import MODE_NAMED, Config
 from lidske_aktivity.directories import Directory, TDirectories
 from lidske_aktivity.utils import math
 
@@ -83,3 +83,8 @@ class Store:
         self._directories = value
         self.pending = {path: True for path in value.keys()}
         self.fractions = {path: 0 for path in value.keys()}
+
+    def get_text(self, path: Path) -> str:
+        if self.config.mode == MODE_NAMED and path in self.config.named_dirs:
+            return self.config.named_dirs[path]
+        return path.name

@@ -139,12 +139,7 @@ class Menu(wx.PopupTransientWindow):
         self.progress_bars = {}
         self.sizer.AddSpacer(10)
         for i, path in enumerate(self.store.directories.keys()):
-            if (self.store.config.mode == MODE_NAMED
-                    and path in self.store.config.named_dirs):
-                text = self.store.config.named_dirs[path]
-            else:
-                text = path.name
-            label = create_label(self, text)
+            label = create_label(self, self.store.get_text(path))
             progress_bar = Gauge(parent=self, color=color_from_index(i))
             fraction = self.store.fractions[path]
             if fraction is not None:

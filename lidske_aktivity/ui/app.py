@@ -1,4 +1,3 @@
-import io
 import logging
 from threading import Event, Thread
 from time import sleep
@@ -11,6 +10,7 @@ from lidske_aktivity import __version__
 from lidske_aktivity.bitmap import draw_pie_chart
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
+from lidske_aktivity.ui.lib import create_icon_from_image
 from lidske_aktivity.ui.menu import Menu
 from lidske_aktivity.ui.settings import Settings
 from lidske_aktivity.ui.setup import Setup
@@ -55,12 +55,15 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         slices_frac = list(self.store.fractions.values())
         logger.info('Updating icon with slices %s', slices_frac)
         image = draw_pie_chart(self.calc_icon_size(), slices_frac)
-        with io.BytesIO() as f:
-            image.save(f, format='PNG')
-            f.seek(0)
-            image = wx.Image(f)
-            icon = wx.Icon(image.ConvertToBitmap())
-        self.SetIcon(icon)
+        icon = create_icon_from_image(image)
+        tooltip = '\n'.join(
+            '{text}: {fraction:.2%}'.format(
+                text=self.store.get_text(path),
+                fraction=self.store.fractions[path]
+            )
+            for path in self.store.fractions
+        )
+        self.SetIcon(icon, tooltip)
 
     @staticmethod
     def calc_icon_size() -> int:
