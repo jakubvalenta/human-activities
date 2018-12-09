@@ -23,6 +23,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
                  on_settings: Callable,
                  on_about: Callable,
                  on_quit: Callable):
+        # TODO: Check TaskBarIcon.isAvailable()
         super().__init__(wx.adv.TBI_DOCK)
 
         icon = wx.Icon()
