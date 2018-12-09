@@ -5,7 +5,7 @@ from typing import Callable, Iterator, List, Tuple
 
 from PIL import Image
 
-TColor = Tuple[int, int, int]
+TColor = Tuple[int, int, int, int]
 TSliceFrac = Tuple[int, TColor]
 TSliceRad = Tuple[float, float, TColor]
 
@@ -48,7 +48,7 @@ def _hsl_to_rgb(h: float, s: float, l: float) -> TColor:
         r = _hue_to_rgb(p, q, h + 1/3)
         g = _hue_to_rgb(p, q, h)
         b = _hue_to_rgb(p, q, h - 1/3)
-    return round(r * 255), round(g * 255), round(b * 255)
+    return round(r * 255), round(g * 255), round(b * 255), 255
 
 
 def str_to_color(s: str) -> TColor:
@@ -61,7 +61,8 @@ def _pie_chart_shader(x: int,
                       w: int,
                       h: int,
                       slices_rad: List[TSliceRad],
-                      default_color: TColor = (255, 255, 255)) -> TColor:
+                      default_color: TColor = (255, 255, 255, 255),
+                      background_color: TColor = (0, 0, 0, 0)) -> TColor:
     center = w / 2, h / 2
     radius = min(center)
     coord = x - center[0], y - center[1]
@@ -70,7 +71,7 @@ def _pie_chart_shader(x: int,
     if angle < 0:
         angle = 2*math.pi + angle
     if distance > radius:
-        return 0, 0, 0
+        return background_color
     for slice_begin, slice_end, color in slices_rad:
         if slice_begin <= angle < slice_end:
             return color
@@ -80,8 +81,8 @@ def _pie_chart_shader(x: int,
 def _draw_image(w: int,
                 h: int,
                 shader: Callable,
-                background_color: TColor = (0, 0, 0)) -> Image:
-    image = Image.new('RGB', (w, h), background_color)
+                background_color: TColor = (0, 0, 0, 0)) -> Image:
+    image = Image.new('RGBA', (w, h), background_color)
     pixels = image.load()
     for x in range(w):
         for y in range(h):
