@@ -32,6 +32,7 @@ class Gauge(wx.Window):
     def set_fraction(self, fraction: float):
         self.is_pulse = False
         self.fraction = fraction
+        self.SetToolTip(f'{fraction:.2%}')
         self.Refresh()
 
     def pulse(self):
@@ -116,6 +117,7 @@ class Menu(wx.PopupTransientWindow):
         ]:
             button = wx.ToggleButton(parent=self, label=label)
             button.SetValue(name == self.store.active_mode)
+            button.SetToolTip(tooltip)  # TODO: Doesn't show
             button.Bind(
                 wx.EVT_TOGGLEBUTTON,
                 partial(self._on_radio_toggled, button=button, mode=name)
