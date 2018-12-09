@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 import wx
 
+from lidske_aktivity.bitmap import TColor, str_to_color
 from lidske_aktivity.config import MODE_NAMED, save_config
 from lidske_aktivity.directories import TDirectories
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
@@ -17,11 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class Gauge(wx.Window):
+    color: TColor
     fraction: float = 0
     is_pulse: bool = True
+    default_color: TColor = (147, 161, 161)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, size=(-1, 5), **kwargs)
+    def __init__(self, parent: wx.Window, color: TColor):
+        self.color = color
+        super().__init__(parent, size=(-1, 5))
         self.Bind(wx.EVT_PAINT, self.on_paint)
 
     def set_fraction(self, fraction: float):
@@ -37,13 +41,18 @@ class Gauge(wx.Window):
         w, h = self.GetSize()
         dc = wx.PaintDC(self)
         if self.is_pulse:
-            set_pen(dc, '#93a1a1', width=h, style=wx.PENSTYLE_SHORT_DASH)
+            set_pen(
+                dc,
+                self.default_color,
+                width=h,
+                style=wx.PENSTYLE_SHORT_DASH
+            )
             dc.DrawLine(0, 0, w, 0)
         else:
             w_fg = round(w * self.fraction)
-            set_pen(dc, '#268bd2', width=h)
+            set_pen(dc, self.color, width=h)
             dc.DrawLine(0, 0, w_fg, 0)
-            set_pen(dc, '#93a1a1', width=h)
+            set_pen(dc, self.default_color, width=h)
             dc.DrawLine(w_fg, 0, w, 0)
 
 
@@ -135,7 +144,7 @@ class Menu(wx.PopupTransientWindow):
             else:
                 text = path.name
             label = create_label(self, text)
-            progress_bar = Gauge(parent=self)
+            progress_bar = Gauge(parent=self, color=str_to_color(str(path)))
             fraction = self.store.fractions[path]
             if fraction is not None:
                 progress_bar.set_fraction(fraction)
