@@ -5,10 +5,11 @@ from typing import Dict, List, Optional
 
 import wx
 
-from lidske_aktivity.bitmap import TColor, str_to_color
+from lidske_aktivity.bitmap import TColor, color_from_index
 from lidske_aktivity.config import MODE_NAMED, save_config
-from lidske_aktivity.directories import TDirectories
-from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
+from lidske_aktivity.store import (
+    SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store, TFractions,
+)
 from lidske_aktivity.ui.lib import (
     create_button, create_label, create_sizer, set_pen,
 )
@@ -21,7 +22,7 @@ class Gauge(wx.Window):
     color: TColor
     fraction: float = 0
     is_pulse: bool = True
-    default_color: TColor = (147, 161, 161)
+    default_color: TColor = (147, 161, 161, 255)
 
     def __init__(self, parent: wx.Window, color: TColor):
         self.color = color
@@ -66,7 +67,7 @@ class Menu(wx.PopupTransientWindow):
     spinner: wx.StaticText
     mouse_x: int = 0
     mouse_y: int = 0
-    last_fractions: Optional[TDirectories] = None
+    last_fractions: Optional[TFractions] = None
 
     def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
         super().__init__(*args, parent=parent, **kwargs)
@@ -144,7 +145,7 @@ class Menu(wx.PopupTransientWindow):
             else:
                 text = path.name
             label = create_label(self, text)
-            progress_bar = Gauge(parent=self, color=str_to_color(str(path)))
+            progress_bar = Gauge(parent=self, color=color_from_index(i))
             fraction = self.store.fractions[path]
             if fraction is not None:
                 progress_bar.set_fraction(fraction)

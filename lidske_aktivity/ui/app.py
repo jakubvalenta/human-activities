@@ -8,7 +8,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.bitmap import draw_pie_chart, str_to_color
+from lidske_aktivity.bitmap import draw_pie_chart
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
 from lidske_aktivity.ui.menu import Menu
@@ -52,10 +52,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         if self.store.fractions == self.last_fractions:
             return
         self.last_fractions = self.store.fractions
-        slices_frac = [
-            (fraction, str_to_color(str(path)))
-            for path, fraction in self.store.fractions.items()
-        ]
+        slices_frac = list(self.store.fractions.values())
         logger.info('Updating icon with slices %s', slices_frac)
         image = draw_pie_chart(22, slices_frac)  # TODO: Size depending on OS
         f = tempfile.NamedTemporaryFile(suffix='.png')  # TODO: Clean tmp file

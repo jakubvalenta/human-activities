@@ -6,11 +6,11 @@ from typing import Callable, Iterator, List, Tuple
 from PIL import Image
 
 TColor = Tuple[int, int, int, int]
-TSliceFrac = Tuple[int, TColor]
+TSliceFrac = float
 TSliceRad = Tuple[float, float, TColor]
 
 
-def _frac_to_rad(frac: int) -> float:
+def _frac_to_rad(frac: float) -> float:
     return frac * 2 * math.pi
 
 
@@ -51,9 +51,19 @@ def _hsl_to_rgb(h: float, s: float, l: float) -> TColor:
     return round(r * 255), round(g * 255), round(b * 255), 255
 
 
-def str_to_color(s: str) -> TColor:
-    fraction = _hash_to_fraction(s)
-    return _hsl_to_rgb(fraction, 0.8, 0.5)
+def hue_from_index(i: int, steps: int = 6) -> float:
+    mod = i % steps
+    frac = 1 / steps
+    div = i // steps + 1
+    shift = frac / div
+    return mod * frac + shift
+
+
+def color_from_index(i: int,
+                     s: float = 0.8,
+                     l: float = 0.5,
+                     **kwargs) -> TColor:
+    return _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
 
 
 def _pie_chart_shader(x: int,
@@ -91,12 +101,12 @@ def _draw_image(w: int,
 
 
 def _slices_frac_to_rad(slices_frac: List[TSliceFrac]) -> Iterator[TSliceRad]:
-    cumulative_frac = 0
-    for frac, color in slices_frac:
+    cumulative_frac: float = 0
+    for i, frac in enumerate(slices_frac):
         yield (
             _frac_to_rad(cumulative_frac),
             _frac_to_rad(cumulative_frac + frac),
-            color
+            color_from_index(i)
         )
         cumulative_frac += frac
 
