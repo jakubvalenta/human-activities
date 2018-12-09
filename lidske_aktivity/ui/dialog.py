@@ -1,7 +1,7 @@
 import wx
 
 from lidske_aktivity.config import Config
-from lidske_aktivity.ui.wx.lib import create_sizer
+from lidske_aktivity.ui.lib import create_sizer
 
 
 class BaseDialog(wx.Dialog):

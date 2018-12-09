@@ -9,10 +9,10 @@ from lidske_aktivity.bitmap import TColor, str_to_color
 from lidske_aktivity.config import MODE_NAMED, save_config
 from lidske_aktivity.directories import TDirectories
 from lidske_aktivity.store import SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store
-from lidske_aktivity.ui.wx.lib import (
+from lidske_aktivity.ui.lib import (
     create_button, create_label, create_sizer, set_pen,
 )
-from lidske_aktivity.ui.wx.setup import Setup
+from lidske_aktivity.ui.setup import Setup
 
 logger = logging.getLogger(__name__)
 

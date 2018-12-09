@@ -6,7 +6,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
-from lidske_aktivity.ui.wx.lib import (
+from lidske_aktivity.ui.lib import (
     add_text_heading, add_text_list, add_text_paragraph, choose_dir,
     create_button, create_label, create_text_control,
 )

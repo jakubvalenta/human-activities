@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from threading import Event, Thread
 
-from lidske_aktivity import ui
 from lidske_aktivity.config import (
     CACHE_PATH, MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, load_config,
 )
@@ -11,6 +10,7 @@ from lidske_aktivity.directories import (
     scan_directories,
 )
 from lidske_aktivity.store import Store
+from lidske_aktivity.ui.app import run_app
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class Application:
         )
         self.load_directories()
         self.scan_start()
-        ui.run_app(self.store, self.scan_stop)
+        run_app(self.store, self.scan_stop)
 
     def load_directories(self):
         if self.store.config.mode == MODE_HOME:

@@ -11,9 +11,9 @@ from lidske_aktivity import __version__
 from lidske_aktivity.bitmap import draw_pie_chart, str_to_color
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
-from lidske_aktivity.ui.wx.menu import Menu
-from lidske_aktivity.ui.wx.settings import Settings
-from lidske_aktivity.ui.wx.setup import Setup
+from lidske_aktivity.ui.menu import Menu
+from lidske_aktivity.ui.settings import Settings
+from lidske_aktivity.ui.setup import Setup
 
 logger = logging.getLogger(__name__)
 
