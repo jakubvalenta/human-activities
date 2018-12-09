@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 import wx
 
 from lidske_aktivity.bitmap import TColor, color_from_index
-from lidske_aktivity.config import MODE_NAMED, save_config
+from lidske_aktivity.config import save_config
 from lidske_aktivity.store import (
     SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store, TFractions,
 )
@@ -29,14 +29,15 @@ class Gauge(wx.Window):
         super().__init__(parent, size=(-1, 5))
         self.Bind(wx.EVT_PAINT, self.on_paint)
 
-    def set_fraction(self, fraction: float):
+    def set_fraction(self, fraction: float, tooltip: str):
         self.is_pulse = False
         self.fraction = fraction
-        self.SetToolTip(f'{fraction:.2%}')
+        self.SetToolTip(tooltip)
         self.Refresh()
 
     def pulse(self):
         self.is_pulse = True
+        self.SetToolTip('Calculating...')
         self.Refresh()
 
     def on_paint(self, event):
@@ -101,18 +102,13 @@ class Menu(wx.PopupTransientWindow):
             (
                 SIZE_MODE_SIZE,
                 'by size',
-                (
-                    'Each bar shows the fraction of the total root directory '
-                    'size that the given directory occupies.'
-                )
+                'Compares data size of the directories.'
             ),
             (
                 SIZE_MODE_SIZE_NEW,
                 'by activity',
-                (
-                    'Each bar shows the fraction of the size of the given '
-                    'directory that was modified in the last 30 days.'
-                )
+                'Shows how many percent of the files in each directory was '
+                'modified in the past 30 days.'
             ),
         ]:
             button = wx.ToggleButton(parent=self, label=label)
@@ -145,7 +141,10 @@ class Menu(wx.PopupTransientWindow):
             progress_bar = Gauge(parent=self, color=color_from_index(i))
             fraction = self.store.fractions[path]
             if fraction is not None:
-                progress_bar.set_fraction(fraction)
+                progress_bar.set_fraction(
+                    fraction,
+                    self.store.get_tooltip(path)
+                )
             self.sizer.Add(label, flag=wx.EXPAND | wx.BOTTOM, border=3)
             self.sizer.Add(progress_bar, flag=wx.EXPAND | wx.BOTTOM, border=5)
             self.progress_bars[path] = progress_bar
@@ -181,7 +180,8 @@ class Menu(wx.PopupTransientWindow):
                         self.progress_bars[path].pulse()
                 else:
                     self.progress_bars[path].set_fraction(
-                        self.store.fractions[path]
+                        self.store.fractions[path],
+                        self.store.get_tooltip(path)
                     )
         if not any(self.store.pending.values()):
             self.spinner.Hide()

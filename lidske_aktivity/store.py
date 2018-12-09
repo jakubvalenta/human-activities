@@ -1,4 +1,5 @@
 import logging
+import textwrap
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
@@ -88,3 +89,12 @@ class Store:
         if self.config.mode == MODE_NAMED and path in self.config.named_dirs:
             return self.config.named_dirs[path]
         return path.name
+
+    def get_tooltip(self, path: Path) -> str:
+        fraction = self.fractions[path]
+        if self.active_mode == SIZE_MODE_SIZE:
+            s = f'{fraction:.2%} of the size of all configured directories'
+        else:
+            s = (f'{fraction:.2%} of the files in this directory was modified '
+                 'in the past 30 days')
+        return textwrap.fill(s)
