@@ -1,5 +1,5 @@
+import io
 import logging
-import tempfile
 from threading import Event, Thread
 from time import sleep
 from typing import Callable, Optional
@@ -55,10 +55,12 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         slices_frac = list(self.store.fractions.values())
         logger.info('Updating icon with slices %s', slices_frac)
         image = draw_pie_chart(self.calc_icon_size(), slices_frac)
-        with tempfile.NamedTemporaryFile(suffix='.png') as f:
-            image.save(f.name)
-            icon = wx.Icon(name=f.name, type=wx.BITMAP_TYPE_PNG)
-            self.SetIcon(icon)
+        with io.BytesIO() as f:
+            image.save(f, format='PNG')
+            f.seek(0)
+            image = wx.Image(f)
+            icon = wx.Icon(image.ConvertToBitmap())
+        self.SetIcon(icon)
 
     @staticmethod
     def calc_icon_size() -> int:
