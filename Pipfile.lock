@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f72bdb303f45f4b72d99c133b2c47ae46cf17e0cf36ffd815ea9e260c35bbfdc"
+            "sha256": "fd54b0db5d58abfcc5c17da9fd316526e54d9932f2006ca418643047b89a11ba"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -59,19 +59,6 @@
             ],
             "index": "pypi",
             "version": "==5.3.0"
-        },
-        "pycairo": {
-            "hashes": [
-                "sha256:abd42a4c9c2069febb4c38fe74bfc4b4a9d3a89fea3bc2e4ba7baff7a20f783f"
-            ],
-            "version": "==1.18.0"
-        },
-        "pygobject": {
-            "hashes": [
-                "sha256:2d4423cbf169d50a3165f2dde21478a00215c7fb3f68d9d236af588c670980bb"
-            ],
-            "index": "pypi",
-            "version": "==3.30.4"
         }
     },
     "develop": {
