@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pygobject = "*"
 click = "*"
+pillow = "*"
 
 [dev-packages]
 "flake8" = "*"
