@@ -3,17 +3,12 @@
 ## Pre-requisites
 
 - pipenv
+- wxPython
 
 Install on Arch Linux:
 
 ```
-# pacman -S pipenv
-```
-
-## Installation
-
-```
-make install
+# pacman -S pipenv python-wxpython
 ```
 
 ## Usage
@@ -21,3 +16,10 @@ make install
 ```
 make run
 ```
+
+## Building distribution package
+
+```
+make build dist-onefile
+```
+

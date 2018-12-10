@@ -1,4 +1,4 @@
-.PHONY: run run-debug install dist clean clean-cache test unit-test lint help
+.PHONY: run run-debug build dist dist-onefile clean clean-cache test unit-test lint help
 
 run:  ## Start the app
 	pipenv run python -m lidske_aktivity
@@ -6,11 +6,20 @@ run:  ## Start the app
 run-debug:  ## Start the app with extended logging
 	pipenv run python -m lidske_aktivity --verbose
 
-install:  ## Install required packages
-	sudo pacman -S gobject-introspection
+build:
+	docker build -t lidske_aktivity .
 
 dist:  ## Build distribution package
 	pipenv run pyinstaller \
+		--windowed \
+		--name=lidske-aktivity \
+		--specpath=install \
+		lidske_aktivity/__main__.py
+
+dist-onefile:  ## Build one file distribution package
+	docker run --rm --volume "$$(pwd):/app" lidske_aktivity \
+	pipenv run pyinstaller \
+		--onefile \
 		--windowed \
 		--name=lidske-aktivity \
 		--specpath=install \
