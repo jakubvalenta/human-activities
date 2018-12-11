@@ -24,5 +24,6 @@ RUN pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/de
 COPY . /app/
 WORKDIR /app
 
+RUN pipenv --three --site-packages
 RUN pipenv install --dev
 
