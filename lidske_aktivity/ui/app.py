@@ -7,7 +7,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import __version__
-from lidske_aktivity.bitmap import draw_pie_chart
+from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
 from lidske_aktivity.ui.lib import create_icon_from_image
@@ -129,7 +129,8 @@ class Application(wx.App):
 
     def show_about(self):
         info = wx.adv.AboutDialogInfo()
-        # TODO: info.Icon = ''
+        image = draw_pie_chart(148, list(gen_random_slices(3, 8)))
+        info.Icon = create_icon_from_image(image)
         info.Name = "Lidské aktivity"
         info.Version = __version__
         info.Copyright = '\u00a9 2018 Jakub Valena, Jiří Skála'

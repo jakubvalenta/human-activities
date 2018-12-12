@@ -1,4 +1,5 @@
 import math
+import random
 from functools import partial
 from hashlib import sha1
 from typing import Callable, Iterator, List, Tuple
@@ -101,7 +102,7 @@ def _draw_image(w: int,
 
 
 def _slices_frac_to_rad(slices_frac: List[TSliceFrac]) -> Iterator[TSliceRad]:
-    cumulative_frac: float = 0
+    cumulative_frac = 0.0
     for i, frac in enumerate(slices_frac):
         yield (
             _frac_to_rad(cumulative_frac),
@@ -118,3 +119,11 @@ def draw_pie_chart(size: int, slices_frac: List[TSliceFrac]) -> Image:
         h=size,
         shader=partial(_pie_chart_shader, slices_rad=slices_rad)
     )
+
+
+def gen_random_slices(n_min: int, n_max: int) -> Iterator[TSliceFrac]:
+    total = 0.0
+    while total <= 1:
+        frac = 1 / random.randint(n_min, n_max)
+        total += frac
+        yield frac
