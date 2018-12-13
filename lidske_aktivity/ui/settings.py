@@ -17,9 +17,11 @@ class Settings(BaseConfigDialog):
     title = 'Lidské aktivity advanced settings'
 
     mode_radios: Dict[str, wx.RadioButton]
+    root_path_panel: wx.Panel
     root_path_control: wx.TextCtrl
-    custom_dirs_list: wx.ListBox
     custom_dirs_panel: wx.Panel
+    custom_dirs_list: wx.ListBox
+    named_dirs_panel: wx.Panel
     named_dirs_path_controls: List[wx.TextCtrl]
     named_dirs_list: List[Tuple[Path, str]]
 
@@ -61,9 +63,10 @@ class Settings(BaseConfigDialog):
         self.sizer.Add(self.mode_radios[mode], flag=wx.ALL, border=5)
 
     def init_root_path_control(self):
-        hbox = create_sizer(self.sizer, wx.HORIZONTAL, flag=wx.EXPAND)
+        self.root_path_panel = wx.Panel(self.panel)
+        hbox = create_sizer(self.root_path_panel, wx.HORIZONTAL)
         self.root_path_control = create_text_control(
-            self.panel,
+            self.root_path_panel,
             value=str(self.config.root_path),
             callback=self.on_root_path_text
         )
@@ -75,31 +78,58 @@ class Settings(BaseConfigDialog):
         )
         button = create_button(
             self,
-            self.panel,
+            self.root_path_panel,
             'Choose',
             self.on_root_path_button
         )
         hbox.Add(button, proportion=1, flag=wx.EXPAND)
+        self.sizer.Add(self.root_path_panel, flag=wx.EXPAND)
 
     def init_custom_dirs(self):
-        hbox = create_sizer(self.sizer, wx.HORIZONTAL, flag=wx.EXPAND)
-        self.init_custom_dirs_list()
+        self.custom_dirs_panel = wx.Panel(self.panel)
+        hbox = create_sizer(self.custom_dirs_panel, wx.HORIZONTAL)
+
+        self.custom_dirs_list = wx.ListBox(self.custom_dirs_panel)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.on_custom_dir_change)
+        for custom_dir in self.config.custom_dirs:
+            self.custom_dirs_list.Append(str(custom_dir))
         hbox.Add(
             self.custom_dirs_list,
             proportion=5,
             flag=wx.EXPAND | wx.RIGHT,
             border=10
         )
-        self.init_custom_dirs_buttons()
-        hbox.Add(self.custom_dirs_buttons, proportion=1, flag=wx.EXPAND)
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        for i, (label, callback) in enumerate([
+                ('New', self.on_custom_dir_new),
+                ('Change', self.on_custom_dir_change),
+                ('Delete', self.on_custom_dir_delete),
+                ('Clear', self.on_custom_dirs_clear),
+        ]):
+            button = create_button(
+                self,
+                self.custom_dirs_panel,
+                label,
+                callback
+            )
+            if i == 0:
+                flag = wx.EXPAND
+            else:
+                flag = wx.EXPAND | wx.TOP
+            vbox.Add(button, flag=flag, border=5)
+        hbox.Add(vbox, proportion=1, flag=wx.EXPAND)
+
+        self.sizer.Add(self.custom_dirs_panel, flag=wx.EXPAND)
 
     def init_named_dirs(self):
-        vbox = wx.BoxSizer(wx.VERTICAL)
+        self.named_dirs_panel = wx.Panel(self.panel)
+        vbox = create_sizer(self.named_dirs_panel)
         self.named_dirs_path_controls = []
         for i, (path, name) in enumerate(self.named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
             text_control_name = create_text_control(
-                self.panel,
+                self.named_dirs_panel,
                 value=name or '',
                 callback=partial(self.on_named_dir_name_text, i)
             )
@@ -110,7 +140,7 @@ class Settings(BaseConfigDialog):
                 border=10
             )
             text_control_path = create_text_control(
-                self.panel,
+                self.named_dirs_panel,
                 value=str(path) or '',
                 callback=partial(self.on_named_dir_path_text, i)
             )
@@ -122,7 +152,7 @@ class Settings(BaseConfigDialog):
             )
             button = create_button(
                 self,
-                self.panel,
+                self.named_dirs_panel,
                 'Choose',
                 partial(self.on_named_dir_button, i)
             )
@@ -132,7 +162,7 @@ class Settings(BaseConfigDialog):
             else:
                 vbox.Add(hbox, flag=wx.EXPAND | wx.TOP, border=5)
             self.named_dirs_path_controls.append(text_control_path)
-        self.sizer.Add(vbox, flag=wx.EXPAND)
+        self.sizer.Add(self.named_dirs_panel, flag=wx.EXPAND)
 
     def _update_named_dirs(self,
                            i: int,
@@ -160,42 +190,17 @@ class Settings(BaseConfigDialog):
 
     def toggle_controls(self):
         if self.config.mode == MODE_PATH:
-            self.root_path_control.Enable()
+            self.root_path_panel.Enable()
         else:
-            self.root_path_control.Disable()
+            self.root_path_panel.Disable()
         if self.config.mode == MODE_CUSTOM:
-            self.custom_dirs_list.Enable()
-            self.custom_dirs_buttons.Enable()
+            self.custom_dirs_panel.Enable()
         else:
-            self.custom_dirs_list.Disable()
-            self.custom_dirs_buttons.Disable()
-
-    def init_custom_dirs_list(self):
-        self.custom_dirs_list = wx.ListBox(self.panel)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.on_custom_dir_change)
-        for custom_dir in self.config.custom_dirs:
-            self.custom_dirs_list.Append(str(custom_dir))
-
-    def init_custom_dirs_buttons(self):
-        self.custom_dirs_buttons = wx.Panel(self.panel)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        for i, (label, callback) in enumerate([
-                ('New', self.on_custom_dir_new),
-                ('Change', self.on_custom_dir_change),
-                ('Delete', self.on_custom_dir_delete),
-                ('Clear', self.on_custom_dirs_clear),
-        ]):
-            button = create_button(
-                self,
-                self.custom_dirs_buttons,
-                label,
-                callback
-            )
-            if i == 0:
-                vbox.Add(button, flag=wx.EXPAND)
-            else:
-                vbox.Add(button, 0, flag=wx.EXPAND | wx.TOP, border=5)
-        self.custom_dirs_buttons.SetSizer(vbox)
+            self.custom_dirs_panel.Disable()
+        if self.config.mode == MODE_NAMED:
+            self.named_dirs_panel.Enable()
+        else:
+            self.named_dirs_panel.Disable()
 
     def on_mode_radio(self, event):
         for mode, radio in self.mode_radios.items():
