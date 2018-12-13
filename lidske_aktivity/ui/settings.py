@@ -1,10 +1,11 @@
+from functools import partial
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional, Tuple
 
 import wx
 
 from lidske_aktivity.config import (
-    MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES,
+    MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES, Config,
 )
 from lidske_aktivity.ui.dialog import BaseConfigDialog
 from lidske_aktivity.ui.lib import (
@@ -20,6 +21,16 @@ class Settings(BaseConfigDialog):
     root_path_control: wx.TextCtrl
     custom_dirs_list: wx.ListBox
     custom_dirs_panel: wx.Panel
+    named_dirs_path_controls: List[wx.TextCtrl]
+    named_dirs_list: List[Tuple[Path, str]]
+
+    def __init__(self, parent: wx.Frame, config: Config):
+        self.config = config
+        self.named_dirs_list = list(zip(
+            self.config.named_dirs.keys(),
+            self.config.named_dirs.values(),
+        ))
+        super().__init__(parent, config)
 
     def init_content(self):
         self.create_mode_radios()
@@ -29,6 +40,7 @@ class Settings(BaseConfigDialog):
         self.add_mode_radio(MODE_CUSTOM)
         self.init_custom_dirs()
         self.add_mode_radio(MODE_NAMED)
+        self.init_named_dirs()
         self.toggle_controls()
 
     def create_mode_radios(self):
@@ -80,6 +92,56 @@ class Settings(BaseConfigDialog):
         self.init_custom_dirs_buttons()
         hbox.Add(self.custom_dirs_buttons, proportion=0.6, flag=wx.EXPAND)
         self.sizer.Add(hbox, flag=wx.EXPAND)
+
+    def init_named_dirs(self):
+        grid = wx.FlexGridSizer(cols=3, vgap=5, hgap=10)
+        self.named_dirs_path_controls = []
+        for i, (path, name) in enumerate(self.named_dirs_list):
+            text_control_name = create_text_control(
+                self,
+                value=name or '',
+                callback=partial(self.on_named_dir_name_text, i)
+            )
+            grid.Add(text_control_name)
+            text_control_path = create_text_control(
+                self,
+                value=str(path) or '',
+                callback=partial(self.on_named_dir_path_text, i)
+            )
+            grid.Add(text_control_path)
+            button = create_button(
+                self,
+                self,
+                'Choose',
+                partial(self.on_named_dir_button, i)
+            )
+            grid.Add(button)
+            self.named_dirs_path_controls.append(text_control_path)
+        self.sizer.Add(grid)
+
+    def _update_named_dirs(self,
+                           i: int,
+                           name: Optional[str] = None,
+                           path: Optional[Path] = None):
+        if path is None:
+            path = self.named_dirs_list[i][0]
+        if name is None:
+            name = self.named_dirs_list[i][1]
+        self.named_dirs_list[i] = (path, name)
+        self.config.named_dirs = dict(self.named_dirs_list)
+
+    def on_named_dir_name_text(self, i: int, event):
+        self._update_named_dirs(i, name=event.GetString())
+
+    def on_named_dir_path_text(self, i: int, event):
+        self._update_named_dirs(i, path=Path(event.GetString()))
+
+    def on_named_dir_button(self, i: int, event):
+        def callback(path_str: str):
+            self._update_named_dirs(i, path=Path(path_str))
+            self.named_dirs_path_controls[i].SetValue(path_str)
+
+        choose_dir(self, callback)
 
     def toggle_controls(self):
         if self.config.mode == MODE_PATH:
