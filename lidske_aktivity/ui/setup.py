@@ -8,15 +8,14 @@ import wx.adv
 from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
 from lidske_aktivity.ui.lib import (
     add_text_heading, add_text_list, add_text_paragraph, choose_dir,
-    create_button, create_label, create_text_control,
+    create_button, create_label, create_sizer, create_text_control,
 )
 
 
 class Page(wx.adv.WizardPageSimple):
     def __init__(self, parent: wx.adv.Wizard):
         super().__init__(parent)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.SetSizer(self.sizer)
+        self.sizer = create_sizer(self)
 
 
 class Setup(wx.adv.Wizard):
@@ -63,25 +62,39 @@ class Setup(wx.adv.Wizard):
 
     def init_controls(self, parent: wx.Panel, sizer: wx.BoxSizer):
         self.text_controls = {}
-        grid = wx.FlexGridSizer(cols=3, vgap=5, hgap=10)
-        for path, name in self.config.named_dirs.items():
+        for i, (path, name) in enumerate(self.config.named_dirs.items()):
+            hbox = wx.BoxSizer(wx.HORIZONTAL)
             label = create_label(parent, name)
-            grid.Add(label)
+            hbox.Add(
+                label,
+                proportion=2,
+                flag=wx.EXPAND | wx.RIGHT,
+                border=10
+            )
             text_control = create_text_control(
                 parent,
                 value=str(path) or '',
                 callback=partial(self.on_named_dir_text, name)
             )
-            grid.Add(text_control)
+            hbox.Add(
+                text_control,
+                proportion=3,
+                flag=wx.EXPAND | wx.RIGHT,
+                border=10
+            )
             button = create_button(
                 parent,
                 parent,
                 'Choose',
                 partial(self.on_named_dir_button, name)
             )
-            grid.Add(button)
+            hbox.Add(button, proportion=1, flag=wx.EXPAND)
+            if i == 0:
+                flag = wx.EXPAND
+            else:
+                flag = wx.EXPAND | wx.TOP
+            sizer.Add(hbox, flag=flag, border=5)
             self.text_controls[name] = text_control
-        sizer.Add(grid)
 
     def _update_named_dirs(self, name: str, path: Path):
         self.named_dirs_by_name[name] = path

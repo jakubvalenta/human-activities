@@ -158,9 +158,10 @@ class Settings(BaseConfigDialog):
             )
             hbox.Add(button, proportion=1, flag=wx.EXPAND)
             if i == 0:
-                vbox.Add(hbox, flag=wx.EXPAND)
+                flag = wx.EXPAND
             else:
-                vbox.Add(hbox, flag=wx.EXPAND | wx.TOP, border=5)
+                flag = wx.EXPAND | wx.TOP
+            vbox.Add(hbox, flag=flag, border=5)
             self.named_dirs_path_controls.append(text_control_path)
         self.sizer.Add(self.named_dirs_panel, flag=wx.EXPAND)
 
