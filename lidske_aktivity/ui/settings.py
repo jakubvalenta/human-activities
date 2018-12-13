@@ -9,7 +9,7 @@ from lidske_aktivity.config import (
 )
 from lidske_aktivity.ui.dialog import BaseConfigDialog
 from lidske_aktivity.ui.lib import (
-    choose_dir, create_button, create_label, create_text_control,
+    choose_dir, create_button, create_label, create_sizer, create_text_control,
 )
 
 
@@ -17,7 +17,6 @@ class Settings(BaseConfigDialog):
     title = 'Lidské aktivity advanced settings'
 
     mode_radios: Dict[str, wx.RadioButton]
-    root_path_panel: wx.Sizer
     root_path_control: wx.TextCtrl
     custom_dirs_list: wx.ListBox
     custom_dirs_panel: wx.Panel
@@ -44,7 +43,7 @@ class Settings(BaseConfigDialog):
         self.toggle_controls()
 
     def create_mode_radios(self):
-        label = create_label(self, 'Scan mode')
+        label = create_label(self.panel, 'Scan mode')
         self.sizer.Add(label, flag=wx.ALL, border=5)
         self.mode_radios = {}
         for i, (mode, label) in enumerate(MODES.items()):
@@ -62,62 +61,78 @@ class Settings(BaseConfigDialog):
         self.sizer.Add(self.mode_radios[mode], flag=wx.ALL, border=5)
 
     def init_root_path_control(self):
-        self.root_path_panel = wx.Panel(self.panel)
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox = create_sizer(self.sizer, wx.HORIZONTAL, flag=wx.EXPAND)
         self.root_path_control = create_text_control(
-            self.root_path_panel,
+            self.panel,
             value=str(self.config.root_path),
             callback=self.on_root_path_text
         )
-        hbox.Add(self.root_path_control, flag=wx.EXPAND | wx.RIGHT, border=10)
+        hbox.Add(
+            self.root_path_control,
+            proportion=5,
+            flag=wx.EXPAND | wx.RIGHT,
+            border=10
+        )
         button = create_button(
             self,
-            self.root_path_panel,
+            self.panel,
             'Choose',
             self.on_root_path_button
         )
-        hbox.Add(button, proportion=0.6, flag=wx.EXPAND)
-        self.root_path_panel.SetSizer(hbox)
-        self.sizer.Add(self.root_path_panel, flag=wx.EXPAND)
+        hbox.Add(button, proportion=1, flag=wx.EXPAND)
 
     def init_custom_dirs(self):
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox = create_sizer(self.sizer, wx.HORIZONTAL, flag=wx.EXPAND)
         self.init_custom_dirs_list()
         hbox.Add(
             self.custom_dirs_list,
-            wx.ID_ANY,
+            proportion=5,
             flag=wx.EXPAND | wx.RIGHT,
             border=10
         )
         self.init_custom_dirs_buttons()
-        hbox.Add(self.custom_dirs_buttons, proportion=0.6, flag=wx.EXPAND)
-        self.sizer.Add(hbox, flag=wx.EXPAND)
+        hbox.Add(self.custom_dirs_buttons, proportion=1, flag=wx.EXPAND)
 
     def init_named_dirs(self):
-        grid = wx.FlexGridSizer(cols=3, vgap=5, hgap=10)
+        vbox = wx.BoxSizer(wx.VERTICAL)
         self.named_dirs_path_controls = []
         for i, (path, name) in enumerate(self.named_dirs_list):
+            hbox = wx.BoxSizer(wx.HORIZONTAL)
             text_control_name = create_text_control(
-                self,
+                self.panel,
                 value=name or '',
                 callback=partial(self.on_named_dir_name_text, i)
             )
-            grid.Add(text_control_name)
+            hbox.Add(
+                text_control_name,
+                proportion=2,
+                flag=wx.EXPAND | wx.RIGHT,
+                border=10
+            )
             text_control_path = create_text_control(
-                self,
+                self.panel,
                 value=str(path) or '',
                 callback=partial(self.on_named_dir_path_text, i)
             )
-            grid.Add(text_control_path)
+            hbox.Add(
+                text_control_path,
+                proportion=3,
+                flag=wx.EXPAND | wx.RIGHT,
+                border=10
+            )
             button = create_button(
                 self,
-                self,
+                self.panel,
                 'Choose',
                 partial(self.on_named_dir_button, i)
             )
-            grid.Add(button)
+            hbox.Add(button, proportion=1, flag=wx.EXPAND)
+            if i == 0:
+                vbox.Add(hbox, flag=wx.EXPAND)
+            else:
+                vbox.Add(hbox, flag=wx.EXPAND | wx.TOP, border=5)
             self.named_dirs_path_controls.append(text_control_path)
-        self.sizer.Add(grid)
+        self.sizer.Add(vbox, flag=wx.EXPAND)
 
     def _update_named_dirs(self,
                            i: int,
@@ -141,13 +156,13 @@ class Settings(BaseConfigDialog):
             self._update_named_dirs(i, path=Path(path_str))
             self.named_dirs_path_controls[i].SetValue(path_str)
 
-        choose_dir(self, callback)
+        choose_dir(self.panel, callback)
 
     def toggle_controls(self):
         if self.config.mode == MODE_PATH:
-            self.root_path_panel.Enable()
+            self.root_path_control.Enable()
         else:
-            self.root_path_panel.Disable()
+            self.root_path_control.Disable()
         if self.config.mode == MODE_CUSTOM:
             self.custom_dirs_list.Enable()
             self.custom_dirs_buttons.Enable()
@@ -177,9 +192,9 @@ class Settings(BaseConfigDialog):
                 callback
             )
             if i == 0:
-                vbox.Add(button)
+                vbox.Add(button, flag=wx.EXPAND)
             else:
-                vbox.Add(button, 0, flag=wx.TOP, border=5)
+                vbox.Add(button, 0, flag=wx.EXPAND | wx.TOP, border=5)
         self.custom_dirs_buttons.SetSizer(vbox)
 
     def on_mode_radio(self, event):

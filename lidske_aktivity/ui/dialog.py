@@ -20,13 +20,15 @@ class BaseDialog(wx.Dialog):
         self.fit()
 
     def init_window(self):
+        self.border_sizer = create_sizer(self)
         self.panel = wx.Panel(self)
-        self.border_sizer = create_sizer(self.panel)
-        self.sizer = create_sizer(
-            self.border_sizer,
+        self.border_sizer.Add(
+            self.panel,
+            proportion=1,
             flag=wx.EXPAND | wx.ALL,
             border=10
         )
+        self.sizer = create_sizer(self.panel)
 
     def init_content(self):
         raise NotImplementedError
@@ -39,7 +41,11 @@ class BaseDialog(wx.Dialog):
         button = wx.Button(self, wx.ID_CANCEL)
         button_sizer.AddButton(button)
         button_sizer.Realize()
-        self.sizer.Add(button_sizer, flag=wx.TOP, border=10)
+        self.border_sizer.Add(
+            button_sizer,
+            flag=wx.EXPAND | wx.TOP | wx.BOTTOM,
+            border=10
+        )
 
     def show(self) -> int:
         self.Centre()

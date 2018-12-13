@@ -14,8 +14,6 @@ def create_sizer(parent: wx.Window,
         parent.Add(sizer, *args, **kwargs)
     else:
         parent.SetSizer(sizer)
-        parent.SetAutoLayout(1)
-        sizer.Fit(parent)
     return sizer
 
 
