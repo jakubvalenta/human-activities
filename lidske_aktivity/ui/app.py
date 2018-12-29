@@ -6,7 +6,9 @@ from typing import Callable, Optional
 import wx
 import wx.adv
 
-from lidske_aktivity import __version__
+from lidske_aktivity import (
+    __authors__, __copyright__, __title__, __uri__, __version__,
+)
 from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
@@ -131,11 +133,11 @@ class Application(wx.App):
         info = wx.adv.AboutDialogInfo()
         image = draw_pie_chart(148, list(gen_random_slices(3, 8)))
         info.Icon = create_icon_from_image(image)
-        info.Name = "Lidské aktivity"
+        info.Name = __title__
         info.Version = __version__
-        info.Copyright = '\u00a9 2018 Jakub Valena, Jiří Skála'
-        info.WebSite = 'https://www.example.com'  # TODO
-        info.Developers = ['Jakub Valenta', 'Jiří Skála']
+        info.Copyright = __copyright__
+        info.WebSite = __uri__
+        info.Developers = __authors__
         wx.adv.AboutBox(info)
 
     def _tick_start(self):
