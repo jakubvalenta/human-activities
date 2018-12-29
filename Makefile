@@ -4,7 +4,7 @@ _arch_linux_pkgrel=1
 _arch_linux_src_path=install/arch_linux/${_name}-${_version}.tar.xz
 _arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
 
-.PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint check help
+.PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint lint-arch-linux check help
 
 run:  ## Start the app
 	pipenv run python -m lidske_aktivity
@@ -71,6 +71,9 @@ unit-test:  ## Run unit tests
 
 lint:  ## Run linting
 	tox -e lint
+
+lint-arch-linux:
+	namcap install/arch_linux/PKGBUILD
 
 check:  ## Test installed app
 	pytest lidske_aktivity/tests
