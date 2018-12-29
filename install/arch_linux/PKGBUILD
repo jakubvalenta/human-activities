@@ -1,6 +1,6 @@
 # Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
 pkgname=lidske-aktivity
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 epoch=
 pkgdesc="Lidské aktivity"
@@ -20,7 +20,7 @@ options=()
 install=
 changelog=
 source=($pkgname-$pkgver.tar.xz)
-md5sums=('76836143bac6966ca7ec7d13b9947678')
+md5sums=('23b6a91c773ad9d529f8b0d6ceffd9a4')
 noextract=()
 
 build() {
@@ -36,19 +36,17 @@ check() {
 }
 
 _copy() {
-  src="$srcdir/$1"
-  dst="$pkgdir$2"
-  mkdir -p "$dst"
-  cp "$src" "$dst"
+  mkdir -p "$2"
+  cp "$1" "$2"
 }
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  _copy data/lidske-aktivity.desktop /usr/share/applications/
-  _copy data/lidske-aktivity.desktop /etc/xdg/autostart/
-  _copy data/lidske-aktivity.png /usr/share/pixmaps/
-  _copy data/lidske-aktivity.svg /usr/share/icons/hicolor/scalable/apps/
+  _copy data/lidske-aktivity.desktop "$pkgdir/usr/share/applications/"
+  _copy data/lidske-aktivity.desktop "$pkgdir/etc/xdg/autostart/"
+  _copy data/lidske-aktivity.png "$pkgdir/usr/share/pixmaps/"
+  _copy data/lidske-aktivity.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/"
 
   python setup.py install --root="$pkgdir/" --optimize=1 --skip-build
 }

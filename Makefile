@@ -1,5 +1,5 @@
 _name=lidske-aktivity
-_version=0.1.0
+_version=0.1.1
 _arch_linux_pkgrel=1
 _arch_linux_src_path=install/arch_linux/${_name}-${_version}.tar.xz
 _arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
