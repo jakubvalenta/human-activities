@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Lidské aktivity
+GenericName=
+Comment=
+Exec=/usr/bin/lidske-aktivity
+Icon=pasystray
+StartupNotify=true
+Type=Application
+Categories=Utility;FileTools;
+Keywords=filesystem;directory;disk;usage;tray;system tray;applet;

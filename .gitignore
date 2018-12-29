@@ -3,6 +3,8 @@
 .tox
 __pycache__
 build
+data/*.png
+data/*.svg
 dist
 install/arch_linux
 !install/arch_linux/PKGBUILD

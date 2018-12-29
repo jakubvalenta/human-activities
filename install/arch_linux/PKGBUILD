@@ -9,7 +9,7 @@ url=""
 license=('GPL')
 groups=()
 depends=()
-makedepends=()
+makedepends=("librsvg")
 checkdepends=("python-pytest")
 optdepends=()
 provides=()
@@ -35,8 +35,20 @@ check() {
   make -k check
 }
 
+_copy() {
+  src="$srcdir/$1"
+  dst="$pkgdir$2"
+  mkdir -p "$dst"
+  cp "$src" "$dst"
+}
+
 package() {
   cd "$srcdir/$pkgname-$pkgver"
+
+  _copy data/lidske-aktivity.desktop /usr/share/applications/
+  _copy data/lidske-aktivity.desktop /etc/xdg/autostart/
+  _copy data/lidske-aktivity.png /usr/share/pixmaps/
+  _copy data/lidske-aktivity.svg /usr/share/icons/hicolor/scalable/apps/
 
   python setup.py install --root="$pkgdir/" --optimize=1 --skip-build
 }

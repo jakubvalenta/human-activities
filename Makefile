@@ -4,7 +4,7 @@ _arch_linux_pkgrel=1
 _arch_linux_src_path=install/arch_linux/${_name}-${_version}.tar.xz
 _arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
 
-.PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build clean clean-cache test unit-test lint check help
+.PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint check help
 
 run:  ## Start the app
 	pipenv run python -m lidske_aktivity
@@ -35,7 +35,7 @@ ${_arch_linux_src_path}:
 	git archive "v${_version}" --prefix "${_name}-${_version}/" \
 		-o "${_arch_linux_src_path}"
 
-${_arch_linux_pkg_path}: | ${_arch_linux_src_path}
+${_arch_linux_pkg_path}: ${_arch_linux_src_path}
 	cd "$$(dirname "${_arch_linux_src_path}")" && makepkg -f
 
 dist-arch-linux: ${_arch_linux_pkg_path}  ## Build an Arch Linux package
@@ -43,10 +43,20 @@ dist-arch-linux: ${_arch_linux_pkg_path}  ## Build an Arch Linux package
 install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux package
 	sudo pacman -U "${_arch_linux_pkg_path}"
 
-build:  ## Build the app using setuptools
+data/lidske-aktivity.svg:
+	cd data && ./draw_svg_icon.py > lidske-aktivity.svg
+
+data/lidske-aktivity.png: data/lidske-aktivity.svg
+	cd data && rsvg-convert -w 48 -h 48 \
+		lidske-aktivity.svg > lidske-aktivity.png
+
+build: data/lidske-aktivity.png  ## Build the app using setuptools
 	python setup.py build
 
 clean:  ## Clean distribution package
+	-rm install/arch_linux/*.tar.xz
+	-rm data/*.png
+	-rm data/*.svg
 	-rm -r build
 	-rm -r dist
 
