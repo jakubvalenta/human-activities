@@ -1,4 +1,10 @@
-.PHONY: run run-debug build dist dist-onefile clean clean-cache test unit-test lint help
+_name=lidske-aktivity
+_version=0.1.0
+_arch_linux_pkgrel=1
+_arch_linux_src_path=install/arch_linux/${_name}-${_version}.tar.xz
+_arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
+
+.PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build clean clean-cache test unit-test lint check help
 
 run:  ## Start the app
 	pipenv run python -m lidske_aktivity
@@ -24,6 +30,18 @@ dist-onefile:  ## Build one file distribution package
 		--name=lidske-aktivity \
 		--specpath=install \
 		lidske_aktivity/__main__.py
+
+${_arch_linux_src_path}:
+	git archive HEAD --prefix "${_name}-${_version}/" \
+		-o "${_arch_linux_src_path}"
+
+${_arch_linux_pkg_path}: | ${_arch_linux_src_path}
+	cd "$$(dirname "${_arch_linux_src_path}")" && makepkg -f
+
+dist-arch-linux: ${_arch_linux_pkg_path}  ## Build an Arch Linux package
+
+install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux package
+	sudo pacman -U "${_arch_linux_pkg_path}"
 
 build:  ## Build the app using setuptools
 	python setup.py build

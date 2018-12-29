@@ -3,14 +3,14 @@ pkgname=lidske-aktivity
 pkgver=0.1.0
 pkgrel=1
 epoch=
-pkgdesc=""
+pkgdesc="Lidské aktivity"
 arch=('any')
 url=""
 license=('GPL')
 groups=()
 depends=()
 makedepends=()
-checkdepends=()
+checkdepends=("python-pytest")
 optdepends=()
 provides=()
 conflicts=()
@@ -19,22 +19,14 @@ backup=()
 options=()
 install=
 changelog=
-source=($pkgname-$pkgver.tar.gz
-        $pkgname-$pkgver.patch)
+source=($pkgname-$pkgver.tar.xz)
+md5sums=('8290f6360f1934916f063373af447026')
 noextract=()
-md5sums=()
-
-prepare() {
-  cd "$srcdir/$pkgname-$pkgver"
-
-  patch -p1 -i "$srcdir/$pkgname-$pkgver.patch"
-}
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  ./configure --prefix=/usr
-  make
+  make build
 }
 
 check() {
@@ -46,7 +38,7 @@ check() {
 package() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  make DESTDIR="$pkgdir/" install
+  python setup.py install --root="$pkgdir/" --optimize=1 --skip-build
 }
 
 # vim:set ts=2 sw=2 et:
