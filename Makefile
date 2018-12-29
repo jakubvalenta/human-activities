@@ -6,7 +6,7 @@ run:  ## Start the app
 run-debug:  ## Start the app with extended logging
 	pipenv run python -m lidske_aktivity --verbose
 
-build:
+dist-prepare:  ## Build the docker image required for packaging
 	docker build -t lidske_aktivity .
 
 dist:  ## Build distribution package
@@ -24,6 +24,9 @@ dist-onefile:  ## Build one file distribution package
 		--name=lidske-aktivity \
 		--specpath=install \
 		lidske_aktivity/__main__.py
+
+build:  ## Build the app using setuptools
+	python setup.py build
 
 clean:  ## Clean distribution package
 	-rm -r build

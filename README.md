@@ -20,6 +20,6 @@ make run
 ## Building distribution package
 
 ```
-make build dist-onefile
+make dist-prepare dist-onefile
 ```
 
