@@ -32,7 +32,7 @@ dist-onefile:  ## Build one file distribution package
 		lidske_aktivity/__main__.py
 
 ${_arch_linux_src_path}:
-	git archive HEAD --prefix "${_name}-${_version}/" \
+	git archive "v${_version}" --prefix "${_name}-${_version}/" \
 		-o "${_arch_linux_src_path}"
 
 ${_arch_linux_pkg_path}: | ${_arch_linux_src_path}
