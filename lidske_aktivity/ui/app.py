@@ -12,7 +12,7 @@ from lidske_aktivity import (
 from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
-from lidske_aktivity.ui.lib import create_icon_from_image
+from lidske_aktivity.ui.lib import create_icon_from_image, new_id_ref_compat
 from lidske_aktivity.ui.menu import Menu
 from lidske_aktivity.ui.settings import Settings
 from lidske_aktivity.ui.setup import Setup
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class TaskBarIcon(wx.adv.TaskBarIcon):
     store: Store
     last_fractions: Optional[TFractions] = None
-    id_setup = wx.NewIdRef()
+    id_setup = new_id_ref_compat
 
     def __init__(self,
                  store: Store,

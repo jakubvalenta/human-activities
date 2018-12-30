@@ -5,6 +5,14 @@ import wx
 from PIL import Image
 
 
+def new_id_ref_compat():
+    """A wrapper around wx.NewIdRef() compatible with wxPython < 4.0.3"""
+    try:
+        return wx.NewIdRef()
+    except AttributeError:
+        return wx.NewId()
+
+
 def create_sizer(parent: wx.Window,
                  orientation: int = wx.VERTICAL,
                  *args,
