@@ -16,11 +16,11 @@ ifeq (,$(DESTDIR))
 	@echo "You must set the variable `DESTDIR`."
 	@exit 1
 endif
-	install -D data/lidske-aktivity.desktop "$DESTDIR/usr/share/applications/"
-	install -D data/lidske-aktivity.desktop "$DESTDIR/etc/xdg/autostart/"
-	install -D data/lidske-aktivity.png "$DESTDIR/usr/share/pixmaps/"
-	install -D data/lidske-aktivity.svg "$DESTDIR/usr/share/icons/hicolor/scalable/apps/"
-	python3 setup.py install --root="$DESTDIR/" --optimize=1 --skip-build
+	install -D -t "${DESTDIR}/usr/share/applications/" data/lidske-aktivity.desktop
+	install -D -t "${DESTDIR}/etc/xdg/autostart/" data/lidske-aktivity.desktop
+	install -D -t "${DESTDIR}/usr/share/pixmaps/" data/lidske-aktivity.png
+	install -D -t "${DESTDIR}/usr/share/icons/hicolor/scalable/apps/" data/lidske-aktivity.svg
+	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
 
 run:  ## Start the app
 	pipenv run python3 -m lidske_aktivity
