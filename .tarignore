@@ -1,0 +1,11 @@
+*.deb
+.git
+.mypy_cache
+.pytest_cache
+.tox
+__pycache__
+build
+data/*.png
+data/*.svg
+dist
+install

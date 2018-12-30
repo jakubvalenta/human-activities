@@ -1,0 +1,16 @@
+Source: lidske-aktivity
+Section: unknown
+Priority: optional
+Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
+Build-Depends: debhelper (>= 9), dh-python, python3-all, python3-setuptools, tox, librsvg2-bin
+Standards-Version: 3.9.8
+Homepage: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
+X-Python3-Version: >= 3.6
+Vcs-Git: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk.git
+Vcs-Browser: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
+#Testsuite: autopkgtest-pkg-python
+
+Package: lidske-aktivity
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3-wxgtk4.0, python3-pil
+Description: Lidské aktivity
