@@ -1,8 +1,10 @@
 _name=lidske-aktivity
 _version=0.1.1
 _arch_linux_pkgrel=1
-_arch_linux_src_path=install/arch_linux/${_name}-${_version}.tar.xz
-_arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
+_arch_linux_dist_parent=dist/arch_linux
+_arch_linux_src_filename=${_name}-${_version}.tar.xz
+_arch_linux_src_dirname=${_name}-${_version}
+_arch_linux_pkg_filename=${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
 
 .PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint lint-arch-linux check help
 
@@ -45,14 +47,19 @@ dist-onefile:  ## Build one file distribution package
 		--specpath=install \
 		lidske_aktivity/__main__.py
 
-${_arch_linux_src_path}:
-	git archive "v${_version}" --prefix "${_name}-${_version}/" \
-		-o "${_arch_linux_src_path}"
+${_arch_linux_dist_parent}/${_arch_linux_src_filename}:
+	mkdir -p "${_arch_linux_dist_parent}"
+	git archive "v${_version}" --prefix "${_arch_linux_src_dirname}/" \
+		-o "${_arch_linux_dist_parent}/${_arch_linux_src_filename}"
 
-${_arch_linux_pkg_path}: ${_arch_linux_src_path}
-	cd "$$(dirname "${_arch_linux_src_path}")" && makepkg -f
+${_arch_linux_dist_parent}/PKGBUILD:
+	mkdir -p "${_arch_linux_dist_parent}"
+	cp arch_linux/PKGBUILD "${_arch_linux_dist_parent}"
 
-dist-arch-linux: ${_arch_linux_pkg_path}  ## Build an Arch Linux package
+${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}: ${_arch_linux_dist_parent}/${_arch_linux_src_filename} ${_arch_linux_dist_parent}/PKGBUILD
+	cd "${_arch_linux_dist_parent}" && makepkg -f
+
+dist-arch-linux: ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}  ## Build an Arch Linux package
 
 install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux package
 	sudo pacman -U "${_arch_linux_pkg_path}"
@@ -65,11 +72,8 @@ data/lidske-aktivity.png: data/lidske-aktivity.svg
 		lidske-aktivity.svg > lidske-aktivity.png
 
 clean:  ## Clean distribution package
-	-rm install/arch_linux/*.tar.xz
-	-rm data/*.png
-	-rm data/*.svg
-	-rm -r build
-	-rm -r dist
+	-rm -rf build
+	-rm -rf dist
 
 clean-cache:  ## Clean cache
 	pipenv run python3 -m lidske_aktivity --verbose --clean

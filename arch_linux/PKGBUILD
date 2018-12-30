@@ -35,11 +35,6 @@ check() {
   make -k check
 }
 
-_copy() {
-  mkdir -p "$2"
-  cp "$1" "$2"
-}
-
 package() {
   cd "$srcdir/$pkgname-$pkgver"
 
