@@ -88,7 +88,7 @@ lint-arch-linux:
 	namcap install/arch_linux/PKGBUILD
 
 check:  ## Test installed app
-	pytest lidske_aktivity/tests
+	python3 -m pytest lidske_aktivity/tests
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
