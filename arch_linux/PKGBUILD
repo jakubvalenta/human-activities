@@ -1,6 +1,6 @@
 # Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
 pkgname=lidske-aktivity
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 epoch=
 pkgdesc='Lidské aktivity'
@@ -20,7 +20,7 @@ options=()
 install=
 changelog=
 source=($pkgname-$pkgver.tar.xz)
-md5sums=('23b6a91c773ad9d529f8b0d6ceffd9a4')
+md5sums=('d0dc550721433eefecf60a65d5edef2f')
 noextract=()
 
 build() {
