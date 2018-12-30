@@ -6,6 +6,9 @@ _arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgre
 
 .PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint lint-arch-linux check help
 
+build: data/lidske-aktivity.png  ## Build the app using setuptools
+	python3 setup.py build
+
 install:  ## Install built files to the filesystem
 ifeq (,$(DESTDIR))
 	@echo "You must set the variable `DESTDIR`."
@@ -18,10 +21,10 @@ endif
 	python3 setup.py install --root="$DESTDIR/" --optimize=1 --skip-build
 
 run:  ## Start the app
-	pipenv run python -m lidske_aktivity
+	pipenv run python3 -m lidske_aktivity
 
 run-debug:  ## Start the app with extended logging
-	pipenv run python -m lidske_aktivity --verbose
+	pipenv run python3 -m lidske_aktivity --verbose
 
 dist-prepare:  ## Build the docker image required for packaging
 	docker build -t lidske_aktivity .
@@ -55,14 +58,11 @@ install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux packag
 	sudo pacman -U "${_arch_linux_pkg_path}"
 
 data/lidske-aktivity.svg:
-	cd data && ./draw_svg_icon.py > lidske-aktivity.svg
+	cd data && python3 draw_svg_icon.py > lidske-aktivity.svg
 
 data/lidske-aktivity.png: data/lidske-aktivity.svg
 	cd data && rsvg-convert -w 48 -h 48 \
 		lidske-aktivity.svg > lidske-aktivity.png
-
-build: data/lidske-aktivity.png  ## Build the app using setuptools
-	python setup.py build
 
 clean:  ## Clean distribution package
 	-rm install/arch_linux/*.tar.xz
@@ -72,7 +72,7 @@ clean:  ## Clean distribution package
 	-rm -r dist
 
 clean-cache:  ## Clean cache
-	pipenv run python -m lidske_aktivity --verbose --clean
+	pipenv run python3 -m lidske_aktivity --verbose --clean
 
 test:  ## Run unit tests and linting
 	tox
