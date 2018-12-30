@@ -28,18 +28,18 @@ run:  ## Start the app
 run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m lidske_aktivity --verbose
 
-dist-prepare:  ## Build the docker image required for packaging
-	docker build -t lidske_aktivity .
+dist-pyinstaller-build:
+	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
 
-dist:  ## Build distribution package
+dist-pyinstaller:  ## Build PyInstaller-based package
 	pipenv run pyinstaller \
 		--windowed \
 		--name=lidske-aktivity \
 		--specpath=install \
 		lidske_aktivity/__main__.py
 
-dist-onefile:  ## Build one file distribution package
-	docker run --rm --volume "$$(pwd):/app" lidske_aktivity \
+dist-pyinstaller-onefile:  ## Build PyInstaller-based one-file package
+	docker run --rm --volume "$$(pwd):/app" lidske_aktivity_pyinstaller \
 	pipenv run pyinstaller \
 		--onefile \
 		--windowed \
