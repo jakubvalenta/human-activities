@@ -8,7 +8,7 @@ arch=('any')
 url='https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'
 license=('GPL')
 groups=()
-depends=()
+depends=('python-pillow' 'python-wxpython>=4')
 makedepends=('librsvg')
 checkdepends=('python-pytest')
 optdepends=()
