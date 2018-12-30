@@ -43,12 +43,7 @@ _copy() {
 package() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  _copy data/lidske-aktivity.desktop "$pkgdir/usr/share/applications/"
-  _copy data/lidske-aktivity.desktop "$pkgdir/etc/xdg/autostart/"
-  _copy data/lidske-aktivity.png "$pkgdir/usr/share/pixmaps/"
-  _copy data/lidske-aktivity.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/"
-
-  python setup.py install --root="$pkgdir/" --optimize=1 --skip-build
+  DESTDIR="$pkgdir" make install
 }
 
 # vim:set ts=2 sw=2 et:

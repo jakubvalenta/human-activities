@@ -6,6 +6,17 @@ _arch_linux_pkg_path=install/arch_linux/${_name}-${_version}-${_arch_linux_pkgre
 
 .PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint lint-arch-linux check help
 
+install:  ## Install built files to the filesystem
+ifeq (,$(DESTDIR))
+	@echo "You must set the variable `DESTDIR`."
+	@exit 1
+endif
+	install -D data/lidske-aktivity.desktop "$DESTDIR/usr/share/applications/"
+	install -D data/lidske-aktivity.desktop "$DESTDIR/etc/xdg/autostart/"
+	install -D data/lidske-aktivity.png "$DESTDIR/usr/share/pixmaps/"
+	install -D data/lidske-aktivity.svg "$DESTDIR/usr/share/icons/hicolor/scalable/apps/"
+	python3 setup.py install --root="$DESTDIR/" --optimize=1 --skip-build
+
 run:  ## Start the app
 	pipenv run python -m lidske_aktivity
 
