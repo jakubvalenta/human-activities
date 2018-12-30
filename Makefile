@@ -92,6 +92,7 @@ dist-debian: ${_debian_dist_parent}/${_debian_pkg_filename}  ## Build a Debian p
 
 install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install built Debian package
 	sudo dpkg -i "${_debian_dist_parent}/${_debian_pkg_filename}"
+	sudo apt-get install -f --yes
 
 data/lidske-aktivity.svg:
 	cd data && python3 draw_svg_icon.py > lidske-aktivity.svg
