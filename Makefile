@@ -79,9 +79,6 @@ clean-cache:  ## Clean cache
 	pipenv run python3 -m lidske_aktivity --verbose --clean
 
 test:  ## Run unit tests and linting
-	tox
-
-unit-test:  ## Run unit tests
 	tox -e py37
 
 lint:  ## Run linting
