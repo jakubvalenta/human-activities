@@ -1,10 +1,10 @@
 _name=lidske-aktivity
 _version=0.1.1
-_arch_linux_pkgrel=1
+_pkgrel=1
 _arch_linux_dist_parent=dist/arch_linux
 _arch_linux_src_filename=${_name}-${_version}.tar.xz
 _arch_linux_src_dirname=${_name}-${_version}
-_arch_linux_pkg_filename=${_name}-${_version}-${_arch_linux_pkgrel}-any.pkg.tar.xz
+_arch_linux_pkg_filename=${_name}-${_version}-${_pkgrel}-any.pkg.tar.xz
 
 .PHONY: run run-debug dist-prepare dist dist-onefile dist-arch-linux install-arch-linux build build-data clean clean-cache test unit-test lint lint-arch-linux check help
 
