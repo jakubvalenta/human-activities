@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class TaskBarIcon(wx.adv.TaskBarIcon):
     store: Store
     last_fractions: Optional[TFractions] = None
-    id_setup = new_id_ref_compat
+    id_setup = new_id_ref_compat()
 
     def __init__(self,
                  store: Store,
