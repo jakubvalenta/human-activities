@@ -10,14 +10,14 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-pyinstaller-onefile dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux check help
+.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-pyinstaller-onefile dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux check bump-version help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
 
 install:  ## Install built files to the filesystem
 ifeq (,$(DESTDIR))
-	@echo "You must set the variable DESTDIR."
+	@echo "You must set the variable 'DESTDIR'."
 	@exit 1
 endif
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
@@ -117,6 +117,15 @@ lint-arch-linux:
 
 check:  ## Test installed app
 	python3 -m pytest lidske_aktivity/tests
+
+bump-version:
+ifeq (,$(version))
+	@echo "You must set the variable 'version'."
+	@exit 1
+endif
+	sed -E -i.bak s/${_version}/${version}/ Makefile
+	sed -E -i.bak s/${_version}/${version}/ lidske_aktivity/__init__.py
+	sed -E -i.bak s/${_version}/${version}/ dist/arch_linux/PKGBUILD
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
