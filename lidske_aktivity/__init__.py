@@ -1,5 +1,5 @@
 __title__ = 'Lidské aktivity'
-__version__ = '0.1.0'
+__version__ = '0.1.3'
 
 __summary__ = 'Lidské aktivity'
 __uri__ = 'https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'
