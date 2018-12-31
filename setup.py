@@ -25,6 +25,11 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(),
+    data_files=[
+        ('share/applications', ['data/lidske-aktivity.desktop']),
+        ('etc/xdg/autostart', ['data/lidske-aktivity.desktop']),
+        ('share/icons/hicolor/scalable/apps', ['data/lidske-aktivity.svg']),
+        ('share/pixmaps', ['data/lidske-aktivity.png']),
     ],
     entry_points={
         'console_scripts': [

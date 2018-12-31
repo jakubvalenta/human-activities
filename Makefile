@@ -17,13 +17,9 @@ build:  ## Build the app using setuptools
 
 install:  ## Install built files to the filesystem
 ifeq (,$(DESTDIR))
-	@echo "You must set the variable `DESTDIR`."
+	@echo "You must set the variable DESTDIR."
 	@exit 1
 endif
-	install -D -t "${DESTDIR}/usr/share/applications/" data/lidske-aktivity.desktop
-	install -D -t "${DESTDIR}/etc/xdg/autostart/" data/lidske-aktivity.desktop
-	install -D -t "${DESTDIR}/usr/share/pixmaps/" data/lidske-aktivity.png
-	install -D -t "${DESTDIR}/usr/share/icons/hicolor/scalable/apps/" data/lidske-aktivity.svg
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
 
 run:  ## Start the app
