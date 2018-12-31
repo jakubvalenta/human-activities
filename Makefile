@@ -125,9 +125,12 @@ ifeq (,$(version))
 	@echo "You must set the variable 'version'."
 	@exit 1
 endif
-	sed -E -i.bak s/${_version}/${version}/ Makefile
-	sed -E -i.bak s/${_version}/${version}/ lidske_aktivity/__init__.py
-	sed -E -i.bak s/${_version}/${version}/ dist/arch_linux/PKGBUILD
+	sed -E -i s/${_version}/${version}/ Makefile
+	sed -E -i s/${_version}/${version}/ lidske_aktivity/__init__.py
+	sed -E -i s/${_version}/${version}/ arch_linux/PKGBUILD
+	docker run -it --volume="$$(pwd):/app" \
+		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
+		lidske_aktivity_debian dch -v "${version}-${_pkgrel}" "New version"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
