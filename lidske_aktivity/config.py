@@ -2,7 +2,6 @@ import json
 import logging
 import os.path
 import platform
-from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, List, Optional, Union
 
@@ -59,14 +58,17 @@ DEFAULT_NAMED_DIRS: Dict[Path, str] = {
 }
 
 
-@dataclass
 class Config:
     root_path: Optional[Path] = None
     test: bool = False
     mode: str = MODE_NAMED
-    custom_dirs: List[Path] = field(default_factory=list)
-    named_dirs: Dict[Path, str] = field(default_factory=dict)
+    custom_dirs: List[Path]
+    named_dirs: Dict[Path, str]
     show_setup: bool = True
+
+    def __init__(self):
+        self.custom_dirs = []
+        self.named_dirs = {}
 
     def to_json(self) -> str:
         d = {

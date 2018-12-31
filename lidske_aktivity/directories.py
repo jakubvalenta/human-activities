@@ -3,18 +3,16 @@ import logging
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
-from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Thread
-from typing import Callable, Dict, Optional, Sequence
+from typing import Callable, Dict, NamedTuple, Optional, Sequence
 
 from lidske_aktivity.utils import filesystem, math
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class Directory:
+class Directory(NamedTuple):
     size: Optional[int] = None
     size_new: Optional[int] = None
 
