@@ -138,6 +138,7 @@ def load_config() -> Config:
 def save_config(config: Config):
     config_json = config.to_json()
     logger.info('Writing config %s', config_json)
+    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     CONFIG_PATH.write_text(config_json)
 
 
