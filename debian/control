@@ -12,9 +12,11 @@ Homepage: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
 X-Python3-Version: >= 3.6
 Vcs-Git: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk.git
 Vcs-Browser: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
-#Testsuite: autopkgtest-pkg-python
 
 Package: lidske-aktivity
 Architecture: all
-Depends: ${python3:Depends}, ${misc:Depends}, python3-wxgtk4.0, python3-pil
+Depends: python3-wxgtk4.0,
+         python3-pil,
+         ${python3:Depends},
+         ${misc:Depends}
 Description: Lidské aktivity
