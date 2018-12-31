@@ -9,7 +9,7 @@ url='https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'
 license=('GPL')
 groups=()
 depends=('python-pillow' 'python-wxpython>=4')
-makedepends=('librsvg')
+makedepends=()
 checkdepends=('python-pytest')
 optdepends=()
 provides=()

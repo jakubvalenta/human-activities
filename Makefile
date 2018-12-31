@@ -10,9 +10,9 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-pyinstaller-onefile dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian clean clean-cache test lint lint-arch-linux check help
+.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-pyinstaller-onefile dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux check help
 
-build: data/lidske-aktivity.png  ## Build the app using setuptools
+build:  ## Build the app using setuptools
 	python3 setup.py build
 
 install:  ## Install built files to the filesystem
@@ -100,6 +100,8 @@ data/lidske-aktivity.svg:
 data/lidske-aktivity.png: data/lidske-aktivity.svg
 	cd data && rsvg-convert -w 48 -h 48 \
 		lidske-aktivity.svg > lidske-aktivity.png
+
+generate-data: data/lidske-aktivity.png
 
 clean:  ## Clean distribution package
 	-rm -rf build

@@ -25,8 +25,6 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(),
-    install_requires=[
-        'pillow',
     ],
     entry_points={
         'console_scripts': [

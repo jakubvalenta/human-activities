@@ -2,7 +2,11 @@ Source: lidske-aktivity
 Section: unknown
 Priority: optional
 Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
-Build-Depends: debhelper (>= 9), dh-python, python3-all, python3-setuptools, tox, librsvg2-bin
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               python3-all,
+               python3-setuptools,
+               tox
 Standards-Version: 3.9.8
 Homepage: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
 X-Python3-Version: >= 3.6

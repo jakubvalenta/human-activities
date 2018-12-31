@@ -5,7 +5,5 @@
 .tox
 __pycache__
 build
-data/*.png
-data/*.svg
 dist
 install
