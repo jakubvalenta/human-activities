@@ -2,7 +2,7 @@
 
 import math
 import sys
-from typing import Iterator, List, Tuple
+from typing import IO, Iterator, List, Tuple
 
 
 def percent_to_coord(percent: float) -> Tuple[float, float]:
@@ -30,7 +30,7 @@ def draw_pie_chart(slices: List[Tuple[float, str]]) -> Iterator[str]:
     yield '</svg>'
 
 
-if __name__ == '__main__':
+def draw_svg_icon(f: IO):
     slices = [
         (0.35, 'rgb(230, 230, 25)'),
         (0.25, 'rgb(25, 230, 25)'),
@@ -39,4 +39,8 @@ if __name__ == '__main__':
         (0.05, 'rgb(230, 25, 230)'),
     ]
     for line in draw_pie_chart(slices):
-        print(line, file=sys.stdout)
+        print(line, file=f)
+
+
+if __name__ == '__main__':
+    draw_svg_icon(sys.stdout)
