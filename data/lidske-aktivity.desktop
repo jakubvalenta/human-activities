@@ -1,10 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Name=Lidské aktivity
-GenericName=
-Comment=
+Comment=Description of Lidské aktivity
 Exec=/usr/bin/lidske-aktivity
-Icon=pasystray
+Icon=lidske-aktivity
 StartupNotify=true
 Type=Application
 Categories=Utility;FileTools;
