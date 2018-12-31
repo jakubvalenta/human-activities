@@ -52,11 +52,13 @@ ${_arch_linux_dist_parent}/${_arch_linux_src_filename}:
 	git archive "v${_version}" --prefix "${_arch_linux_src_dirname}/" \
 		-o "${_arch_linux_dist_parent}/${_arch_linux_src_filename}"
 
-${_arch_linux_dist_parent}/PKGBUILD:
+${_arch_linux_dist_parent}/PKGBUILD: ${_arch_linux_dist_parent}/${_arch_linux_src_filename}
 	mkdir -p "${_arch_linux_dist_parent}"
 	cp arch_linux/PKGBUILD "${_arch_linux_dist_parent}"
+	cd "${_arch_linux_dist_parent}" && makepkg -g >> PKGBUILD
+	cp -f "${_arch_linux_dist_parent}/PKGBUILD" arch_linux/PKGBUILD
 
-${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}: ${_arch_linux_dist_parent}/${_arch_linux_src_filename} ${_arch_linux_dist_parent}/PKGBUILD
+${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}: ${_arch_linux_dist_parent}/PKGBUILD
 	cd "${_arch_linux_dist_parent}" && makepkg -f
 
 dist-arch-linux: ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}  ## Build an Arch Linux package
