@@ -1,7 +1,7 @@
 import logging
 import textwrap
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Optional, Tuple
 
 from lidske_aktivity.config import MODE_NAMED, Config
 from lidske_aktivity.directories import Directory, TDirectories
@@ -16,24 +16,31 @@ SIZE_MODE_SIZE = 'size'
 SIZE_MODE_SIZE_NEW = 'size_new'
 
 
-def calc_size_fractions(directories: TDirectories) -> TFractions:
+def calc_size(directories: TDirectories) -> Tuple[TFractions, TFractions]:
     total_size = sum(d.size or 0 for d in directories.values())
-    return {
+    fractions = {
         path: math.safe_div(directory.size, total_size)
         for path, directory in directories.items()
     }
+    return fractions, fractions
 
 
-def calc_size_new_fractions(directories: TDirectories) -> TFractions:
-    return {
+def calc_size_new(directories: TDirectories) -> Tuple[TFractions, TFractions]:
+    fractions = {
         path: math.safe_div(directory.size_new, directory.size)
         for path, directory in directories.items()
     }
+    total_fractions = sum(fractions.values())
+    percents = {
+        path: math.safe_div(fraction, total_fractions)
+        for path, fraction in fractions.items()
+    }
+    return fractions, percents
 
 
-CALC_FRACTIONS = {
-    SIZE_MODE_SIZE: calc_size_fractions,
-    SIZE_MODE_SIZE_NEW: calc_size_new_fractions,
+CALC = {
+    SIZE_MODE_SIZE: calc_size,
+    SIZE_MODE_SIZE_NEW: calc_size_new,
 }
 
 
@@ -42,6 +49,7 @@ class Store:
     _directories: TDirectories
     pending: TPending
     fractions: TFractions
+    percents: TFractions
     active_mode: str = SIZE_MODE_SIZE
     on_config_change: Optional[Callable] = None
 
@@ -50,10 +58,13 @@ class Store:
         self._directories = {}
         self.pending = {}
         self.fractions = {}
+        self.percents = {}
         self.on_config_change = on_config_change
 
     def calc_fractions(self):
-        self.fractions = CALC_FRACTIONS[self.active_mode](self.directories)
+        self.fractions, self.percents = CALC[self.active_mode](
+            self.directories
+        )
 
     def update(self, path: Path, directory: Directory):
         self.directories[path] = directory

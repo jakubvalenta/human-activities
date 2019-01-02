@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
     store: Store
-    last_fractions: Optional[TFractions] = None
+    last_percents: Optional[TFractions] = None
     id_setup = new_id_ref_compat()
 
     def __init__(self,
@@ -51,19 +51,19 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         return menu
 
     def update(self):
-        if self.store.fractions == self.last_fractions:
+        if self.store.percents == self.last_percents:
             return
-        self.last_fractions = self.store.fractions
-        slices_frac = list(self.store.fractions.values())
+        self.last_percents = self.store.percents
+        slices_frac = list(self.store.percents.values())
         logger.info('Updating icon with slices %s', slices_frac)
         image = draw_pie_chart(self.calc_icon_size(), slices_frac)
         icon = create_icon_from_image(image)
         tooltip = '\n'.join(
             '{text}: {fraction:.2%}'.format(
                 text=self.store.get_text(path),
-                fraction=self.store.fractions[path]
+                fraction=fraction
             )
-            for path in self.store.fractions
+            for path, fraction in self.store.percents.items()
         )
         self.SetIcon(icon, tooltip)
 
