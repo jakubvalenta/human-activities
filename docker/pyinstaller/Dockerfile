@@ -26,4 +26,3 @@ WORKDIR /app
 
 RUN pipenv --three --site-packages
 RUN pipenv install --dev
-

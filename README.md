@@ -42,4 +42,3 @@ make dist-pyinstaller-docker
 ```
 make dist-pyinstaller
 ```
-
