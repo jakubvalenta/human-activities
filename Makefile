@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
+.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -31,7 +31,15 @@ run-debug:  ## Start the app with extended logging
 dist-pyinstaller-build:
 	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
 
-dist-pyinstaller: | dist-pyinstaller-build  ## Build a PyInstaller-based package
+dist-pyinstaller:  ## Build a PyInstaller-based package (with Docker)
+	pipenv run pyinstaller \
+		--onefile \
+		--windowed \
+		--name=lidske-aktivity \
+		--specpath=pyinstaller \
+		lidske_aktivity/__main__.py
+
+dist-pyinstaller-docker: | dist-pyinstaller-build  ## Build a PyInstaller-based package (without Docker)
 	docker run --rm --volume "$$(pwd):/app" -e PYTHONHASHSEED=1 \
 		lidske_aktivity_pyinstaller \
 		pipenv run pyinstaller \
