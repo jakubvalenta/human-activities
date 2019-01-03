@@ -1,20 +1,51 @@
 # Lidské aktivity
 
-## Pre-requisites
+## Installation
 
-- pipenv
-- wxPython
-
-Install on Arch Linux:
+### Arch Linux
 
 ```
 # pacman -S pipenv python-wxpython
+$ make setup
 ```
+
+### Windows
+
+#. Install pre-requisites:
+
+    - [Git](https://www.git-scm.com/).
+    - [Python3](https://www.python.org/).
+    - [Cygwin](https://cygwin.com/setup-x86.exe) including 'make' and 'nano'.
+    - [Visual C++ Redistributable for Visual Studio
+       2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
+
+#. Open Cygwin Terminal.
+
+#. Clone this repo.
+
+#. Install Python dependencies:
+
+    ```
+    $ pip install pipenv wxpython
+    $ make setup
+    ```
 
 ## Usage
 
 ```
 make run
+```
+
+Debugging:
+
+```
+make run-debug
+```
+
+When there is no `python3` executable:
+
+```
+pipenv run python -m lidske_aktivity --verbose
 ```
 
 ## Building distribution package
@@ -31,13 +62,13 @@ make dist-arch-linux-build dist-arch-linux
 make dist-debian-build dist-debian
 ```
 
-### Mac (with Docker)
+### Mac
 
 ```
-make dist-pyinstaller-docker
+make dist-pyinstaller
 ```
 
-### Mac (without Docker)
+### Windows
 
 ```
 make dist-pyinstaller

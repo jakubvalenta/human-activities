@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install run run-debug dist-pyinstaller-build dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
+.PHONY: build install setup run run-debug dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -22,17 +22,17 @@ ifeq (,$(DESTDIR))
 endif
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
 
+setup:  ## Create Pipenv virtual environment and install dependencies.
+	pipenv --three --site-packages
+	pipenv install --dev
+
 run:  ## Start the app
 	pipenv run python3 -m lidske_aktivity
 
 run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m lidske_aktivity --verbose
 
-dist-pyinstaller-build:
-	pipenv --three --site-packages
-	pipenv install --dev
-
-dist-pyinstaller:  ## Build a PyInstaller-based package (with Docker)
+dist-pyinstaller:  ## Build a PyInstaller-based package (without Docker)
 	pipenv run pyinstaller \
 		--onefile \
 		--windowed \
@@ -43,7 +43,7 @@ dist-pyinstaller:  ## Build a PyInstaller-based package (with Docker)
 dist-pyinstaller-docker-build:
 	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
 
-dist-pyinstaller-docker: | dist-pyinstaller-build  ## Build a PyInstaller-based package (without Docker)
+dist-pyinstaller-docker: | dist-pyinstaller-build  ## Build a PyInstaller-based package (with Docker)
 	docker run --rm --volume "$$(pwd):/app" -e PYTHONHASHSEED=1 \
 		lidske_aktivity_pyinstaller \
 		pipenv run pyinstaller \
