@@ -3,4 +3,4 @@ pipenv run pyinstaller ^
        --windowed ^
        --name=lidske-aktivity ^
        --specpath=pyinstaller ^
-       lidske_aktivity/__main__.py
+       lidske_aktivity\__main__.py
