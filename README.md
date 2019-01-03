@@ -13,20 +13,31 @@ $ make setup
 
 #. Install pre-requisites:
 
-    - [Git](https://www.git-scm.com/).
-    - [Python3](https://www.python.org/).
-    - [Cygwin](https://cygwin.com/setup-x86.exe) including 'make' and 'nano'.
     - [Visual C++ Redistributable for Visual Studio
        2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
+    - [Cygwin](https://cygwin.com/setup-x86.exe) with packages:
+        - git
+        - make
+        - nano
+        - python3
+        - python3-pip
+    - [Python3](https://www.python.org/).
 
 #. Open Cygwin Terminal.
+
+#. Append to `.bash_profile`:
+
+    ```
+    alias python3=python
+    alias pip3=pip
+    ```
 
 #. Clone this repo.
 
 #. Install Python dependencies:
 
     ```
-    $ pip install pipenv wxpython
+    $ pip3 install pipenv wxpython
     $ make setup
     ```
 
