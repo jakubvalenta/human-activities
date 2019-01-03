@@ -18,14 +18,14 @@ $ make setup
     - [Git](https://www.git-scm.com/).
     - [Python3](https://www.python.org/).
 
-#. Open Command Prompt.
+#. Open Git bash.
 
 #. Clone this repo.
 
 #. Install Python dependencies:
 
     ```
-    $ pip install pipenv wxpython pyinstaller
+    pip install Pillow wxpython
     ```
 
 ## Usage
@@ -71,5 +71,6 @@ make dist-pyinstaller
 ### Windows
 
 ```
+pip install pyinstaller
 pyinstaller/bin/pyinstaller_win.cmd
 ```
