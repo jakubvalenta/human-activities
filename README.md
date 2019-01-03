@@ -15,33 +15,22 @@ $ make setup
 
     - [Visual C++ Redistributable for Visual Studio
        2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
-    - [Cygwin](https://cygwin.com/setup-x86.exe) with packages:
-        - git
-        - make
-        - nano
-        - python3
-        - python3-pip
+    - [Git](https://www.git-scm.com/).
     - [Python3](https://www.python.org/).
 
-#. Open Cygwin Terminal.
-
-#. Append to `.bash_profile`:
-
-    ```
-    alias python3=python
-    alias pip3=pip
-    ```
+#. Open Command Prompt.
 
 #. Clone this repo.
 
 #. Install Python dependencies:
 
     ```
-    $ pip3 install pipenv wxpython
-    $ make setup
+    $ pip install pipenv wxpython pyinstaller
     ```
 
 ## Usage
+
+### Linux and Mac
 
 ```
 make run
@@ -53,10 +42,10 @@ Debugging:
 make run-debug
 ```
 
-When there is no `python3` executable:
+### Windows
 
 ```
-pipenv run python -m lidske_aktivity --verbose
+python -m lidske_aktivity --verbose
 ```
 
 ## Building distribution package
@@ -82,5 +71,5 @@ make dist-pyinstaller
 ### Windows
 
 ```
-make dist-pyinstaller
+pyinstaller/bin/pyinstaller_win.cmd
 ```
