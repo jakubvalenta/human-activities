@@ -33,12 +33,7 @@ run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m lidske_aktivity --verbose
 
 dist-pyinstaller:  ## Build a PyInstaller-based package (without Docker)
-	pipenv run pyinstaller \
-		--onefile \
-		--windowed \
-		--name=lidske-aktivity \
-		--specpath=pyinstaller \
-		lidske_aktivity/__main__.py
+
 
 dist-pyinstaller-docker-build:
 	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
