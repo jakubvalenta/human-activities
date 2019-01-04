@@ -63,8 +63,8 @@ def merge_directories(a: TDirectories, b: TDirectories) -> TDirectories:
 
 
 def init_directories_from_root_path(cache_path: Path,
-                                    root_path: Path) -> TDirectories:
-    if not root_path.is_dir():
+                                    root_path: Optional[Path]) -> TDirectories:
+    if not root_path or not root_path.is_dir():
         logger.error('Path %s is not a directory', root_path)
         return {}
     paths = filesystem.list_dirs(root_path)
