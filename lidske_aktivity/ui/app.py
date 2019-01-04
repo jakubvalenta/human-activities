@@ -94,7 +94,7 @@ class Application(wx.App):
         super().__init__(False, *args, **kwargs)
 
     def OnInit(self) -> bool:
-        self.frame = wx.Frame(parent=None, title='Foo')
+        self.frame = wx.Frame(parent=None, title=__title__)
         self.status_icon = TaskBarIcon(
             store=self.store,
             on_menu=lambda event: self.show_menu(),
