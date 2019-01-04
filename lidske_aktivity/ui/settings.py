@@ -67,7 +67,7 @@ class Settings(BaseConfigDialog):
         hbox = create_sizer(self.root_path_panel, wx.HORIZONTAL)
         self.root_path_control = create_text_control(
             self.root_path_panel,
-            value=str(self.config.root_path),
+            value=str(self.config.root_path) if self.config.root_path else '',
             callback=self.on_root_path_text
         )
         hbox.Add(
