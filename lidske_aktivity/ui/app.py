@@ -103,7 +103,7 @@ class Application(wx.App):
             on_about=lambda event: self.show_about(),
             on_quit=lambda event: self.quit()
         )
-        self.menu = Menu(store=self.store, parent=self.frame)
+        self.menu = Menu(store=self.store)
         if self.store.config.show_setup:
             self.store.config.show_setup = False
             self.show_setup()
