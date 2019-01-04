@@ -1,4 +1,5 @@
 import logging
+import time
 from functools import partial
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -78,6 +79,7 @@ class Menu(wx.PopupTransientWindow):
     mouse_x: int = 0
     mouse_y: int = 0
     last_fractions: Optional[TFractions] = None
+    last_closed: float = 0
 
     def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
         super().__init__(*args, parent=parent, **kwargs)
@@ -199,7 +201,12 @@ class Menu(wx.PopupTransientWindow):
 
     def popup_at(self, mouse_x: int, mouse_y: int):
         if self.IsShown():
+            logger.info('Popup menu: doing nothing, menu is already open')
             return
+        if self.was_just_closed():
+            logger.info('Popup menu: doing nothing, menu was just closed')
+            return
+        logger.info('Popup menu at %s x %s', mouse_x, mouse_y)
         self.mouse_x = mouse_x
         self.mouse_y = mouse_y
         self._position()
@@ -244,6 +251,21 @@ class Menu(wx.PopupTransientWindow):
             self.refresh()
             save_config(self.store.config)
 
-    def ProcessLeftDown(self, event):
-        logger.info('ProcessLeftDown: %s' % event.GetPosition())
-        return wx.PopupTransientWindow.ProcessLeftDown(self, event)
+    def was_just_closed(self, threshold_seconds: float = 1) -> bool:
+        """Was the menu closed less than threshold_seconds ago?
+
+        Used to fix the case on Windows, where ProcessLeftDown() is triggered
+        before popup_at(), which causes the menu to close and immediatelly
+        open again when the user clicks on the tray icon.
+        """
+        diff = time.time() - self.last_closed
+
+        # Don't leave the menu forever closed when the system time changed.
+        self.last_closed = 0
+
+        return diff < threshold_seconds
+
+    def ProcessLeftDown(self, event: wx.MouseEvent):
+        logger.info('Click outside menu')
+        self.last_closed = time.time()
+        return super().ProcessLeftDown(self, event)
