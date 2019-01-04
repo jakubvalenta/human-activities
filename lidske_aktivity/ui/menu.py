@@ -111,9 +111,9 @@ class Menu(wx.PopupTransientWindow):
                 'modified in the past 30 days.'
             ),
         ]:
-            button = wx.ToggleButton(parent=self, label=label)
+            button = wx.ToggleButton(parent=self.panel, label=label)
             button.SetValue(name == self.store.active_mode)
-            button.SetToolTip(tooltip)  # TODO: Doesn't show
+            button.SetToolTip(tooltip)
             button.Bind(
                 wx.EVT_TOGGLEBUTTON,
                 partial(self._on_radio_toggled, button=button, mode=name)
