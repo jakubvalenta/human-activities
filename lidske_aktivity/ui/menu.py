@@ -18,31 +18,39 @@ from lidske_aktivity.ui.setup import Setup
 logger = logging.getLogger(__name__)
 
 
-class Gauge(wx.Window):
+class ProgressBar(wx.BoxSizer):
+    label: wx.StaticText
+    bar: wx.Window
     color: TColor
     fraction: float = 0
     is_pulse: bool = True
     default_color: TColor = (147, 161, 161, 255)
 
-    def __init__(self, parent: wx.Window, color: TColor):
+    def __init__(self, parent: wx.Window, text: str, color: TColor):
+        super().__init__(wx.VERTICAL)
         self.color = color
-        super().__init__(parent, size=(-1, 5))
-        self.Bind(wx.EVT_PAINT, self.on_paint)
+        self.label = create_label(parent, text)
+        self.bar = wx.Window(parent, size=(-1, 5))
+        self.bar.Bind(wx.EVT_PAINT, self.on_paint)
+        self.Add(self.label, flag=wx.EXPAND | wx.BOTTOM, border=3)
+        self.Add(self.bar, flag=wx.EXPAND | wx.BOTTOM, border=5)
 
     def set_fraction(self, fraction: float, tooltip: str):
         self.is_pulse = False
         self.fraction = fraction
-        self.SetToolTip(tooltip)
-        self.Refresh()
+        self.label.SetToolTip(tooltip)
+        self.bar.SetToolTip(tooltip)
+        self.bar.Refresh()
 
     def pulse(self):
         self.is_pulse = True
-        self.SetToolTip('Calculating...')
-        self.Refresh()
+        self.label.SetToolTip('Calculating...')
+        self.bar.SetToolTip('Calculating...')
+        self.bar.Refresh()
 
     def on_paint(self, event):
-        w, h = self.GetSize()
-        dc = wx.PaintDC(self)
+        w, h = self.bar.GetSize()
+        dc = wx.PaintDC(self.bar)
         if self.is_pulse:
             set_pen(
                 dc,
@@ -65,7 +73,7 @@ class Menu(wx.PopupTransientWindow):
     border_sizer: wx.BoxSizer
     sizer: wx.BoxSizer
     radio_buttons: List[wx.RadioButton]
-    progress_bars: Dict[Path, wx.Gauge]
+    progress_bars: Dict[Path, ProgressBar]
     spinner: wx.StaticText
     mouse_x: int = 0
     mouse_y: int = 0
@@ -137,16 +145,18 @@ class Menu(wx.PopupTransientWindow):
         self.progress_bars = {}
         self.sizer.AddSpacer(10)
         for i, path in enumerate(self.store.directories.keys()):
-            label = create_label(self, self.store.get_text(path))
-            progress_bar = Gauge(parent=self, color=color_from_index(i))
+            progress_bar = ProgressBar(
+                parent=self.panel,
+                text=self.store.get_text(path),
+                color=color_from_index(i)
+            )
             fraction = self.store.fractions[path]
             if fraction is not None:
                 progress_bar.set_fraction(
                     fraction,
                     self.store.get_tooltip(path)
                 )
-            self.sizer.Add(label, flag=wx.EXPAND | wx.BOTTOM, border=3)
-            self.sizer.Add(progress_bar, flag=wx.EXPAND | wx.BOTTOM, border=5)
+            self.sizer.Add(progress_bar, flag=wx.EXPAND)
             self.progress_bars[path] = progress_bar
 
     def _init_spinner(self):
