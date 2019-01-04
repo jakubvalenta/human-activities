@@ -81,9 +81,9 @@ class Menu(wx.PopupTransientWindow):
         if self.store.directories:
             self._init_radio_buttons()
             self._init_progress_bars()
-            self._init_spinner()
         else:
             self._init_empty()
+        self._init_spinner()
         self._fit()
 
     def _init_window(self):
