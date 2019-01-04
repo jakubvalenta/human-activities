@@ -210,6 +210,11 @@ class Menu(wx.PopupTransientWindow):
         self.SetPosition((window_x, window_y))
 
     def _on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
+        logger.info(
+            'Radio toggled for mode "%s" (current active mode = "%s")',
+            mode,
+            self.store.active_mode
+        )
         if self.store.active_mode == mode:
             button.SetValue(True)
             return
