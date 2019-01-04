@@ -85,7 +85,8 @@ class Config:
 
 
 def _load_config_root_path(config_json: Any, config: Config):
-    config.root_path = Path(config_json['root_path']).expanduser()
+    if config_json['root_path']:
+        config.root_path = Path(config_json['root_path']).expanduser()
 
 
 def _load_config_test(config_json: Any, config: Config):
