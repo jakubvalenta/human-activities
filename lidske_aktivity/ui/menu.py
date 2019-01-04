@@ -71,8 +71,8 @@ class Menu(wx.PopupTransientWindow):
     mouse_y: int = 0
     last_fractions: Optional[TFractions] = None
 
-    def __init__(self, store: Store):
-        super().__init__(parent=None)
+    def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
+        super().__init__(*args, parent=parent, **kwargs)
         self.store = store
         self._init()
 
