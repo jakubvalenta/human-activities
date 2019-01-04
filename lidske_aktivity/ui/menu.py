@@ -198,6 +198,8 @@ class Menu(wx.PopupTransientWindow):
             self._fit()
 
     def popup_at(self, mouse_x: int, mouse_y: int):
+        if self.IsShown():
+            return
         self.mouse_x = mouse_x
         self.mouse_y = mouse_y
         self._position()
