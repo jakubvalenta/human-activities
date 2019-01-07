@@ -11,9 +11,10 @@ from lidske_aktivity import (
 from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import save_config
 from lidske_aktivity.store import Store, TFractions
-from lidske_aktivity.ui.lib import App, StatusIcon
+from lidske_aktivity.ui.lib import Application, StatusIcon, show_about
 from lidske_aktivity.ui.menu import Menu
 from lidske_aktivity.ui.settings import Settings
+from lidske_aktivity.ui.setup import Setup
 
 logger = logging.getLogger(__name__)
 
@@ -91,31 +92,39 @@ class Application(App):
         self.menu.popup_at(*wx.GetMousePosition())
 
     def show_setup(self):
-        setup = Setup(self.frame, self.store.config)
-        if setup.run():
-            self.store.config = setup.config
-            self.menu.refresh()
-            save_config(self.store.config)
+        Setup(
+            self.store.config,
+            on_finish=self.on_setup_finish,
+            parent=self.frame
+        )
+
+    def on_setup_finish(self, setup: Setup):
+        self.store.config = setup.config
+        self.menu.refresh()
+        save_config(self.store.config)
 
     def show_settings(self):
-        settings = Settings(self.frame, self.store.config)
-        val = settings.show()
-        if val == wx.ID_OK:
-            self.store.config = settings.config
-            self.menu.refresh()
-            save_config(self.store.config)
-        settings.Destroy()
+        Settings(
+            self.store.config,
+            self.on_settings_accept,
+            parent=self.frame
+        )
+
+    def on_settings_accept(self, settings: Settings):
+        self.store.config = settings.config
+        self.menu.refresh()
+        save_config(self.store.config)
 
     def show_about(self):
-        info = wx.adv.AboutDialogInfo()
         image = draw_pie_chart(148, list(gen_random_slices(3, 8)))
-        info.Icon = create_icon_from_image(image)
-        info.Name = __title__
-        info.Version = __version__
-        info.Copyright = __copyright__
-        info.WebSite = __uri__
-        info.Developers = __authors__
-        wx.adv.AboutBox(info)
+        show_about(
+            image=image,
+            title=__title__,
+            version=__version__,
+            copyright=__copyright__,
+            uri=__uri__,
+            authors=__authors__
+        )
 
     def _tick_start(self):
         self.tick_event_stop = Event()
@@ -142,7 +151,7 @@ class Application(App):
     def quit(self):
         logger.info('Menu quit')
         self._tick_stop()
-        self.status_icon.Destroy()
+        self.status_icon.destroy()
         self.menu.Destroy()
         self.frame.Destroy()
 
@@ -156,4 +165,4 @@ class Application(App):
 
 def run_app(store: Store, on_quit: Callable):
     app = Application(store, on_quit)
-    app.MainLoop()
+    app.run()

@@ -1,3 +1,5 @@
+from typing import Callable
+
 import wx
 
 from lidske_aktivity.config import Config
@@ -6,18 +8,21 @@ from lidske_aktivity.ui.lib import create_sizer
 
 class BaseDialog(wx.Dialog):
     title: str
+    on_accept: Callable
 
     panel: wx.Panel
     sizer: wx.Sizer
     border_sizer: wx.Sizer
 
-    def __init__(self, parent: wx.Frame):
+    def __init__(self, on_accept: Callable, parent: wx.Frame):
+        self.on_accept = on_accept
         super().__init__()
         self.Create(parent, id=-1, title=self.title)
         self.init_window()
         self.init_content()
         self.init_dialog_buttons()
         self.fit()
+        self.show()
 
     def init_window(self):
         self.border_sizer = create_sizer(self)
@@ -49,7 +54,10 @@ class BaseDialog(wx.Dialog):
 
     def show(self) -> int:
         self.Centre()
-        return self.ShowModal()
+        val = self.ShowModal()
+        if val == wx.ID_OK:
+            self.on_accept(self)
+        self.Destroy()
 
     def fit(self):
         self.border_sizer.Fit(self.panel)
@@ -60,6 +68,6 @@ class BaseDialog(wx.Dialog):
 class BaseConfigDialog(BaseDialog):
     config: Config
 
-    def __init__(self, parent: wx.Frame, config: Config):
+    def __init__(self, config: Config, *args, **kwargs):
         self.config = config
-        super().__init__(parent)
+        super().__init__(*args, **kwargs)

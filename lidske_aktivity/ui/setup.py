@@ -1,6 +1,6 @@
 from functools import partial
 from pathlib import Path
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 import wx
 import wx.adv
@@ -24,7 +24,7 @@ class Setup(wx.adv.Wizard):
     text_controls: Dict[str, wx.TextCtrl]
     named_dirs_by_name: Dict[str, Path]
 
-    def __init__(self, parent: wx.Frame, config: Config):
+    def __init__(self, config: Config, on_finish: Callable, parent: wx.Frame):
         self.config = config
         self.config.mode = MODE_NAMED
         if not self.config.named_dirs:
@@ -33,15 +33,19 @@ class Setup(wx.adv.Wizard):
             self.config.named_dirs.values(),
             self.config.named_dirs.keys(),
         ))
+        self.on_finish = on_finish
         super().__init__(parent)
         self.pages = [Page(self) for _ in range(2)]
         self.init_text(self.pages[0], self.pages[0].sizer)
         self.init_controls(self.pages[1], self.pages[1].sizer)
         wx.adv.WizardPageSimple.Chain(*self.pages)
         self.GetPageAreaSizer().Add(self.pages[0])
+        self.run()
 
     def run(self):
-        return self.RunWizard(self.pages[0])
+        val = self.RunWizard(self.pages[0])
+        if val:
+            self.on_finish(self)
 
     def init_text(self, parent: wx.Panel, sizer: wx.BoxSizer):
         add_text_heading(parent, sizer, 'Lidské aktivity setup')
