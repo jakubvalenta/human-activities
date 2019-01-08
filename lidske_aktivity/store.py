@@ -84,9 +84,9 @@ class Store:
         return self._config
 
     @config.setter
-    def config(self, value: Config):
+    def config(self, config: Config):
         logger.info('Config changed')
-        self._config = value
+        self._config = config
         if self.on_config_change:
             self.on_config_change()
 
@@ -95,7 +95,7 @@ class Store:
         return self._directories
 
     @directories.setter
-    def directories(self, value: TDirectories):
-        self._directories = value
-        self.pending = {path: True for path in value.keys()}
-        self.fractions = {path: 0 for path in value.keys()}
+    def directories(self, directories: TDirectories):
+        self._directories = directories
+        self.pending = {path: True for path in directories.keys()}
+        self.fractions = {path: 0 for path in directories.keys()}

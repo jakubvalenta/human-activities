@@ -2,15 +2,16 @@ import logging
 import time
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 import wx
 
 from lidske_aktivity.bitmap import TColor, color_from_index
+from lidske_aktivity.directories import TDirectories
 from lidske_aktivity.ui.lib import create_button, create_label, create_sizer
 
 if TYPE_CHECKING:
-    from lidske_aktivity.app import Application
+    from lidske_aktivity.app import Application, Mode  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ class ProgressBar(wx.BoxSizer):
 
 class Menu(wx.PopupTransientWindow):
     app: 'Application'
+    active_mode: str
     panel: wx.Panel
     border_sizer: wx.BoxSizer
     sizer: wx.BoxSizer
@@ -83,16 +85,20 @@ class Menu(wx.PopupTransientWindow):
     mouse_y: int = 0
     last_closed: float = 0
 
-    def __init__(self, app: 'Application', *args, **kwargs):
+    def __init__(self,
+                 app: 'Application',
+                 modes: Tuple['Mode'],
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = app
-        self._init()
+        self.modes = modes
 
-    def _init(self):
+    def init(self, active_mode: str, directories: TDirectories):
         self._init_window()
-        if self.app.directories:
+        if directories:
             self._init_radio_buttons()
-            self._init_progress_bars()
+            self.update_radio_buttons(active_mode)
+            self._init_progress_bars(directories)
         else:
             self._init_empty()
         self._init_spinner()
@@ -108,18 +114,17 @@ class Menu(wx.PopupTransientWindow):
         )
 
     def _init_radio_buttons(self):
-        self.radio_buttons = []
+        self.radio_buttons = {}
         grid = wx.GridSizer(cols=2, vgap=0, hgap=10)
-        for mode in self.app.modes:
+        for mode in self.modes:
             button = wx.ToggleButton(parent=self.panel, label=mode.label)
-            button.SetValue(mode.name == self.app.active_mode)
             button.SetToolTip(mode.tooltip)
             button.Bind(
                 wx.EVT_TOGGLEBUTTON,
                 partial(self._on_radio_toggled, button=button, mode=mode.name)
             )
             grid.Add(button)
-            self.radio_buttons.append(button)
+            self.radio_buttons[mode.name] = button
         self.sizer.Add(grid)
 
     def _init_empty(self):
@@ -133,10 +138,10 @@ class Menu(wx.PopupTransientWindow):
         )
         self.sizer.Add(button, flag=wx.EXPAND)
 
-    def _init_progress_bars(self):
+    def _init_progress_bars(self, directories: TDirectories):
         self.progress_bars = {}
         self.sizer.AddSpacer(10)
-        for i, path in enumerate(self.app.directories.keys()):
+        for i, path in enumerate(directories.keys()):
             progress_bar = ProgressBar(
                 parent=self.panel,
                 text=self.app.get_text(path),
@@ -171,9 +176,9 @@ class Menu(wx.PopupTransientWindow):
         self.spinner.Hide()
         self._fit()
 
-    def reset(self):
+    def reset(self, active_mode: str, directories: TDirectories):
         self._empty()
-        self._init()
+        self.init(active_mode, directories)
         self._position()
 
     def popup_at(self, mouse_x: int, mouse_y: int):
@@ -206,14 +211,15 @@ class Menu(wx.PopupTransientWindow):
         self.SetPosition((window_x, window_y))
 
     def _on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
-        logger.info('Radio toggled: "%s" > "%s"', self.app.active_mode, mode)
-        if self.app.active_mode == mode:
-            button.SetValue(True)
-            return
-        for other_button in self.radio_buttons:
-            if other_button != button:
-                other_button.SetValue(False)
-        self.app.active_mode = mode
+        logger.info('Radio toggled: new mode = "%s"', mode)
+        self.app.set_active_mode(mode)
+
+    def update_radio_buttons(self, active_mode: str):
+        for mode, radio_button in self.radio_buttons.items():
+            if mode == active_mode:
+                radio_button.SetValue(True)
+            else:
+                radio_button.SetValue(False)
 
     def _on_setup_button(self, event):
         self.Dismiss()

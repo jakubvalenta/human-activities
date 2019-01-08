@@ -125,28 +125,21 @@ class Application(UIApplication):
 
     def on_init(self):
         logger.info('On init')
-        self.menu = Menu(self, parent=self.frame)
+        self.menu = Menu(
+            self,
+            self.modes,
+            parent=self.frame
+        )
+        self.menu.init(self.store.active_mode, self.store.directories)
         self.status_icon = StatusIcon(self)
         if self.store.config.show_setup:
             self.store.config.show_setup = False
             self.show_setup()
         self.tick_start()
 
-    @property
-    def directories(self):
-        return self.store.directories
-
-    @property
-    def fractions(self):
-        return self.store.fractions
-
-    @property
-    def active_mode(self):
-        return self.store.active_mode
-
-    @active_mode.setter
-    def active_mode(self, mode: str):
-        self.store.active_mode = mode
+    def set_active_mode(self, active_mode: str):
+        self.store.active_mode = active_mode
+        self.menu.update_radio_buttons(active_mode)
         self.update_icon()
         self.update_menu(pulse=False)
 
@@ -157,8 +150,8 @@ class Application(UIApplication):
         return path.name
 
     def get_tooltip(self, path: Path) -> str:
-        fraction = self.fractions[path]
-        if self.active_mode == SIZE_MODE_SIZE:
+        fraction = self.store.fractions[path]
+        if self.store.active_mode == SIZE_MODE_SIZE:
             s = f'{fraction:.2%} of the size of all configured directories'
         else:
             s = (f'{fraction:.2%} of the files in this directory was modified '
@@ -273,7 +266,7 @@ class Application(UIApplication):
             self.menu.hide_spinner()
 
     def reset_menu(self):
-        self.menu.reset()
+        self.menu.reset(self.store.active_mode, self.store.directories)
 
     def quit(self):
         logger.info('Menu quit')
