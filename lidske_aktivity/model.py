@@ -137,7 +137,7 @@ class Model:
         self._init()
 
     def _init(self):
-        self._scan_stop()
+        self.scan_stop()
         self._directories = load_directories(self._config)
         self._create_ext_directories()
         self._scan_start()
@@ -152,7 +152,7 @@ class Model:
             test=self.config.test
         )
 
-    def _scan_stop(self):
+    def scan_stop(self):
         if self.scan_event_stop:
             self.scan_event_stop.set()
             self.scan_thread.join()
