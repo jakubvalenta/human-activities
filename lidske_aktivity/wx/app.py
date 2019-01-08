@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 
 import wx
 
@@ -9,18 +10,20 @@ class Application(wx.App):
     title: str
     frame: wx.Frame
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 title: str,
+                 on_init: Callable,
+                 on_quit: Callable,
+                 *args,
+                 **kwargs):
+        self.title = title
+        self.on_init = on_init
+        self.on_quit = on_quit
         super().__init__(False, *args, **kwargs)
-
-    def on_init(self):
-        raise NotImplementedError
-
-    def on_quit(self):
-        raise NotImplementedError
 
     def OnInit(self) -> bool:
         self.frame = wx.Frame(parent=None, title=self.title)
-        self.on_init()
+        self.on_init(self.frame)
         return True
 
     def quit(self):

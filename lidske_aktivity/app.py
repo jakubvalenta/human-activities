@@ -1,7 +1,7 @@
 import logging
 import time
 from threading import Event, Thread
-from typing import Optional
+from typing import Any, Optional
 
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
@@ -10,23 +10,6 @@ from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import Config
 from lidske_aktivity.model import Model, TExtDirectories
 
-if False:
-    from lidske_aktivity.wx.about import show_about
-    from lidske_aktivity.wx.app import Application as UIApplication
-    from lidske_aktivity.wx.lib import call_tick
-    from lidske_aktivity.wx.menu import Menu
-    from lidske_aktivity.wx.settings import Settings
-    from lidske_aktivity.wx.setup import Setup
-    from lidske_aktivity.wx.status_icon import StatusIcon
-else:
-    from lidske_aktivity.gtk.about import show_about
-    from lidske_aktivity.gtk.app import Application as UIApplication
-    from lidske_aktivity.gtk.lib import call_tick
-    from lidske_aktivity.gtk.menu import Menu
-    from lidske_aktivity.gtk.settings import Settings
-    from lidske_aktivity.gtk.setup import Setup
-    from lidske_aktivity.gtk.status_icon import StatusIcon
-
 logger = logging.getLogger(__name__)
 
 
@@ -34,21 +17,28 @@ class AppError(Exception):
     pass
 
 
-class Application(UIApplication):
-    title = __title__
+class Application:
     model: Model
-    status_icon: StatusIcon
+    frame: Any
+    ui_app: Any
+    status_icon: Any
     last_ext_directories: Optional[TExtDirectories] = None
 
-    def __init__(self):
+    def __init__(self, ui: Any):
         self.model = Model()
-        super().__init__()
+        self.ui = ui
+        self.ui_app = self.ui.app.Application(
+            __title__,
+            self.on_init,
+            self.on_quit
+        )
+        self.ui_app.run()
 
-    def on_init(self):
+    def on_init(self, frame: Any):
         logger.info('On init')
-        self.menu = Menu(self, parent=self.frame)
+        self.menu = self.ui.menu.Menu(self, parent=frame)
         self.menu.init(self.model.active_mode, self.model.ext_directories)
-        self.status_icon = StatusIcon(self)
+        self.status_icon = self.ui.status_icon.StatusIcon(self)
         if self.model.config.show_setup:
             self.model.config.show_setup = False
             self.show_setup()
@@ -70,22 +60,22 @@ class Application(UIApplication):
         self.menu.popup_at(mouse_x, mouse_y)
 
     def show_setup(self):
-        Setup(
+        self.ui.setup.Setup(
             self.model.config,
             on_finish=lambda setup: self.set_config(setup.config),
-            parent=self.frame
+            parent=self.ui_app.frame
         )
 
     def show_settings(self):
-        Settings(
+        self.ui.settings.Settings(
             self.model.config,
             lambda settings: self.set_config(settings.config),
-            parent=self.frame
+            parent=self.ui_app.frame
         )
 
     def show_about(self):
         image = draw_pie_chart(148, list(gen_random_slices(3, 8)))
-        show_about(
+        self.ui.about.show_about(
             image=image,
             title=__title__,
             version=__version__,
@@ -109,7 +99,7 @@ class Application(UIApplication):
     def tick(self):
         while not self.tick_event_stop.is_set():
             logger.info('Tick')
-            call_tick(self.on_tick)
+            self.ui.lib.call_tick(self.on_tick)
             time.sleep(1)
 
     def on_tick(self):
@@ -145,7 +135,7 @@ class Application(UIApplication):
 
     def quit(self):
         logger.info('Menu quit')
-        super().quit()
+        self.ui_app.quit()
         self.status_icon.destroy()
         self.menu.destroy()
 
@@ -153,8 +143,3 @@ class Application(UIApplication):
         logger.info('App on_quit')
         self.tick_stop()
         self.model.scan_stop()
-
-
-def main():
-    app = Application()
-    app.run()

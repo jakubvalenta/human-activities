@@ -8,7 +8,6 @@ from lidske_aktivity.wx.lib import create_sizer
 
 class BaseDialog(wx.Dialog):
     title: str
-    on_accept: Callable
 
     panel: wx.Panel
     sizer: wx.Sizer

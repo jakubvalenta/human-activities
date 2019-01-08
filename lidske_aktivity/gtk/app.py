@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 
 import gi
 
@@ -13,20 +14,22 @@ class Application(Gtk.Application):
     title: str
     frame = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 title: str,
+                 on_init: Callable,
+                 on_quit: Callable,
+                 *args,
+                 **kwargs):
+        self.title = title
+        self.on_init = on_init
+        self.on_quit = on_quit
         GLib.set_application_name(self.title)
         super().__init__(*args, application_id='org.example.myapp', **kwargs)
         self.window: Gtk.ApplicationWindow = None
 
-    def on_init(self):
-        raise NotImplementedError
-
-    def on_quit(self):
-        raise NotImplementedError
-
     def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
-        self.on_init()
+        self.on_init(self.frame)
 
     def do_activate(self) -> None:
         if not self.window:

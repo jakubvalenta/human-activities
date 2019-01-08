@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup run run-debug dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
+.PHONY: build install setup run run-debug run-gtk dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -31,6 +31,9 @@ run:  ## Start the app
 
 run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m lidske_aktivity --verbose
+
+run-gtk:  ## Start the app with the GTK backend and extended logging
+	pipenv run python3 -m lidske_aktivity --verbose --gtk
 
 dist-pyinstaller:  ## Build a PyInstaller-based package (without Docker)
 
