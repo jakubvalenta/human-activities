@@ -86,7 +86,7 @@ def scan_directory(path: Path,
                    callback: TScanCallback,
                    event_stop: Event,
                    test: bool = False):
-    logger.info('Calculating size %s', path)
+    logger.info('Calculating size of "%s"', path)
     thirty_days_ago = time.time() - 30 * 24 * 3600
     time_start = time.time()
     size, size_new = filesystem.calc_dir_size(
@@ -96,15 +96,12 @@ def scan_directory(path: Path,
     )
     time_duration = time.time() - time_start
     logger.info(
-        'Calculated size %s = %s (%s) in %f s',
+        'Calculated size of "%s" in %f s: %s (%s)',
         path,
+        time_duration,
         size,
-        size_new,
-        time_duration
+        size_new
     )
-    if size is None or size_new is None:
-        logger.warn('Size of %s is None, not using the result.', path)
-        return
     if test:
         for _ in range(random.randint(1, 20)):
             if event_stop.is_set():

@@ -30,9 +30,12 @@ def calc_dir_size(path: str,
                   event_stop: Event) -> Tuple[Optional[int], Optional[int]]:
     try:
         entries = os.scandir(path)
+    except FileNotFoundError:
+        logger.info('Directory not found "%s"', path)
+        return None, None
     except PermissionError:
-        logger.info('Permission error %s', path)
-        return 0, 0
+        logger.info('No permissions to read directory "%s"', path)
+        return None, None
     total_size = 0
     total_size_new = 0
     for entry in entries:
