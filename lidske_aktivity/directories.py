@@ -5,7 +5,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from threading import Event, Thread
-from typing import Callable, Dict, NamedTuple, Optional, Sequence
+from typing import Callable, Dict, Iterable, NamedTuple, Optional
 
 from lidske_aktivity.utils import filesystem, math
 
@@ -74,7 +74,7 @@ def init_directories_from_root_path(cache_path: Path,
 
 def init_directories_from_paths(
         cache_path: Path,
-        paths: Sequence[Optional[Path]] = ()) -> TDirectories:
+        paths: Iterable[Optional[Path]] = ()) -> TDirectories:
     directories = {path: Directory() for path in paths if path}
     return merge_directories(directories, read_cached_directories(cache_path))
 

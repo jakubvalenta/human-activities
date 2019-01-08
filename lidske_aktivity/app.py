@@ -9,13 +9,23 @@ from lidske_aktivity import (
 from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import Config
 from lidske_aktivity.model import Model, TExtDirectories
-from lidske_aktivity.ui.about import show_about
-from lidske_aktivity.ui.app import Application as UIApplication
-from lidske_aktivity.ui.lib import call_tick
-from lidske_aktivity.ui.menu import Menu
-from lidske_aktivity.ui.settings import Settings
-from lidske_aktivity.ui.setup import Setup
-from lidske_aktivity.ui.status_icon import StatusIcon
+
+if False:
+    from lidske_aktivity.ui.about import show_about
+    from lidske_aktivity.ui.app import Application as UIApplication
+    from lidske_aktivity.ui.lib import call_tick
+    from lidske_aktivity.ui.menu import Menu
+    from lidske_aktivity.ui.settings import Settings
+    from lidske_aktivity.ui.setup import Setup
+    from lidske_aktivity.ui.status_icon import StatusIcon
+else:
+    from lidske_aktivity.gtk.about import show_about
+    from lidske_aktivity.gtk.app import Application as UIApplication
+    from lidske_aktivity.gtk.lib import call_tick
+    from lidske_aktivity.gtk.menu import Menu
+    from lidske_aktivity.gtk.settings import Settings
+    from lidske_aktivity.gtk.setup import Setup
+    from lidske_aktivity.gtk.status_icon import StatusIcon
 
 logger = logging.getLogger(__name__)
 

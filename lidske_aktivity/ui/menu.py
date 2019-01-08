@@ -2,7 +2,7 @@ import logging
 import time
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict
 
 import wx
 
@@ -78,16 +78,14 @@ class Menu(wx.PopupTransientWindow):
     panel: wx.Panel
     border_sizer: wx.BoxSizer
     sizer: wx.BoxSizer
-    radio_buttons: List[wx.RadioButton]
+    radio_buttons: Dict[Path, wx.RadioButton]
     progress_bars: Dict[Path, ProgressBar]
     spinner: wx.StaticText
     mouse_x: int = 0
     mouse_y: int = 0
     last_closed: float = 0
 
-    def __init__(self,
-                 app: 'Application',
-                 *args, **kwargs):
+    def __init__(self, app: 'Application', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = app
 

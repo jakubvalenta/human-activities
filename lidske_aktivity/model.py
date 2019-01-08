@@ -83,7 +83,7 @@ def calc_size_new(directories: TDirectories) -> Tuple[TFractions, TFractions]:
     return fractions, percents
 
 
-def format_label(path: str, config_mode: str, named_dirs: TNamedDirs) -> str:
+def format_label(path: Path, config_mode: str, named_dirs: TNamedDirs) -> str:
     if (config_mode == MODE_NAMED and path in named_dirs):
         return named_dirs[path]
     return path.name
@@ -218,4 +218,5 @@ class Model:
         return [
             ext_directory.percent
             for ext_directory in self.ext_directories.values()
+            if ext_directory.percent
         ]
