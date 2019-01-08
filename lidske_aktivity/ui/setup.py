@@ -7,9 +7,25 @@ import wx.adv
 
 from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
 from lidske_aktivity.ui.lib import (
-    add_text_heading, add_text_list, add_text_paragraph, choose_dir,
-    create_button, create_label, create_sizer, create_text_control,
+    choose_dir, create_button, create_label, create_sizer, create_text_control,
 )
+
+
+def add_text_heading(parent: wx.Window, sizer: wx.Sizer, text: str):
+    label = create_label(parent, text)
+    sizer.Add(label, flag=wx.BOTTOM, border=10)
+
+
+def add_text_paragraph(parent: wx.Window, sizer: wx.Sizer, text: str):
+    label = create_label(parent, text)
+    sizer.Add(label, flag=wx.BOTTOM, border=5)
+
+
+def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
+    for item in items:
+        label = create_label(parent, f'\N{BULLET} {item}')
+        sizer.Add(label)
+    sizer.AddSpacer(5)
 
 
 class Page(wx.adv.WizardPageSimple):

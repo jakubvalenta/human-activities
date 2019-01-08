@@ -52,7 +52,7 @@ class BaseDialog(wx.Dialog):
             border=10
         )
 
-    def show(self) -> int:
+    def show(self):
         self.Centre()
         val = self.ShowModal()
         if val == wx.ID_OK:

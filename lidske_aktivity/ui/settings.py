@@ -25,13 +25,13 @@ class Settings(BaseConfigDialog):
     named_dirs_path_controls: List[wx.TextCtrl]
     named_dirs_list: List[Tuple[Path, str]]
 
-    def __init__(self, parent: wx.Frame, config: Config):
+    def __init__(self, config: Config, *args, **kwargs):
         self.config = config
         self.named_dirs_list = list(zip(
             self.config.named_dirs.keys(),
             self.config.named_dirs.values(),
         ))
-        super().__init__(parent, config)
+        super().__init__(config, *args, **kwargs)
 
     def init_content(self):
         self.create_mode_radios()

@@ -1,5 +1,6 @@
 import logging
 import textwrap
+import time
 from pathlib import Path
 from threading import Event, Thread
 from typing import NamedTuple, Optional
@@ -21,9 +22,13 @@ from lidske_aktivity.directories import (
 from lidske_aktivity.store import (
     SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store, TFractions,
 )
-from lidske_aktivity.ui.lib import Application, Menu, StatusIcon, show_about
+from lidske_aktivity.ui.about import show_about
+from lidske_aktivity.ui.app import Application as UIApplication
+from lidske_aktivity.ui.lib import call_tick
+from lidske_aktivity.ui.menu import Menu
 from lidske_aktivity.ui.settings import Settings
 from lidske_aktivity.ui.setup import Setup
+from lidske_aktivity.ui.status_icon import StatusIcon
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +43,7 @@ class AppError(Exception):
     pass
 
 
-class Application(Application):
+class Application(UIApplication):
     title = __title__
 
     store: Store
@@ -71,6 +76,7 @@ class Application(Application):
         )
         self.load_directories()
         self.scan_start()
+        super().__init__()
 
     def load_directories(self):
         if self.store.config.mode == MODE_HOME:
@@ -118,11 +124,13 @@ class Application(Application):
         logger.info('Scan stopped')
 
     def on_init(self):
+        logger.info('On init')
         self.menu = Menu(self, parent=self.frame)
         self.status_icon = StatusIcon(self)
         if self.store.config.show_setup:
             self.store.config.show_setup = False
             self.show_setup()
+        self.tick_start()
 
     @property
     def directories(self):
@@ -143,8 +151,9 @@ class Application(Application):
         self.update_menu(pulse=False)
 
     def get_text(self, path: Path) -> str:
-        if self.config.mode == MODE_NAMED and path in self.config.named_dirs:
-            return self.config.named_dirs[path]
+        if (self.store.config.mode == MODE_NAMED and
+                path in self.store.config.named_dirs):
+            return self.store.config.named_dirs[path]
         return path.name
 
     def get_tooltip(self, path: Path) -> str:
@@ -168,10 +177,10 @@ class Application(Application):
 
     def on_setup_finish(self, setup: Setup):
         self.store.config = setup.config
+        save_config(self.store.config)
         self.reset_menu()
         self.update_icon()
-        self.update_menu()
-        save_config(self.store.config)
+        self.update_menu(pulse=True)
 
     def show_settings(self):
         Settings(
@@ -182,10 +191,10 @@ class Application(Application):
 
     def on_settings_accept(self, settings: Settings):
         self.store.config = settings.config
+        save_config(self.store.config)
         self.reset_menu()
         self.update_icon()
-        self.update_menu()
-        save_config(self.store.config)
+        self.update_menu(pulse=True)
 
     def show_about(self):
         image = draw_pie_chart(148, list(gen_random_slices(3, 8)))
@@ -198,8 +207,31 @@ class Application(Application):
             authors=__authors__
         )
 
+    def tick_start(self):
+        self.tick_event_stop = Event()
+        self.tick_thread = Thread(target=self.tick)
+        self.tick_thread.start()
+
+    def tick_stop(self):
+        if self.tick_event_stop is not None:
+            self.tick_event_stop.set()
+        if self.tick_thread is not None:
+            self.tick_thread.join()
+        logger.info('Tick stopped')
+
+    def tick(self):
+        while not self.tick_event_stop.is_set():
+            logger.info('Tick')
+            call_tick(self.on_tick)
+            time.sleep(1)
+
+    def on_tick(self):
+        if self._should_update():
+            self.update_icon()
+            self.update_menu(pulse=True)
+
     def _should_update(self) -> bool:
-        if self.store.fractions != self.last_fractions:
+        if self.store.fractions == self.last_fractions:
             return False
         self.last_fractions = self.store.fractions
         return True
@@ -207,7 +239,7 @@ class Application(Application):
     def _create_icon_image(self) -> Image:
         slices_frac = list(self.store.percents.values())
         logger.info('Updating icon with slices %s', slices_frac)
-        return draw_pie_chart(self.status_icon.icon, slices_frac)
+        return draw_pie_chart(self.status_icon.icon_size, slices_frac)
 
     def _create_tooltip(self) -> str:
         return '\n'.join(
@@ -218,39 +250,40 @@ class Application(Application):
             for path, fraction in self.store.percents.items()
         )
 
-    def on_tick(self, pulse: bool = True):
-        if self._should_update():
-            self.update_icon()
-            self.update_menu(pulse)
-
-    def reset_menu(self):
-        self.menu.reset()
-
     def update_icon(self):
+        logger.info('Update icon')
         image = self._create_icon_image()
         tooltip = self._create_tooltip()
         self.status_icon.update(image, tooltip)
 
     def update_menu(self, pulse: bool):
+        logger.info('Update icon (pulse = %s)', pulse)
         if self.store.directories:
             for path, d in self.store.directories.items():
                 if d.size is None:
                     if pulse:
-                        self.menu.pulse_progress_bar()
+                        self.menu.pulse_progress_bar(path)
                 else:
                     self.menu.update_progress_bar(
+                        path,
                         self.store.fractions[path],
                         self.get_tooltip(path)
                     )
         if not any(self.store.pending.values()):
             self.menu.hide_spinner()
 
+    def reset_menu(self):
+        self.menu.reset()
+
     def quit(self):
+        logger.info('Menu quit')
         super().quit()
         self.status_icon.destroy()
         self.menu.destroy()
 
-    def on_exit(self):
+    def on_quit(self):
+        logger.info('App on_quit')
+        self.tick_stop()
         self.scan_stop()
 
 
