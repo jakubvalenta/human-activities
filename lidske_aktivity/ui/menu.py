@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List
 import wx
 
 from lidske_aktivity.bitmap import TColor
-from lidske_aktivity.store import SIZE_MODES, TExtDirectories
+from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 from lidske_aktivity.ui.lib import create_button, create_label, create_sizer
 
 if TYPE_CHECKING:

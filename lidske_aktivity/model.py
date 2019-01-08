@@ -113,7 +113,7 @@ def load_directories(config: Config) -> TDirectories:
     return init_func()
 
 
-class Store:
+class Model:
     _config: Config
     _directories: TDirectories
     ext_directories: TExtDirectories
