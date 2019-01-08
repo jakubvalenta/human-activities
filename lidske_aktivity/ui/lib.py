@@ -1,6 +1,7 @@
 import io
 import logging
 import time
+from functools import partial
 from pathlib import Path
 from threading import Event, Thread
 from typing import Callable, Dict, List, Optional
@@ -166,7 +167,7 @@ class ProgressBar(wx.BoxSizer):
 
 
 class Menu(wx.PopupTransientWindow):
-    store: Store
+    app: 'Application'
     panel: wx.Panel
     border_sizer: wx.BoxSizer
     sizer: wx.BoxSizer
@@ -177,14 +178,13 @@ class Menu(wx.PopupTransientWindow):
     mouse_y: int = 0
     last_closed: float = 0
 
-    def __init__(self, store: Store, parent: wx.Window, *args, **kwargs):
-        super().__init__(*args, parent=parent, **kwargs)
-        self.store = store
-        self._init()
+    def __init__(self, app: 'Application', *args, **kwargs):
+        self.app = app
+        super().__init__(*args, **kwargs)
 
-    def _init(self):
+    def init(self, app: 'Application'):
         self._init_window()
-        if self.store.directories:
+        if self.app.directories:
             self._init_radio_buttons()
             self._init_progress_bars()
         else:
@@ -204,25 +204,13 @@ class Menu(wx.PopupTransientWindow):
     def _init_radio_buttons(self):
         self.radio_buttons = []
         grid = wx.GridSizer(cols=2, vgap=0, hgap=10)
-        for name, label, tooltip in [
-            (
-                SIZE_MODE_SIZE,
-                'by size',
-                'Compares data size of the directories.'
-            ),
-            (
-                SIZE_MODE_SIZE_NEW,
-                'by activity',
-                'Shows how many percent of the files in each directory was '
-                'modified in the past 30 days.'
-            ),
-        ]:
-            button = wx.ToggleButton(parent=self.panel, label=label)
-            button.SetValue(name == self.store.active_mode)
-            button.SetToolTip(tooltip)
+        for mode in self.app.modes:
+            button = wx.ToggleButton(parent=self.panel, label=mode.label)
+            button.SetValue(mode.name == self.app.active_mode)
+            button.SetToolTip(mode.tooltip)
             button.Bind(
                 wx.EVT_TOGGLEBUTTON,
-                partial(self._on_radio_toggled, button=button, mode=name)
+                partial(self._on_radio_toggled, button=button, mode=mode.name)
             )
             grid.Add(button)
             self.radio_buttons.append(button)
@@ -242,18 +230,12 @@ class Menu(wx.PopupTransientWindow):
     def _init_progress_bars(self):
         self.progress_bars = {}
         self.sizer.AddSpacer(10)
-        for i, path in enumerate(self.store.directories.keys()):
+        for i, path in enumerate(self.app.directories.keys()):
             progress_bar = ProgressBar(
                 parent=self.panel,
-                text=self.store.get_text(path),
+                text=self.app.get_text(path),
                 color=color_from_index(i)
             )
-            fraction = self.store.fractions[path]
-            if fraction is not None:
-                progress_bar.set_fraction(
-                    fraction,
-                    self.store.get_tooltip(path)
-                )
             self.sizer.Add(progress_bar, flag=wx.EXPAND)
             self.progress_bars[path] = progress_bar
 
@@ -283,7 +265,7 @@ class Menu(wx.PopupTransientWindow):
         self.spinner.Hide()
         self._fit()
 
-    def refresh(self):
+    def reset(self):
         self._empty()
         self._init()
         self._position()
@@ -292,7 +274,7 @@ class Menu(wx.PopupTransientWindow):
         if self.IsShown():
             logger.info('Popup menu: doing nothing, menu is already open')
             return
-        if self.was_just_closed():
+        if self._was_just_closed():
             logger.info('Popup menu: doing nothing, menu was just closed')
             return
         logger.info('Popup menu at %s x %s', mouse_x, mouse_y)
@@ -318,34 +300,20 @@ class Menu(wx.PopupTransientWindow):
         self.SetPosition((window_x, window_y))
 
     def _on_radio_toggled(self, event, button: wx.ToggleButton, mode: str):
-        logger.info(
-            'Radio toggled for mode "%s" (current active mode = "%s")',
-            mode,
-            self.store.active_mode
-        )
-        if self.store.active_mode == mode:
+        logger.info('Radio toggled: "%s" > "%s"', self.app.active_mode, mode)
+        if self.app.active_mode == mode:
             button.SetValue(True)
             return
-        self.store.set_active_mode(mode)
         for other_button in self.radio_buttons:
             if other_button != button:
                 other_button.SetValue(False)
-        self.update(pulse=False)
+        self.app.active_mode = mode
 
     def _on_setup_button(self):
         self.Dismiss()
-        Setup(
-            self.config,
-            on_finish=self.on_setup_finish,
-            parent=self.frame
-        )
+        self.app.show_setup()
 
-    def on_setup_finish(self, setup: Setup):
-        self.store.config = setup.config
-        self.refresh()
-        save_config(self.store.config)
-
-    def was_just_closed(self, threshold_seconds: float = 1) -> bool:
+    def _was_just_closed(self, threshold_seconds: float = 1) -> bool:
         """Was the menu closed less than threshold_seconds ago?
 
         Used to fix the case on Windows, where ProcessLeftDown() is triggered
@@ -364,43 +332,57 @@ class Menu(wx.PopupTransientWindow):
         self.last_closed = time.time()
         return super().ProcessLeftDown(self, event)
 
+    def destroy(self):
+        self.Destroy()
+
 
 class StatusIcon(wx.adv.TaskBarIcon):
-    menu: Menu
+    app: 'Application'
     id_setup = new_id_ref_compat()
 
-    def __init__(self,
-                 on_setup: Callable,
-                 on_settings: Callable,
-                 on_about: Callable,
-                 on_quit: Callable):
+    def __init__(self, app: 'Application'):
         # TODO: Check TaskBarIcon.isAvailable()
         super().__init__(wx.adv.TBI_DOCK)
-        self.update()
-        self.menu = Menu(store=self.store, parent=self.frame)
-        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self._show_menu)
-        self.Bind(wx.EVT_MENU, lambda event: on_setup(), id=self.id_setup)
-        self.Bind(wx.EVT_MENU, lambda event: on_settings(), id=wx.ID_SETUP)
-        self.Bind(wx.EVT_MENU, lambda event: on_about(), id=wx.ID_ABOUT)
-        self.Bind(wx.EVT_MENU, lambda event: on_quit(), id=wx.ID_EXIT)
+        self.app = app
+        self.Bind(
+            wx.adv.EVT_TASKBAR_LEFT_DOWN,
+            lambda: self.app.show_menu(*wx.GetMousePosition())
+        )
+        self.Bind(
+            wx.EVT_MENU,
+            lambda event: self.app.show_setup(),
+            id=self.id_setup
+        )
+        self.Bind(
+            wx.EVT_MENU,
+            lambda event: self.app.show_settings(),
+            id=wx.ID_SETUP
+        )
+        self.Bind(
+            wx.EVT_MENU,
+            lambda event: self.app.show_about(),
+            id=wx.ID_ABOUT
+        )
+        self.Bind(
+            wx.EVT_MENU,
+            lambda event: self.app.quit(),
+            id=wx.ID_EXIT
+        )
 
     def CreatePopupMenu(self) -> wx.Menu:
-        menu = wx.Menu()
-        menu.Append(self.id_setup, '&Setup')
-        menu.Append(wx.ID_SETUP, 'Advanced &configuration')
-        menu.Append(wx.ID_ABOUT, '&About')
-        menu.Append(wx.ID_EXIT, 'E&xit')
-        return menu
+        context_menu = wx.Menu()
+        context_menu.Append(self.id_setup, '&Setup')
+        context_menu.Append(wx.ID_SETUP, 'Advanced &configuration')
+        context_menu.Append(wx.ID_ABOUT, '&About')
+        context_menu.Append(wx.ID_EXIT, 'E&xit')
+        return context_menu
 
-    def _show_menu(self):
-        self.menu.popup_at(*wx.GetMousePosition())
-
-    def update_icon(self, image: Image, tooltip: str):
+    def update(self, image: Image, tooltip: str):
         icon = create_icon_from_image(image)
         self.SetIcon(icon, tooltip)
 
-    @staticmethod
-    def calc_icon_size() -> int:
+    @property
+    def icon_size(self) -> int:
         if 'wxMSW' in wx.PlatformInfo:
             return 16
         if 'wxGTK' in wx.PlatformInfo:
@@ -409,7 +391,6 @@ class StatusIcon(wx.adv.TaskBarIcon):
 
     def destroy(self):
         self.Destroy()
-        self.menu.Destroy()
 
 
 class Application(wx.App):

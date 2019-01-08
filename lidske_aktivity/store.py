@@ -1,9 +1,8 @@
 import logging
-import textwrap
 from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple
 
-from lidske_aktivity.config import MODE_NAMED, Config
+from lidske_aktivity.config import Config
 from lidske_aktivity.directories import Directory, TDirectories
 from lidske_aktivity.utils import math
 
@@ -50,7 +49,7 @@ class Store:
     pending: TPending
     fractions: TFractions
     percents: TFractions
-    active_mode: str = SIZE_MODE_SIZE
+    _active_mode: str = SIZE_MODE_SIZE
     on_config_change: Optional[Callable] = None
 
     def __init__(self, config: Config, on_config_change: Callable):
@@ -71,8 +70,13 @@ class Store:
         self.pending[path] = False
         self.calc_fractions()
 
-    def set_active_mode(self, mode: str):
-        self.active_mode = mode
+    @property
+    def active_mode(self):
+        return self._active_mode
+
+    @active_mode.setter
+    def active_mode(self, mode: str):
+        self._active_mode = mode
         self.calc_fractions()
 
     @property
@@ -95,17 +99,3 @@ class Store:
         self._directories = value
         self.pending = {path: True for path in value.keys()}
         self.fractions = {path: 0 for path in value.keys()}
-
-    def get_text(self, path: Path) -> str:
-        if self.config.mode == MODE_NAMED and path in self.config.named_dirs:
-            return self.config.named_dirs[path]
-        return path.name
-
-    def get_tooltip(self, path: Path) -> str:
-        fraction = self.fractions[path]
-        if self.active_mode == SIZE_MODE_SIZE:
-            s = f'{fraction:.2%} of the size of all configured directories'
-        else:
-            s = (f'{fraction:.2%} of the files in this directory was modified '
-                 'in the past 30 days')
-        return textwrap.fill(s)

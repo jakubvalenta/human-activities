@@ -1,7 +1,8 @@
 import logging
+import textwrap
 from pathlib import Path
 from threading import Event, Thread
-from typing import Optional
+from typing import NamedTuple, Optional
 
 from PIL import Image
 
@@ -17,12 +18,20 @@ from lidske_aktivity.directories import (
     init_directories_from_paths, init_directories_from_root_path,
     scan_directories,
 )
-from lidske_aktivity.store import Store, TFractions
-from lidske_aktivity.ui.lib import Application, StatusIcon, show_about
+from lidske_aktivity.store import (
+    SIZE_MODE_SIZE, SIZE_MODE_SIZE_NEW, Store, TFractions,
+)
+from lidske_aktivity.ui.lib import Application, Menu, StatusIcon, show_about
 from lidske_aktivity.ui.settings import Settings
 from lidske_aktivity.ui.setup import Setup
 
 logger = logging.getLogger(__name__)
+
+
+class Mode(NamedTuple):
+    name: str
+    label: str
+    tooltip: str
 
 
 class AppError(Exception):
@@ -39,6 +48,20 @@ class Application(Application):
     status_icon: StatusIcon
     last_percents: Optional[TFractions] = None
     last_fractions: Optional[TFractions] = None
+
+    modes = (
+        Mode(
+            name=SIZE_MODE_SIZE,
+            label='by size',
+            tooltip='Compares data size of the directories.'
+        ),
+        Mode(
+            name=SIZE_MODE_SIZE_NEW,
+            label='by activity',
+            tooltip=('Shows how many percent of the files in each directory '
+                     'was modified in the past 30 days.')
+        ),
+    )
 
     def __init__(self):
         config = load_config()
@@ -95,15 +118,46 @@ class Application(Application):
         logger.info('Scan stopped')
 
     def on_init(self):
-        self.status_icon = StatusIcon(
-            on_setup=self.show_setup,
-            on_settings=self.show_settings,
-            on_about=self.show_about,
-            on_quit=self.quit
-        )
+        self.menu = Menu(self, parent=self.frame)
+        self.status_icon = StatusIcon(self)
         if self.store.config.show_setup:
             self.store.config.show_setup = False
             self.show_setup()
+
+    @property
+    def directories(self):
+        return self.store.directories
+
+    @property
+    def fractions(self):
+        return self.store.fractions
+
+    @property
+    def active_mode(self):
+        return self.store.active_mode
+
+    @active_mode.setter
+    def active_mode(self, mode: str):
+        self.store.active_mode = mode
+        self.update_icon()
+        self.update_menu(pulse=False)
+
+    def get_text(self, path: Path) -> str:
+        if self.config.mode == MODE_NAMED and path in self.config.named_dirs:
+            return self.config.named_dirs[path]
+        return path.name
+
+    def get_tooltip(self, path: Path) -> str:
+        fraction = self.fractions[path]
+        if self.active_mode == SIZE_MODE_SIZE:
+            s = f'{fraction:.2%} of the size of all configured directories'
+        else:
+            s = (f'{fraction:.2%} of the files in this directory was modified '
+                 'in the past 30 days')
+        return textwrap.fill(s)
+
+    def show_menu(self, mouse_x: int, mouse_y: int):
+        self.menu.popup_at(mouse_x, mouse_y)
 
     def show_setup(self):
         Setup(
@@ -114,7 +168,9 @@ class Application(Application):
 
     def on_setup_finish(self, setup: Setup):
         self.store.config = setup.config
-        self.status_icon.refresh_menu()
+        self.reset_menu()
+        self.update_icon()
+        self.update_menu()
         save_config(self.store.config)
 
     def show_settings(self):
@@ -126,7 +182,9 @@ class Application(Application):
 
     def on_settings_accept(self, settings: Settings):
         self.store.config = settings.config
-        self.status_icon.refresh_menu()
+        self.reset_menu()
+        self.update_icon()
+        self.update_menu()
         save_config(self.store.config)
 
     def show_about(self):
@@ -149,12 +207,12 @@ class Application(Application):
     def _create_icon_image(self) -> Image:
         slices_frac = list(self.store.percents.values())
         logger.info('Updating icon with slices %s', slices_frac)
-        return draw_pie_chart(self.calc_icon_size(), slices_frac)
+        return draw_pie_chart(self.status_icon.icon, slices_frac)
 
     def _create_tooltip(self) -> str:
         return '\n'.join(
             '{text}: {fraction:.2%}'.format(
-                text=self.store.get_text(path),
+                text=self.get_text(path),
                 fraction=fraction
             )
             for path, fraction in self.store.percents.items()
@@ -162,12 +220,18 @@ class Application(Application):
 
     def on_tick(self, pulse: bool = True):
         if self._should_update():
-            image = self._create_icon_image()
-            tooltip = self._create_tooltip()
-            self.update_icon(image, tooltip)
-            self.update_menu(pulse=pulse)
+            self.update_icon()
+            self.update_menu(pulse)
 
-    def update_menu(self, pulse: bool = False):
+    def reset_menu(self):
+        self.menu.reset()
+
+    def update_icon(self):
+        image = self._create_icon_image()
+        tooltip = self._create_tooltip()
+        self.status_icon.update(image, tooltip)
+
+    def update_menu(self, pulse: bool):
         if self.store.directories:
             for path, d in self.store.directories.items():
                 if d.size is None:
@@ -176,17 +240,15 @@ class Application(Application):
                 else:
                     self.menu.update_progress_bar(
                         self.store.fractions[path],
-                        self.store.get_tooltip(path)
+                        self.get_tooltip(path)
                     )
         if not any(self.store.pending.values()):
             self.menu.hide_spinner()
 
-    def refresh_menu(self):
-        self.menu.refresh()
-
     def quit(self):
         super().quit()
         self.status_icon.destroy()
+        self.menu.destroy()
 
     def on_exit(self):
         self.scan_stop()
