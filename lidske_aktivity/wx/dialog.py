@@ -3,7 +3,7 @@ from typing import Callable
 import wx
 
 from lidske_aktivity.config import Config
-from lidske_aktivity.ui.lib import create_sizer
+from lidske_aktivity.wx.lib import create_sizer
 
 
 class BaseDialog(wx.Dialog):

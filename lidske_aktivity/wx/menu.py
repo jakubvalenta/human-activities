@@ -8,7 +8,7 @@ import wx
 
 from lidske_aktivity.bitmap import TColor
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
-from lidske_aktivity.ui.lib import create_button, create_label, create_sizer
+from lidske_aktivity.wx.lib import create_button, create_label, create_sizer
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application

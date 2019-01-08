@@ -7,8 +7,8 @@ import wx
 from lidske_aktivity.config import (
     MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES, Config,
 )
-from lidske_aktivity.ui.dialog import BaseConfigDialog
-from lidske_aktivity.ui.lib import (
+from lidske_aktivity.wx.dialog import BaseConfigDialog
+from lidske_aktivity.wx.lib import (
     choose_dir, create_button, create_label, create_sizer, create_text_control,
 )
 

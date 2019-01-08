@@ -3,7 +3,7 @@ from typing import List
 import wx.adv
 from PIL import Image
 
-from lidske_aktivity.ui.lib import create_icon_from_image
+from lidske_aktivity.wx.lib import create_icon_from_image
 
 
 def show_about(image: Image,

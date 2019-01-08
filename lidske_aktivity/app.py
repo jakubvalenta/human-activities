@@ -11,13 +11,13 @@ from lidske_aktivity.config import Config
 from lidske_aktivity.model import Model, TExtDirectories
 
 if False:
-    from lidske_aktivity.ui.about import show_about
-    from lidske_aktivity.ui.app import Application as UIApplication
-    from lidske_aktivity.ui.lib import call_tick
-    from lidske_aktivity.ui.menu import Menu
-    from lidske_aktivity.ui.settings import Settings
-    from lidske_aktivity.ui.setup import Setup
-    from lidske_aktivity.ui.status_icon import StatusIcon
+    from lidske_aktivity.wx.about import show_about
+    from lidske_aktivity.wx.app import Application as UIApplication
+    from lidske_aktivity.wx.lib import call_tick
+    from lidske_aktivity.wx.menu import Menu
+    from lidske_aktivity.wx.settings import Settings
+    from lidske_aktivity.wx.setup import Setup
+    from lidske_aktivity.wx.status_icon import StatusIcon
 else:
     from lidske_aktivity.gtk.about import show_about
     from lidske_aktivity.gtk.app import Application as UIApplication

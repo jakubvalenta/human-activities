@@ -4,7 +4,7 @@ import wx
 import wx.adv
 from PIL import Image
 
-from lidske_aktivity.ui.lib import create_icon_from_image, new_id_ref_compat
+from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
