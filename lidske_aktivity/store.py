@@ -1,18 +1,64 @@
 import logging
+import textwrap
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple
+from threading import Event, Thread
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
-from lidske_aktivity.config import Config
-from lidske_aktivity.directories import Directory, TDirectories
+from lidske_aktivity.bitmap import TColor, color_from_index
+from lidske_aktivity.config import (
+    CACHE_PATH, MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, Config,
+    TNamedDirs, load_config, save_config,
+)
+from lidske_aktivity.directories import (
+    Directory, TDirectories, init_directories_from_paths,
+    init_directories_from_root_path, scan_directories,
+)
 from lidske_aktivity.utils import math
 
 logger = logging.getLogger(__name__)
 
-TPending = Dict[Path, bool]
+
+class SizeMode(NamedTuple):
+    name: str
+    label: str
+    tooltip: str
+
+
+class ExtDirectory(NamedTuple):
+    label: str
+    color: TColor
+    fraction: Optional[float] = 0
+    percent: Optional[float] = 0
+    pending: bool = True
+    tooltip: str = ''
+
+
+TExtDirectories = Dict[Path, ExtDirectory]
 TFractions = Dict[Path, float]
 
 SIZE_MODE_SIZE = 'size'
 SIZE_MODE_SIZE_NEW = 'size_new'
+SIZE_MODES = (
+    SizeMode(
+        name=SIZE_MODE_SIZE,
+        label='by size',
+        tooltip='Compares data size of the directories.'
+    ),
+    SizeMode(
+        name=SIZE_MODE_SIZE_NEW,
+        label='by activity',
+        tooltip=('Shows how many percent of the files in each directory '
+                 'was modified in the past 30 days.')
+    ),
+)
+
+TOOLTIPS = {
+    SIZE_MODE_SIZE: '{:.2%} of the size of all configured directories',
+    SIZE_MODE_SIZE_NEW: (
+        '{:.2%} of the files in this directory was modified in the past 30'
+        'days'
+    )
+}
 
 
 def calc_size(directories: TDirectories) -> Tuple[TFractions, TFractions]:
@@ -37,38 +83,109 @@ def calc_size_new(directories: TDirectories) -> Tuple[TFractions, TFractions]:
     return fractions, percents
 
 
-CALC = {
-    SIZE_MODE_SIZE: calc_size,
-    SIZE_MODE_SIZE_NEW: calc_size_new,
-}
+def format_label(path: str, config_mode: str, named_dirs: TNamedDirs) -> str:
+    if (config_mode == MODE_NAMED and path in named_dirs):
+        return named_dirs[path]
+    return path.name
+
+
+def format_tooltip(fraction: float, active_mode: str):
+    s = TOOLTIPS[active_mode].format(fraction)
+    return textwrap.fill(s)
+
+
+def load_directories(config: Config) -> TDirectories:
+    init_funcs = {
+        MODE_HOME: lambda: init_directories_from_root_path(
+            CACHE_PATH, Path.home()
+        ),
+        MODE_PATH: lambda: init_directories_from_root_path(
+            CACHE_PATH, config.root_path
+        ),
+        MODE_CUSTOM: lambda: init_directories_from_paths(
+            CACHE_PATH, config.custom_dirs
+        ),
+        MODE_NAMED: lambda: init_directories_from_paths(
+            CACHE_PATH, config.named_dirs.keys()
+        )
+    }
+    init_func = init_funcs[config.mode]
+    return init_func()
 
 
 class Store:
     _config: Config
     _directories: TDirectories
-    pending: TPending
-    fractions: TFractions
-    percents: TFractions
+    ext_directories: TExtDirectories
     _active_mode: str = SIZE_MODE_SIZE
-    on_config_change: Optional[Callable] = None
 
-    def __init__(self, config: Config, on_config_change: Callable):
+    scan_event_stop: Optional[Event] = None
+    scan_thread: Thread
+    last_percents: Optional[TFractions] = None
+
+    def __init__(self):
+        self.config = load_config()
+
+    @property
+    def config(self) -> Config:
+        return self._config
+
+    @config.setter
+    def config(self, config: Config):
         self._config = config
-        self._directories = {}
-        self.pending = {}
-        self.fractions = {}
-        self.percents = {}
-        self.on_config_change = on_config_change
+        save_config(config)
+        self._init()
 
-    def calc_fractions(self):
-        self.fractions, self.percents = CALC[self.active_mode](
-            self.directories
+    def _init(self):
+        self._scan_stop()
+        self._directories = load_directories(self._config)
+        self._create_ext_directories()
+        self._scan_start()
+
+    def _scan_start(self):
+        self.scan_event_stop = Event()
+        self.scan_thread = scan_directories(
+            self._directories,
+            cache_path=CACHE_PATH,
+            callback=self._update_directory,
+            event_stop=self.scan_event_stop,
+            test=self.config.test
         )
 
-    def update(self, path: Path, directory: Directory):
-        self.directories[path] = directory
-        self.pending[path] = False
-        self.calc_fractions()
+    def _scan_stop(self):
+        if self.scan_event_stop:
+            self.scan_event_stop.set()
+            self.scan_thread.join()
+            logger.info('Scan stopped')
+
+    def _create_ext_directories(self):
+        self.ext_directories = {
+            path: ExtDirectory(
+                label=format_label(
+                    path,
+                    self.config.mode,
+                    self.config.named_dirs
+                ),
+                color=color_from_index(i)
+            )
+            for i, (path, directory) in enumerate(self._directories.items())
+        }
+
+    def _update_ext_directories(self):
+        calc_funcs = {
+            SIZE_MODE_SIZE: calc_size,
+            SIZE_MODE_SIZE_NEW: calc_size_new,
+        }
+        calc_func = calc_funcs[self.active_mode]
+        fractions, percents = calc_func(self._directories)
+        self.ext_directories = {
+            path: ext_directory._replace(
+                fraction=fractions[path],
+                percent=percents[path],
+                tooltip=format_tooltip(fractions[path], self.active_mode),
+            )
+            for path, ext_directory in self.ext_directories.items()
+        }
 
     @property
     def active_mode(self):
@@ -77,25 +194,28 @@ class Store:
     @active_mode.setter
     def active_mode(self, mode: str):
         self._active_mode = mode
-        self.calc_fractions()
+        self._update_ext_directories()
+
+    def _update_directory(self, path: Path, directory: Directory):
+        self._directories[path] = self._directories[path]._replace(
+            size=directory.size,
+            size_new=directory.size_new,
+        )
+        self._update_ext_directories()
+        self.ext_directories[path] = self.ext_directories[path]._replace(
+            pending=False
+        )
 
     @property
-    def config(self) -> Config:
-        return self._config
-
-    @config.setter
-    def config(self, config: Config):
-        logger.info('Config changed')
-        self._config = config
-        if self.on_config_change:
-            self.on_config_change()
+    def tooltip(self):
+        return '\n'.join(
+            f'{ext_directory.label}: {ext_directory.fraction:.2%}'
+            for ext_directory in self.ext_directories.values()
+        )
 
     @property
-    def directories(self) -> TDirectories:
-        return self._directories
-
-    @directories.setter
-    def directories(self, directories: TDirectories):
-        self._directories = directories
-        self.pending = {path: True for path in directories.keys()}
-        self.fractions = {path: 0 for path in directories.keys()}
+    def percents(self) -> List[float]:
+        return [
+            ext_directory.percent
+            for ext_directory in self.ext_directories.values()
+        ]

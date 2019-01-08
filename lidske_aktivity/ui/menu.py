@@ -2,16 +2,16 @@ import logging
 import time
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List
 
 import wx
 
-from lidske_aktivity.bitmap import TColor, color_from_index
-from lidske_aktivity.directories import TDirectories
+from lidske_aktivity.bitmap import TColor
+from lidske_aktivity.store import SIZE_MODES, TExtDirectories
 from lidske_aktivity.ui.lib import create_button, create_label, create_sizer
 
 if TYPE_CHECKING:
-    from lidske_aktivity.app import Application, Mode  # noqa: F401
+    from lidske_aktivity.app import Application
 
 logger = logging.getLogger(__name__)
 
@@ -87,18 +87,16 @@ class Menu(wx.PopupTransientWindow):
 
     def __init__(self,
                  app: 'Application',
-                 modes: Tuple['Mode'],
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = app
-        self.modes = modes
 
-    def init(self, active_mode: str, directories: TDirectories):
+    def init(self, active_mode: str, ext_directories: TExtDirectories):
         self._init_window()
-        if directories:
+        if ext_directories:
             self._init_radio_buttons()
             self.update_radio_buttons(active_mode)
-            self._init_progress_bars(directories)
+            self._init_progress_bars(ext_directories)
         else:
             self._init_empty()
         self._init_spinner()
@@ -116,7 +114,7 @@ class Menu(wx.PopupTransientWindow):
     def _init_radio_buttons(self):
         self.radio_buttons = {}
         grid = wx.GridSizer(cols=2, vgap=0, hgap=10)
-        for mode in self.modes:
+        for mode in SIZE_MODES:
             button = wx.ToggleButton(parent=self.panel, label=mode.label)
             button.SetToolTip(mode.tooltip)
             button.Bind(
@@ -138,14 +136,14 @@ class Menu(wx.PopupTransientWindow):
         )
         self.sizer.Add(button, flag=wx.EXPAND)
 
-    def _init_progress_bars(self, directories: TDirectories):
+    def _init_progress_bars(self, ext_directories: TExtDirectories):
         self.progress_bars = {}
         self.sizer.AddSpacer(10)
-        for i, path in enumerate(directories.keys()):
+        for i, (path, ext_directory) in enumerate(ext_directories.items()):
             progress_bar = ProgressBar(
                 parent=self.panel,
-                text=self.app.get_text(path),
-                color=color_from_index(i)
+                text=ext_directory.label,
+                color=ext_directory.color
             )
             self.sizer.Add(progress_bar, flag=wx.EXPAND)
             self.progress_bars[path] = progress_bar
@@ -176,9 +174,9 @@ class Menu(wx.PopupTransientWindow):
         self.spinner.Hide()
         self._fit()
 
-    def reset(self, active_mode: str, directories: TDirectories):
+    def reset(self, active_mode: str, ext_directories: TExtDirectories):
         self._empty()
-        self.init(active_mode, directories)
+        self.init(active_mode, ext_directories)
         self._position()
 
     def popup_at(self, mouse_x: int, mouse_y: int):

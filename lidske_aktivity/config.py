@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 PACKAGE_NAME = 'lidske-aktivity'
 PACKAGE_ID = 'com.example.lidske-aktivity'
 
+TNamedDirs = Dict[Path, str]
+
 
 def get_dir(mac_dir: str,
             xdg_var: str,
@@ -49,7 +51,7 @@ MODES = {
     MODE_CUSTOM: 'Custom directories',
     MODE_NAMED: 'Predefined directories',
 }
-DEFAULT_NAMED_DIRS: Dict[Path, str] = {
+DEFAULT_NAMED_DIRS: TNamedDirs = {
     Path('~/Paid work').expanduser(): 'Honorovaná práce',
     Path('~/Unpaid work').expanduser(): 'Nehonorovaná práce',
     Path('~/Free time').expanduser(): 'Volný čas',
