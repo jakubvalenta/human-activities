@@ -103,7 +103,7 @@ class Application:
         if self.model.ext_directories != self.last_ext_directories:
             self.last_ext_directories = self.model.ext_directories
             self.update_icon()
-            self.update_menu()
+        self.update_menu()  # Always update to keep GTK pulsing.
 
     def update_icon(self):
         logger.info('Updating icon with slices %s', self.model.percents)
