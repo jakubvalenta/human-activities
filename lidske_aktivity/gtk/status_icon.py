@@ -75,13 +75,13 @@ class StatusIcon():
             filename=__application_name__ + '.svg',
             prefix=__application_id__ + '-',
         )
+        self._indicator.set_icon_full(__application_name__, tooltip)
         self._indicator.set_icon_theme_path(self.icon_temp_dir.name)
         logger.info(
             'Set icon %s/%s',
             self._indicator.get_icon_theme_path(),
             self._indicator.get_icon()
         )
-        self._indicator.set_label(tooltip, tooltip)
 
     def destroy(self):
         self._indicator.show(False)
