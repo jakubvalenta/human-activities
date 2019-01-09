@@ -97,7 +97,7 @@ install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install buil
 	sudo apt-get install -f --yes
 
 data/lidske-aktivity.svg:
-	cd data && python3 draw_svg_icon.py > lidske-aktivity.svg
+	pipenv run python3 -m lidske_aktivity.bitmap > data/lidske-aktivity.svg
 
 data/lidske-aktivity.png: data/lidske-aktivity.svg
 	cd data && rsvg-convert -w 48 -h 48 \

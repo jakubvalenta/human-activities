@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import math
 import random
+import sys
 from functools import partial
 from hashlib import sha1
 from typing import Callable, Iterator, List, Tuple
@@ -83,8 +86,8 @@ def _pie_chart_shader(x: int,
         angle = 2*math.pi + angle
     if distance > radius:
         return background_color
-    for slice_begin, slice_end, color in slices_rad:
-        if slice_begin <= angle < slice_end:
+    for slice_start, slice_end, color in slices_rad:
+        if slice_start <= angle < slice_end:
             return color
     return default_color
 
@@ -121,9 +124,29 @@ def draw_pie_chart(size: int, slices_frac: List[TSliceFrac]) -> Image:
     )
 
 
-def gen_random_slices(n_min: int, n_max: int) -> Iterator[TSliceFrac]:
+def draw_pie_chart_svg(slices_frac: List[TSliceFrac]) -> Iterator[str]:
+    slices_rad = _slices_frac_to_rad(slices_frac)
+    yield '''<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-1 -1 2 2">\n'''
+    for slice_start, slice_end, (r, g, b, a) in slices_rad:
+        start_x, start_y = math.cos(slice_start), math.sin(slice_start)
+        end_x, end_y = math.cos(slice_end), math.sin(slice_end)
+        large_arc_flag = int(slice_end - slice_start > math.pi)
+        yield (f'<path d="M {start_x:.5f} {start_y:.5f} '
+               f'A 1 1 0 {large_arc_flag} 1 {end_x:.5f} {end_y:.5f} L 0 0" '
+               f'fill="rgb({r}, {g}, {b})" />\n')
+    yield '</svg>\n'
+
+
+def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[TSliceFrac]:
     total = 0.0
     while total <= 1:
         frac = 1 / random.randint(n_min, n_max)
         total += frac
         yield frac
+
+
+if __name__ == '__main__':
+    slices_frac = [0.35, 0.25, 0.20, 0.15, 0.05]
+    svg = draw_pie_chart_svg(slices_frac)
+    sys.stdout.writelines(svg)
