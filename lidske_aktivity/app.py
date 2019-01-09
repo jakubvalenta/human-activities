@@ -6,7 +6,6 @@ from typing import Any, Optional
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
-from lidske_aktivity.bitmap import gen_random_slices
 from lidske_aktivity.config import Config
 from lidske_aktivity.model import Model, TExtDirectories
 
@@ -41,6 +40,8 @@ class Application:
         self.tick_start()
 
     def set_active_mode(self, active_mode: str):
+        if self.model.active_mode == active_mode:
+            return
         self.model.active_mode = active_mode
         self.menu.update_radio_buttons(active_mode)
         self.update_icon()
