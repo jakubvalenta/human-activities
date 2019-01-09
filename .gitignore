@@ -2,6 +2,7 @@
 .pytest_cache
 .tox
 __pycache__
+bak
 build
 dist
 install/arch_linux

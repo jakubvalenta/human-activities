@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup run run-debug run-gtk dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version help
+.PHONY: build install setup run run-debug run-gtk dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -127,7 +127,7 @@ lint-data:
 check:  ## Test installed app
 	python3 -m pytest lidske_aktivity/tests
 
-bump-version:
+bump-version:  ## Increase application version (automatically change code)
 ifeq (,$(version))
 	@echo "You must set the variable 'version'."
 	@exit 1
@@ -138,6 +138,11 @@ endif
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
 		lidske_aktivity_debian dch -v "${version}-${_pkgrel}" "New version"
+
+backup:  ## Backup built packages (currently Debian-only)
+	timestamp=$$(date +%s) && \
+	mkdir -p "bak/$$timestamp" && \
+	cp "${_debian_dist_parent}/${_debian_pkg_filename}" "bak/$$timestamp"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
