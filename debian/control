@@ -15,8 +15,8 @@ Vcs-Browser: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
 
 Package: lidske-aktivity
 Architecture: all
-Depends: python3-wxgtk4.0,
-         python3-pil,
+Depends: python3-pil,
+         gir1.2-appindicator3-0.1,
          ${python3:Depends},
          ${misc:Depends}
 Description: Lidské aktivity
