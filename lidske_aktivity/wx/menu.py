@@ -49,8 +49,8 @@ class ProgressBar(wx.BoxSizer):
 
     def pulse(self):
         self.is_pulse = True
-        self.label.SetToolTip('Calculating...')
-        self.bar.SetToolTip('Calculating...')
+        self.label.SetToolTip('calculating...')
+        self.bar.SetToolTip('calculating...')
         self.bar.Refresh()
 
     def on_paint(self, event):
@@ -212,10 +212,7 @@ class Menu(wx.PopupTransientWindow):
 
     def update_radio_buttons(self, active_mode: str):
         for mode, radio_button in self.radio_buttons.items():
-            if mode == active_mode:
-                radio_button.SetValue(True)
-            else:
-                radio_button.SetValue(False)
+            radio_button.SetValue(mode == active_mode)
 
     def _on_setup_button(self, event):
         self.Dismiss()
