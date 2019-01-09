@@ -27,11 +27,7 @@ class Application:
     def __init__(self, ui: Any):
         self.model = Model()
         self.ui = ui
-        self.ui_app = self.ui.app.Application(
-            __title__,
-            self.on_init,
-            self.on_quit
-        )
+        self.ui_app = self.ui.app.Application(self.on_init, self.on_quit)
         self.ui_app.run()
 
     def on_init(self, frame: Any):

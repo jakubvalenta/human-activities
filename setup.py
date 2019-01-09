@@ -3,12 +3,12 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 from lidske_aktivity import (
-    __author_email__, __authors__, __license__, __summary__, __uri__,
-    __version__,
+    __application_name__, __author_email__, __authors__, __license__,
+    __summary__, __uri__, __version__,
 )
 
 setup(
-    name='lidske-aktivity',
+    name=__application_name__,
     version=__version__,
     description=__summary__,
     long_description=(Path(__file__).parent / 'README.md').read_text(),
@@ -26,14 +26,15 @@ setup(
     ],
     packages=find_packages(),
     data_files=[
-        ('share/applications', ['data/lidske-aktivity.desktop']),
-        ('etc/xdg/autostart', ['data/lidske-aktivity.desktop']),
-        ('share/icons/hicolor/scalable/apps', ['data/lidske-aktivity.svg']),
-        ('share/pixmaps', ['data/lidske-aktivity.png']),
+        ('share/applications', [f'data/{__application_name__}.desktop']),
+        ('etc/xdg/autostart', [f'data/{__application_name__}.desktop']),
+        ('share/icons/hicolor/scalable/apps',
+         [f'data/{__application_name__}.svg']),
+        ('share/pixmaps', [f'data/{__application_name__}.png']),
     ],
     entry_points={
         'console_scripts': [
-            'lidske-aktivity=lidske_aktivity.cli:main',
+            '{__application_name__}=lidske_aktivity.cli:main',
         ],
     },
 )

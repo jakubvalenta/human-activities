@@ -5,10 +5,9 @@ import platform
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, List, Optional, Union
 
-logger = logging.getLogger(__name__)
+from lidske_aktivity import __application_id__, __application_name__
 
-PACKAGE_NAME = 'lidske-aktivity'
-PACKAGE_ID = 'com.example.lidske-aktivity'
+logger = logging.getLogger(__name__)
 
 TNamedDirs = Dict[Path, str]
 
@@ -19,14 +18,14 @@ def get_dir(mac_dir: str,
     if platform.win32_ver()[0]:
         win_app_dir = os.environ.get('APPDATA')
         if win_app_dir:
-            return PureWindowsPath(win_app_dir) / PACKAGE_NAME
+            return PureWindowsPath(win_app_dir) / __application_name__
     elif platform.mac_ver()[0]:
-        return Path.home() / mac_dir / PACKAGE_ID
+        return Path.home() / mac_dir / __application_id__
     else:
         xdg_cache_dir = os.environ.get(xdg_var)
         if xdg_cache_dir:
-            return PurePosixPath(xdg_cache_dir) / PACKAGE_NAME
-    return Path.home() / fallback_dir / PACKAGE_NAME
+            return PurePosixPath(xdg_cache_dir) / __application_name__
+    return Path.home() / fallback_dir / __application_name__
 
 
 def get_cache_dir():

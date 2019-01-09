@@ -1,3 +1,6 @@
+__application_id__ = 'cz.jakubvalenta.lidske-aktivity'
+__application_name__ = 'lidske-aktivity'
+
 __title__ = 'Lidské aktivity'
 __version__ = '0.1.3'
 
