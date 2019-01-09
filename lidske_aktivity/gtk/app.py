@@ -28,3 +28,8 @@ class Application(Gtk.Application):
     def do_activate(self):
         if not self.frame:
             self.frame = Gtk.ApplicationWindow(application=self)
+
+    def quit(self):
+        logger.info('App quit')
+        self.on_quit()
+        super().quit()
