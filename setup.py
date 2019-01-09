@@ -34,7 +34,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            '{__application_name__}=lidske_aktivity.cli:main',
+            f'{__application_name__}=lidske_aktivity.cli:main',
         ],
     },
 )
