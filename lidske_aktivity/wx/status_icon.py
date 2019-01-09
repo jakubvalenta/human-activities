@@ -15,7 +15,6 @@ class StatusIcon(wx.adv.TaskBarIcon):
     id_setup = new_id_ref_compat()
 
     def __init__(self, app: 'Application'):
-        # TODO: Check TaskBarIcon.isAvailable()
         super().__init__(wx.adv.TBI_DOCK)
         self.app = app
         self.Bind(

@@ -10,9 +10,6 @@ import gi
 from lidske_aktivity import __application_id__, __application_name__
 from lidske_aktivity.bitmap import draw_pie_chart_svg
 
-logger = logging.getLogger(__name__)
-
-
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
 
@@ -20,6 +17,8 @@ from gi.repository import AppIndicator3, Gtk  # noqa:E402  # isort:skip
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
+
+logger = logging.getLogger(__name__)
 
 
 def create_menu_item(menu: Gtk.Menu,
