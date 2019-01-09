@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import wx
 import wx.adv
-from PIL import Image
 
+from lidske_aktivity.bitmap import draw_pie_chart
 from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
 
 if TYPE_CHECKING:
@@ -51,7 +51,8 @@ class StatusIcon(wx.adv.TaskBarIcon):
         context_menu.Append(wx.ID_EXIT, 'E&xit')
         return context_menu
 
-    def update(self, image: Image, tooltip: str):
+    def update(self, percents: List[float], tooltip: str):
+        image = draw_pie_chart(self.icon_size, percents)
         icon = create_icon_from_image(image)
         self.SetIcon(icon, tooltip)
 

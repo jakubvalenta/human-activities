@@ -6,7 +6,7 @@ from typing import Any, Optional
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
-from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
+from lidske_aktivity.bitmap import gen_random_slices
 from lidske_aktivity.config import Config
 from lidske_aktivity.model import Model, TExtDirectories
 
@@ -104,8 +104,7 @@ class Application:
 
     def update_icon(self):
         logger.info('Updating icon with slices %s', self.model.percents)
-        image = draw_pie_chart(self.status_icon.icon_size, self.model.percents)
-        self.status_icon.update(image, self.model.tooltip)
+        self.status_icon.update(self.model.percents, self.model.tooltip)
 
     def update_menu(self):
         logger.info('Update menu')
