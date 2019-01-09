@@ -6,6 +6,7 @@ from typing import Any, Optional
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
+from lidske_aktivity.bitmap import draw_pie_chart, gen_random_slices
 from lidske_aktivity.config import Config
 from lidske_aktivity.model import Model, TExtDirectories
 
@@ -72,6 +73,7 @@ class Application:
 
     def show_about(self):
         self.ui.about.show_about(
+            image=draw_pie_chart(148, list(gen_random_slices())),
             title=__title__,
             version=__version__,
             copyright=__copyright__,

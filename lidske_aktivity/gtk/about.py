@@ -1,22 +1,24 @@
 from typing import List
 
 import gi
+from PIL import Image
 
-from lidske_aktivity import __application_name__
+from lidske_aktivity.gtk.lib import image_to_pixbuf
 
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk  # noqa:E402  # isort:skip
 
 
-def show_about(title: str,
+def show_about(image: Image,
+               title: str,
                version: str,
                copyright: str,
                uri: str,
                authors: List[str]):
     about_dialog = Gtk.AboutDialog(
         modal=True,
-        logo_icon_name=__application_name__,
+        logo=image_to_pixbuf(image),
         authors=authors,
         copyright=copyright,
         license_type=Gtk.License.GPL_3_0,

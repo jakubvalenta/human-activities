@@ -65,8 +65,8 @@ def create_icon_from_image(image: Image) -> wx.Icon:
     with io.BytesIO() as f:
         image.save(f, format='PNG')
         f.seek(0)
-        image = wx.Image(f)
-        icon = wx.Icon(image.ConvertToBitmap())
+        wx_image = wx.Image(f)
+        icon = wx.Icon(wx_image.ConvertToBitmap())
     return icon
 
 
