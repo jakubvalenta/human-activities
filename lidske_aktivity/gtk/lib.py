@@ -16,18 +16,5 @@ def create_button(label: str, callback: Callable):
     return button
 
 
-def create_menu_item(menu: Gtk.Menu,
-                     label: str,
-                     callback: Callable = None) -> Gtk.MenuItem:
-    menu_item = Gtk.MenuItem()
-    menu_item.set_label(label)
-    if callback:
-        menu_item.connect('activate', callback)
-    else:
-        menu_item.set_sensitive(False)
-    menu.append(menu_item)
-    return menu_item
-
-
 def call_tick(func: Callable):
     GLib.idle_add(func)

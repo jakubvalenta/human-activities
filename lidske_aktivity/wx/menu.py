@@ -78,7 +78,7 @@ class Menu(wx.PopupTransientWindow):
     panel: wx.Panel
     border_sizer: wx.BoxSizer
     sizer: wx.BoxSizer
-    radio_buttons: Dict[Path, wx.RadioButton]
+    radio_buttons: Dict[str, wx.RadioButton]
     progress_bars: Dict[Path, ProgressBar]
     spinner: wx.StaticText
     mouse_x: int = 0

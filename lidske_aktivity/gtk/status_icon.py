@@ -1,13 +1,14 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Tuple
+from typing import (
+    TYPE_CHECKING, Callable, Iterable, Iterator, List, Optional, Tuple,
+)
 
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
 from lidske_aktivity.bitmap import draw_pie_chart_svg
-from lidske_aktivity.gtk.lib import create_menu_item
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,30 @@ from gi.repository import AppIndicator3, Gtk  # noqa:E402  # isort:skip
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
+
+
+def create_menu_item(menu: Gtk.Menu,
+                     label: str,
+                     callback: Callable = None,
+                     icon: Optional[str] = None) -> Gtk.MenuItem:
+    if icon:
+        menu_item = Gtk.ImageMenuItem()
+        image = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.MENU)
+        menu_item.set_image(image)
+    else:
+        menu_item = Gtk.MenuItem()
+    menu_item.set_label(label)
+    if callback:
+        menu_item.connect('activate', callback)
+    else:
+        menu_item.set_sensitive(False)
+    menu.append(menu_item)
+    return menu_item
+
+
+def create_menu_separator(menu: Gtk.Menu):
+    menu_item = Gtk.SeparatorMenuItem()
+    menu.append(menu_item)
 
 
 def create_indicator(
@@ -83,22 +108,33 @@ class StatusIcon():
         secondary_target = create_menu_item(
             menu,
             'Show',
-            lambda event: self.app.show_menu(0, 0)
+            lambda event: self.app.show_menu(0, 0),
+            icon='lidske-aktivity'
         )
+        create_menu_separator(menu)
         create_menu_item(
             menu,
             'Setup',
-            lambda event: self.app.show_setup()
+            lambda event: self.app.show_setup(),
+            icon='document-properties'
         )
         create_menu_item(
             menu,
             'Advanced configuration',
-            lambda event: self.app.show_settings()
+            lambda event: self.app.show_settings(),
+            icon='configure'
+        )
+        create_menu_item(
+            menu,
+            'About',
+            lambda event: self.app.show_about(),
+            icon='help-about'
         )
         create_menu_item(
             menu,
             'Quit',
-            lambda event: self.app.quit()
+            lambda event: self.app.quit(),
+            icon='application-exit'
         )
         menu.show_all()
         return menu, secondary_target

@@ -69,7 +69,7 @@ class Menu(Gtk.ApplicationWindow):
     app: 'Application'
     active_mode: str
     vbox: Gtk.Box
-    radio_buttons: Dict[Path, Gtk.RadioButton]
+    radio_buttons: Dict[str, Gtk.RadioButton]
     progress_bars: Dict[Path, ProgressBar]
     spinner: Gtk.MenuItem
     last_closed: float = 0
@@ -161,6 +161,7 @@ class Menu(Gtk.ApplicationWindow):
 
     def popup_at(self, mouse_x: int, mouse_y: int):
         self.present()
+        self.set_position(Gtk.WindowPosition.CENTER)
 
     def _on_radio_toggled(self, button: Gtk.Button, mode: str):
         logger.info('Radio toggled: new mode = "%s"', mode)
