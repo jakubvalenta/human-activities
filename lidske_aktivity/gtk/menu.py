@@ -78,6 +78,7 @@ class Menu(Gtk.Menu):
         else:
             self._init_empty()
         self._init_spinner()
+        self.show_all()
 
     def _init_radio_buttons(self):
         self.radio_buttons = {}
@@ -94,7 +95,6 @@ class Menu(Gtk.Menu):
             )
             self.progress_bars[path] = progress_bar
             self.append(progress_bar)
-        self.show_all()
 
     def _init_spinner(self):
         self.spinner = create_spinner_menu_item('calculating...')

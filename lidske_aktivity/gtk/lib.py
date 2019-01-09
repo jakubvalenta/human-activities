@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def create_menu_item(menu: Gtk.Menu,
                      label: str,
-                     callback: Callable = None) -> None:
+                     callback: Callable = None) -> Gtk.MenuItem:
     menu_item = Gtk.MenuItem()
     menu_item.set_label(label)
     if callback:
@@ -20,6 +20,7 @@ def create_menu_item(menu: Gtk.Menu,
     else:
         menu_item.set_sensitive(False)
     menu.append(menu_item)
+    return menu_item
 
 
 def call_tick(func: Callable):
