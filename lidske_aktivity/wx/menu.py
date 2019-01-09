@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict
 
 import wx
 
-from lidske_aktivity.bitmap import TColor
+from lidske_aktivity.bitmap import color_from_index
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 from lidske_aktivity.wx.lib import create_button, create_label, create_sizer
 
@@ -16,26 +16,26 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def set_pen(dc: wx.PaintDC, *args, **kwargs):
-    pen = wx.Pen(*args, **kwargs)
+def set_pen(dc: wx.PaintDC, color_index: int, *args, **kwargs):
+    color = color_from_index(color_index)
+    pen = wx.Pen(*args, color, **kwargs)
     pen.SetJoin(wx.JOIN_MITER)
     pen.SetCap(wx.CAP_BUTT)
     dc.SetPen(pen)
 
 
 class ProgressBar(wx.BoxSizer):
+    i: int
     label: wx.StaticText
     bar: wx.Window
-    color: TColor
     fraction: float = 0
     is_pulse: bool = True
-    default_color: TColor = (147, 161, 161, 255)
 
-    def __init__(self, parent: wx.Window, text: str, color: TColor):
+    def __init__(self, parent: wx.Window, text: str, i: int):
         super().__init__(wx.VERTICAL)
-        self.color = color
+        self.i = i
         self.label = create_label(parent, text)
-        self.bar = wx.Window(parent, size=(-1, 5))
+        self.bar = wx.Window(parent, size=(-1, 6))
         self.bar.Bind(wx.EVT_PAINT, self.on_paint)
         self.Add(self.label, flag=wx.EXPAND | wx.BOTTOM, border=3)
         self.Add(self.bar, flag=wx.EXPAND | wx.BOTTOM, border=5)
@@ -59,16 +59,16 @@ class ProgressBar(wx.BoxSizer):
         if self.is_pulse:
             set_pen(
                 dc,
-                self.default_color,
+                color_index=-1,
                 width=h,
                 style=wx.PENSTYLE_SHORT_DASH
             )
             dc.DrawLine(0, 0, w, 0)
         else:
             w_fg = round(w * self.fraction)
-            set_pen(dc, self.color, width=h)
+            set_pen(dc, color_index=self.i, width=h)
             dc.DrawLine(0, 0, w_fg, 0)
-            set_pen(dc, self.default_color, width=h)
+            set_pen(dc, color_index=-1, width=h)
             dc.DrawLine(w_fg, 0, w, 0)
 
 
@@ -141,7 +141,7 @@ class Menu(wx.PopupTransientWindow):
             progress_bar = ProgressBar(
                 parent=self.panel,
                 text=ext_directory.label,
-                color=ext_directory.color
+                i=i
             )
             self.sizer.Add(progress_bar, flag=wx.EXPAND)
             self.progress_bars[path] = progress_bar

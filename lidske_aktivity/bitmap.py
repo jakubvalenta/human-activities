@@ -3,11 +3,13 @@
 import math
 import random
 import sys
-from functools import partial
+from functools import lru_cache, partial
 from hashlib import sha1
 from typing import Callable, Iterator, List, Tuple
 
 from PIL import Image
+
+MAX_COLORS = 64
 
 TColor = Tuple[int, int, int, int]
 TSliceFrac = float
@@ -63,10 +65,14 @@ def hue_from_index(i: int, steps: int = 6) -> float:
     return mod * frac + shift
 
 
+@lru_cache(MAX_COLORS + 1)
 def color_from_index(i: int,
                      s: float = 0.8,
                      l: float = 0.5,
+                     default_color: TColor = (147, 161, 161, 255),
                      **kwargs) -> TColor:
+    if i == -1:
+        return default_color
     return _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
 
 

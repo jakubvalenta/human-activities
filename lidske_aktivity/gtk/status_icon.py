@@ -115,14 +115,12 @@ class StatusIcon():
         create_menu_item(
             menu,
             'Setup',
-            lambda event: self.app.show_setup(),
-            icon='document-properties'
+            lambda event: self.app.show_setup()
         )
         create_menu_item(
             menu,
             'Advanced configuration',
-            lambda event: self.app.show_settings(),
-            icon='configure'
+            lambda event: self.app.show_settings()
         )
         create_menu_item(
             menu,

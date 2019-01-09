@@ -4,7 +4,6 @@ from pathlib import Path
 from threading import Event, Thread
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
-from lidske_aktivity.bitmap import TColor, color_from_index
 from lidske_aktivity.config import (
     CACHE_PATH, MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, Config,
     TNamedDirs, load_config, save_config,
@@ -26,7 +25,6 @@ class SizeMode(NamedTuple):
 
 class ExtDirectory(NamedTuple):
     label: str
-    color: TColor
     fraction: Optional[float] = 0
     percent: Optional[float] = 0
     pending: bool = True
@@ -165,10 +163,9 @@ class Model:
                     path,
                     self.config.mode,
                     self.config.named_dirs
-                ),
-                color=color_from_index(i)
+                )
             )
-            for i, (path, directory) in enumerate(self._directories.items())
+            for path, directory in self._directories.items()
         }
 
     def _update_ext_directories(self):

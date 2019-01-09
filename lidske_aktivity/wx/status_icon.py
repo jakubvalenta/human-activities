@@ -48,7 +48,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
         context_menu.Append(self.id_setup, '&Setup')
         context_menu.Append(wx.ID_SETUP, 'Advanced &configuration')
         context_menu.Append(wx.ID_ABOUT, '&About')
-        context_menu.Append(wx.ID_EXIT, 'E&xit')
+        context_menu.Append(wx.ID_EXIT, '&Quit')
         return context_menu
 
     def update(self, percents: List[float], tooltip: str):

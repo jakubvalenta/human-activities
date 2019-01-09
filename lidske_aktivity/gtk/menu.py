@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import gi
 
-from lidske_aktivity.bitmap import TColor
 from lidske_aktivity.gtk.lib import create_button
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 
@@ -44,15 +43,14 @@ def create_window_box(window: Gtk.ApplicationWindow) -> Gtk.Box:
 
 
 class ProgressBar(Gtk.ProgressBar):
-    color: TColor
     fraction: float = 0
     is_pulse: bool = True
-    default_color: TColor = (147, 161, 161, 255)
 
-    def __init__(self, text: str, color: TColor):
+    def __init__(self, i: int, text: str):
         super().__init__(text=text)
         self.set_show_text(True)
         self.set_pulse_step(1)
+        self.get_style_context().add_class(f'bg-{i}')
 
     def set_fraction(self, fraction: float, tooltip: str):
         self.fraction = fraction
@@ -130,10 +128,7 @@ class Menu(Gtk.ApplicationWindow):
     def _init_progress_bars(self, ext_directories: TExtDirectories):
         self.progress_bars = {}
         for i, (path, ext_directory) in enumerate(ext_directories.items()):
-            progress_bar = ProgressBar(
-                text=ext_directory.label,
-                color=ext_directory.color
-            )
+            progress_bar = ProgressBar(text=ext_directory.label, i=i)
             box_add(self.vbox, progress_bar)
             self.progress_bars[path] = progress_bar
 
@@ -160,8 +155,8 @@ class Menu(Gtk.ApplicationWindow):
         self.init(active_mode, ext_directories)
 
     def popup_at(self, mouse_x: int, mouse_y: int):
-        self.present()
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.present()
 
     def _on_radio_toggled(self, button: Gtk.Button, mode: str):
         logger.info('Radio toggled: new mode = "%s"', mode)
