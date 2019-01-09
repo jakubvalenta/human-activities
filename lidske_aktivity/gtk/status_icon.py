@@ -83,7 +83,7 @@ class StatusIcon():
         secondary_target = create_menu_item(
             menu,
             'Show',
-            lambda event: self.app.show_menu()
+            lambda event: self.app.show_menu(0, 0)
         )
         create_menu_item(
             menu,
