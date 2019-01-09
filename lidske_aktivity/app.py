@@ -70,9 +70,7 @@ class Application:
         )
 
     def show_about(self):
-        image = draw_pie_chart(148, list(gen_random_slices(3, 8)))
         self.ui.about.show_about(
-            image=image,
             title=__title__,
             version=__version__,
             copyright=__copyright__,
