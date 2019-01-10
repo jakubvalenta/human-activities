@@ -1,21 +1,24 @@
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import wx
 
 from lidske_aktivity.config import (
     MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES, Config,
 )
-from lidske_aktivity.wx.dialog import BaseConfigDialog
 from lidske_aktivity.wx.lib import (
     choose_dir, create_button, create_label, create_sizer, create_text_control,
 )
 
 
-class Settings(BaseConfigDialog):
+class Settings(wx.Dialog):
     title = 'Lidské aktivity advanced settings'
 
+    config: Config
+    panel: wx.Panel
+    sizer: wx.Sizer
+    border_sizer: wx.Sizer
     mode_radios: Dict[str, wx.RadioButton]
     root_path_panel: wx.Panel
     root_path_control: wx.TextCtrl
@@ -25,15 +28,62 @@ class Settings(BaseConfigDialog):
     named_dirs_path_controls: List[wx.TextCtrl]
     named_dirs_list: List[Tuple[Path, str]]
 
-    def __init__(self, config: Config, *args, **kwargs):
+    def __init__(self, config: Config, on_accept: Callable, parent: wx.Frame):
+        self._init_config(config)
+        self._on_accept = on_accept
+        super().__init__()
+        self.Create(parent, id=-1, title=self.title)
+        self._init_window()
+        self._init_content()
+        self._init_dialog_buttons()
+        self._fit()
+        self._show()
+
+    def _init_config(self, config: Config):
         self.config = config
         self.named_dirs_list = list(zip(
             self.config.named_dirs.keys(),
             self.config.named_dirs.values(),
         ))
-        super().__init__(config, *args, **kwargs)
 
-    def init_content(self):
+    def _init_window(self):
+        self.border_sizer = create_sizer(self)
+        self.panel = wx.Panel(self)
+        self.border_sizer.Add(
+            self.panel,
+            proportion=1,
+            flag=wx.EXPAND | wx.ALL,
+            border=10
+        )
+        self.sizer = create_sizer(self.panel)
+
+    def _init_dialog_buttons(self):
+        button_sizer = wx.StdDialogButtonSizer()
+        button = wx.Button(self, wx.ID_OK)
+        button.SetDefault()
+        button_sizer.AddButton(button)
+        button = wx.Button(self, wx.ID_CANCEL)
+        button_sizer.AddButton(button)
+        button_sizer.Realize()
+        self.border_sizer.Add(
+            button_sizer,
+            flag=wx.EXPAND | wx.TOP | wx.BOTTOM,
+            border=10
+        )
+
+    def _fit(self):
+        self.border_sizer.Fit(self.panel)
+        self.border_sizer.Fit(self)
+        self.Layout()
+
+    def _show(self):
+        self.Centre()
+        val = self.ShowModal()
+        if val == wx.ID_OK:
+            self._on_accept(self.config)
+        self.Destroy()
+
+    def _init_content(self):
         self.create_mode_radios()
         self.add_mode_radio(MODE_HOME)
         self.add_mode_radio(MODE_PATH)
