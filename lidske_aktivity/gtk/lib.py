@@ -13,24 +13,63 @@ logger = logging.getLogger(__name__)
 
 
 def create_box(orientation: Gtk.Orientation = Gtk.Orientation.VERTICAL,
-               *args,
+               homogeneous: bool = True,
                **kwargs) -> Gtk.Box:
-    return Gtk.Box(orientation, *args, **kwargs)
+    box = Gtk.Box(orientation=orientation, **kwargs)
+    if not homogeneous:
+        box.set_homogeneous(homogeneous)
+    return box
 
 
-def box_add(box: Gtk.Box, widget: Gtk.Widget):
-    box.pack_start(widget, True, True, 0)
+def box_add(box: Gtk.Box,
+            widget: Gtk.Widget,
+            expand: bool = True,
+            fill: bool = True,
+            padding: int = 0):
+    box.pack_start(widget, expand, fill, padding)
     box.show_all()
 
 
 def create_label(text: str) -> Gtk.Label:
-    return Gtk.Label(text)
+    label = Gtk.Label(text)
+    label.set_justify(Gtk.Justification.LEFT)
+    label.set_xalign(0)
+    return label
 
 
 def create_button(label: str, callback: Callable):
     button = Gtk.Button.new_with_label(label)
     button.connect('clicked', callback)
     return button
+
+
+def create_entry(value: str,
+                 callback: Callable) -> Gtk.Entry:
+    entry = Gtk.Entry()
+    if value:
+        entry.set_text(value)
+    entry.connect('changed', callback)
+    return entry
+
+
+def choose_dir(parent_window: Gtk.Window, callback: Callable[[str], None]):
+    dialog = Gtk.FileChooserDialog(
+        'Please choose a directory',
+        parent_window,
+        Gtk.FileChooserAction.SELECT_FOLDER,
+        (
+            Gtk.STOCK_CANCEL,
+            Gtk.ResponseType.CANCEL,
+            'Select',
+            Gtk.ResponseType.OK
+        )
+    )
+    dialog.set_default_size(800, 400)
+    response = dialog.run()
+    if response == Gtk.ResponseType.OK:
+        path = dialog.get_filename()
+        callback(path)
+    dialog.destroy()
 
 
 def image_to_pixbuf(image: Image) -> GdkPixbuf:
