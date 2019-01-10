@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Tuple
 import gi
 
 from lidske_aktivity.gtk.lib import (
-    box_add, create_button, create_label, create_vbox,
+    box_add, create_box, create_button, create_label,
 )
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 
@@ -30,9 +30,9 @@ def create_spinner(tooltip: str) -> Gtk.Spinner:
 
 def create_window_box(window: Gtk.ApplicationWindow) -> Gtk.Box:
     window.set_border_width(10)
-    vbox = create_vbox()
-    window.add(vbox)
-    return vbox
+    box = create_box(spacing=6)
+    window.add(box)
+    return box
 
 
 class ProgressBar(Gtk.ProgressBar):
@@ -59,7 +59,7 @@ class ProgressBar(Gtk.ProgressBar):
 class Menu(Gtk.ApplicationWindow):
     app: 'Application'
     active_mode: str
-    vbox: Gtk.Box
+    box: Gtk.Box
     radio_buttons: Dict[str, Gtk.RadioButton]
     progress_bars: Dict[Path, ProgressBar]
     spinner: Gtk.MenuItem
@@ -90,7 +90,7 @@ class Menu(Gtk.ApplicationWindow):
         self.connect('focus-out-event', self._on_focus_out)
 
     def _init_window(self):
-        self.vbox = create_window_box(self)
+        self.box = create_window_box(self)
 
     def _init_radio_buttons(self, active_mode: str):
         self.radio_buttons = {}
@@ -110,28 +110,28 @@ class Menu(Gtk.ApplicationWindow):
             button.connect('toggled', self._on_radio_toggled, mode.name)
             box_add(hbox, button)
             self.radio_buttons[mode.name] = button
-        box_add(self.vbox, hbox)
+        box_add(self.box, hbox)
 
     def _init_empty(self):
         label = create_label('No directories found')
-        box_add(self.vbox, label)
+        box_add(self.box, label)
         button = create_button('Open app setup', self._on_setup_button)
-        box_add(self.vbox, button)
+        box_add(self.box, button)
 
     def _init_progress_bars(self, ext_directories: TExtDirectories):
         self.progress_bars = {}
         for i, (path, ext_directory) in enumerate(ext_directories.items()):
             progress_bar = ProgressBar(text=ext_directory.label, i=i)
-            box_add(self.vbox, progress_bar)
+            box_add(self.box, progress_bar)
             self.progress_bars[path] = progress_bar
 
     def _init_spinner(self):
         self._size_remember()
         self.spinner = create_spinner('calculating...')
-        box_add(self.vbox, self.spinner)
+        box_add(self.box, self.spinner)
 
     def _empty(self):
-        self.vbox.destroy()
+        self.box.destroy()
 
     def pulse_progress_bar(self, path: Path):
         self.progress_bars[path].pulse()

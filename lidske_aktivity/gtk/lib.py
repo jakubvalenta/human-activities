@@ -12,13 +12,15 @@ from gi.repository import GdkPixbuf, Gtk, GLib  # noqa:E402  # isort:skip
 logger = logging.getLogger(__name__)
 
 
-def create_vbox() -> Gtk.Box:
-    return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+def create_box(orientation: Gtk.Orientation = Gtk.Orientation.VERTICAL,
+               *args,
+               **kwargs) -> Gtk.Box:
+    return Gtk.Box(orientation, *args, **kwargs)
 
 
-def box_add(vbox: Gtk.Box, widget: Gtk.Widget):
-    vbox.pack_start(widget, True, True, 0)
-    vbox.show_all()
+def box_add(box: Gtk.Box, widget: Gtk.Widget):
+    box.pack_start(widget, True, True, 0)
+    box.show_all()
 
 
 def create_label(text: str) -> Gtk.Label:

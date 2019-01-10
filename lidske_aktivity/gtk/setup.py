@@ -4,42 +4,42 @@ from typing import Callable, List, NamedTuple
 import gi
 
 from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
-from lidske_aktivity.gtk.lib import box_add, create_label, create_vbox
+from lidske_aktivity.gtk.lib import box_add, create_box, create_label
 
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk  # noqa:E402  # isort:skip
 
 
-def add_text_heading(vbox: Gtk.VBox, text: str):
+def add_text_heading(box: Gtk.Box, text: str):
     label = create_label(text)
-    box_add(vbox, label)
+    box_add(box, label)
 
 
-def add_text_paragraph(vbox: Gtk.VBox, text: str):
+def add_text_paragraph(box: Gtk.Box, text: str):
     label = create_label(text)
-    box_add(vbox, label)
+    box_add(box, label)
 
 
-def add_text_list(vbox: Gtk.VBox, items: List[str]):
+def add_text_list(box: Gtk.Box, items: List[str]):
     for item in items:
         label = create_label(f'\N{BULLET} {item}')
-        box_add(vbox, label)
+        box_add(box, label)
 
 
-def create_content_intro() -> Gtk.VBox:
-    vbox = create_vbox()
-    add_text_heading(vbox, 'Lidské aktivity setup')
-    add_text_paragraph(vbox, 'Please adjust your OS settings like this:')
+def create_content_intro() -> Gtk.Box:
+    box = create_box()
+    add_text_heading(box, 'Lidské aktivity setup')
+    add_text_paragraph(box, 'Please adjust your OS settings like this:')
     add_text_list(
-        vbox,
+        box,
         [
             'first do this',
             'than that',
             'and finally something different',
         ]
     )
-    return vbox
+    return box
 
 
 def create_content_setup() -> Gtk.Label:
