@@ -1,5 +1,7 @@
 import logging
-from typing import Callable
+from typing import (
+    Callable, Dict, Iterable, Iterator, List, NamedTuple, Optional,
+)
 
 import gi
 from PIL import Image
@@ -41,6 +43,37 @@ def create_button(label: str, callback: Callable):
     button = Gtk.Button.new_with_label(label)
     button.connect('clicked', callback)
     return button
+
+
+class RadioConfig(NamedTuple):
+    value: str
+    label: str
+    tooltip: Optional[str] = None
+    mode: bool = False
+
+
+def create_radio_group(
+        radio_configs: Iterable[RadioConfig],
+        active_value: str,
+        callback: Callable,
+        use_toggle_buttons: bool = False) -> Dict[str, Gtk.RadioButton]:
+    radio_buttons = {}
+    group = None
+    for radio_config in radio_configs:
+        radio_button = Gtk.RadioButton.new_with_label_from_widget(
+            group,
+            radio_config.label
+        )
+        if use_toggle_buttons:
+            radio_button.set_mode(False)
+        if radio_config.tooltip:
+            radio_button.set_tooltip_text(radio_config.tooltip)
+        if not group:
+            group = radio_button
+        radio_button.connect('toggled', callback, radio_config.value)
+        radio_button.set_active(radio_config.value == active_value)
+        radio_buttons[radio_config.value] = radio_button
+    return radio_buttons
 
 
 def create_entry(value: str,

@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Dict, Tuple
 import gi
 
 from lidske_aktivity.gtk.lib import (
-    box_add, create_box, create_button, create_label,
+    RadioConfig, box_add, create_box, create_button, create_label,
+    create_radio_group,
 )
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 
@@ -93,23 +94,20 @@ class Menu(Gtk.ApplicationWindow):
         self.box = create_window_box(self)
 
     def _init_radio_buttons(self, active_mode: str):
-        self.radio_buttons = {}
-        hbox = Gtk.Box()
+        radio_configs = [
+            RadioConfig(mode.name, mode.label, mode.tooltip)
+            for mode in SIZE_MODES
+        ]
+        hbox = create_box(Gtk.Orientation.HORIZONTAL)
         Gtk.StyleContext.add_class(hbox.get_style_context(), 'linked')
-        group = None
-        for mode in SIZE_MODES:
-            button = Gtk.RadioButton.new_with_label_from_widget(
-                group,
-                mode.label
-            )
-            button.set_tooltip_text(mode.tooltip)
-            button.set_mode(False)
-            if not group:
-                group = button
-            button.set_active(mode.name == active_mode)
-            button.connect('toggled', self._on_radio_toggled, mode.name)
-            box_add(hbox, button)
-            self.radio_buttons[mode.name] = button
+        self.radio_buttons = create_radio_group(
+            radio_configs,
+            active_value=active_mode,
+            callback=self._on_radio_toggled,
+            use_toggle_buttons=True
+        )
+        for radio_button in self.radio_buttons.values():
+            box_add(hbox, radio_button)
         box_add(self.box, hbox)
 
     def _init_empty(self):
