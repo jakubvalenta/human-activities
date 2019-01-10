@@ -4,7 +4,9 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import gi
 
-from lidske_aktivity.gtk.lib import create_button
+from lidske_aktivity.gtk.lib import (
+    box_add, create_button, create_label, create_vbox,
+)
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 
 gi.require_version('Gtk', '3.0')
@@ -16,15 +18,6 @@ if TYPE_CHECKING:
     from lidske_aktivity.app import Application
 
 logger = logging.getLogger(__name__)
-
-
-def create_vbox() -> Gtk.Box:
-    return Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-
-
-def box_add(vbox: Gtk.Box, widget: Gtk.Widget):
-    vbox.pack_start(widget, True, True, 0)
-    vbox.show_all()
 
 
 def create_spinner(tooltip: str) -> Gtk.Spinner:
@@ -120,7 +113,7 @@ class Menu(Gtk.ApplicationWindow):
         box_add(self.vbox, hbox)
 
     def _init_empty(self):
-        label = Gtk.Label('No directories found')
+        label = create_label('No directories found')
         box_add(self.vbox, label)
         button = create_button('Open app setup', self._on_setup_button)
         box_add(self.vbox, button)
