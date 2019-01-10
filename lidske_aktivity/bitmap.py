@@ -81,7 +81,6 @@ def _pie_chart_shader(x: int,
                       w: int,
                       h: int,
                       slices_rad: List[TSliceRad],
-                      default_color: TColor = (255, 255, 255, 255),
                       background_color: TColor = (0, 0, 0, 0)) -> TColor:
     center = w / 2, h / 2
     radius = min(center)
@@ -90,12 +89,11 @@ def _pie_chart_shader(x: int,
     angle = math.atan2(coord[1], coord[0]) + math.pi / 2
     if angle < 0:
         angle = 2*math.pi + angle
-    if distance > radius:
-        return background_color
-    for slice_start, slice_end, color in slices_rad:
-        if slice_start <= angle < slice_end:
-            return color
-    return default_color
+    if distance <= radius:
+        for slice_start, slice_end, color in slices_rad:
+            if slice_start <= angle < slice_end:
+                return color
+    return background_color
 
 
 def _draw_image(w: int,
@@ -110,7 +108,12 @@ def _draw_image(w: int,
     return image
 
 
-def _slices_frac_to_rad(slices_frac: List[TSliceFrac]) -> Iterator[TSliceRad]:
+def _slices_frac_to_rad(
+        slices_frac: List[TSliceFrac],
+        default_color: TColor = (255, 255, 255, 255)) -> Iterator[TSliceRad]:
+    if not slices_frac:
+        yield (0, _frac_to_rad(1), default_color)
+        return
     cumulative_frac = 0.0
     for i, frac in enumerate(slices_frac):
         yield (
@@ -135,6 +138,9 @@ def draw_pie_chart_svg(slices_frac: List[TSliceFrac]) -> Iterator[str]:
     yield '''<?xml version="1.0" encoding="UTF-8" ?>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-1 -1 2 2">\n'''
     for slice_start, slice_end, (r, g, b, a) in slices_rad:
+        if slice_start == 0 and slice_end == 2*math.pi:
+            yield f'<circle cx="0" cy="0" r="1" fill="rgb({r}, {g}, {b})" />\n'
+            continue
         start_x, start_y = math.cos(slice_start), math.sin(slice_start)
         end_x, end_y = math.cos(slice_end), math.sin(slice_end)
         large_arc_flag = int(slice_end - slice_start > math.pi)
@@ -154,5 +160,6 @@ def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[TSliceFrac]:
 
 if __name__ == '__main__':
     slices_frac = [0.35, 0.25, 0.20, 0.15, 0.05]
+    slices_frac = []
     svg = draw_pie_chart_svg(slices_frac)
     sys.stdout.writelines(svg)
