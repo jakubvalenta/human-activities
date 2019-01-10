@@ -46,7 +46,7 @@ def load_css():
 
 
 class Application(Gtk.Application):
-    _frame: Optional[Gtk.ApplicationWindow] = None
+    _window: Optional[Gtk.ApplicationWindow] = None
 
     def __init__(self, on_init: Callable, on_quit: Callable, *args, **kwargs):
         self.on_init = on_init
@@ -60,11 +60,11 @@ class Application(Gtk.Application):
         self.on_init(self)
 
     def do_activate(self):
-        if not self._frame:
-            self._frame = Gtk.ApplicationWindow(application=self)
+        if not self._window:
+            self._window = Gtk.ApplicationWindow(application=self)
 
     def spawn_frame(self, func: Callable[..., T], *args, **kwargs) -> T:
-        return func(*args, **kwargs)
+        return func(*args, **kwargs, parent=self._window)
 
     def quit(self):
         logger.info('App quit')
