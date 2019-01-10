@@ -32,7 +32,7 @@ def add_text_list(box: Gtk.Box, items: List[str]):
         box_add(box, label, expand=False)
 
 
-def create_content_intro() -> Gtk.Box:
+def create_content_intro(parent: Gtk.Window) -> Gtk.Box:
     box = create_box(spacing=5, homogeneous=False)
     add_text_heading(box, 'Lidské aktivity setup')
     add_text_paragraph(box, 'Please adjust your OS settings like this:')
@@ -100,7 +100,7 @@ class Setup:
             [
                 Page(
                     title='Intro',
-                    content_func=lambda parent: create_content_intro(),
+                    content_func=create_content_intro,
                     page_type=Gtk.AssistantPageType.INTRO
                 ),
                 Page(

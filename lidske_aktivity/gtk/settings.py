@@ -22,6 +22,9 @@ class Settings(Gtk.Dialog):
     _config: Config
     _box: Gtk.Box
     _mode_radios: Dict[str, Gtk.RadioButton]
+    _root_path_form: RootPathForm
+    _custom_dirs_form: CustomDirsForm
+    _named_dirs_form: NamedDirsForm
 
     def __init__(self,
                  config: Config,
@@ -42,28 +45,48 @@ class Settings(Gtk.Dialog):
         )
         self.set_default_size(500, 600)
         self._init_window()
-        self._init_content()
+        self._create_widgets()
+        self._add_widgets()
         self._show()
 
     def _init_window(self):
-        content_area = self.get_content_area()
-        self._box = create_box(spacing=5, homogeneous=False)
-        box_add(content_area, self._box, padding=10)
+        self._box = self.get_content_area()
+        self._box.set_homogeneous(False)
+        self._box.set_border_width(10)
+        self._box.set_spacing(10)
 
-    def _init_content(self):
+    def _create_widgets(self):
+        self._root_path_form = RootPathForm(
+            self._config.root_path,
+            self._on_root_path_change,
+            parent=self
+        )
+        self._custom_dirs_form = CustomDirsForm(
+            self._config.custom_dirs,
+            self._on_custom_dirs_change,
+            parent=self
+        )
+        self._named_dirs_form = NamedDirsForm(
+            self._config.named_dirs,
+            self._on_named_dirs_change,
+            parent=self
+        )
         self._create_mode_radios()
-        self._add_mode_radio(MODE_HOME)
-        self._add_mode_radio(MODE_PATH)
-        self._init_root_path_form()
-        self._add_mode_radio(MODE_CUSTOM)
-        self._init_custom_dirs_form()
-        self._add_mode_radio(MODE_NAMED)
-        self._init_named_dirs_form()
-        self._toggle_controls()
+
+    def _add_widgets(self):
+        for widget in (
+                create_label('Scan mode'),
+                self._mode_radios[MODE_HOME],
+                self._mode_radios[MODE_PATH],
+                self._root_path_form,
+                self._mode_radios[MODE_CUSTOM],
+                self._custom_dirs_form,
+                self._mode_radios[MODE_NAMED],
+                self._named_dirs_form,
+        ):
+            box_add(self._box, widget, expand=False)
 
     def _create_mode_radios(self):
-        label = create_label('Scan mode')
-        box_add(self._box, label)
         radio_configs = [
             RadioConfig(value, label)
             for value, label in MODES.items()
@@ -76,54 +99,18 @@ class Settings(Gtk.Dialog):
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
-        self._toggle_controls()
-
-    def _add_mode_radio(self, mode: str):
-        box_add(self._box, self._mode_radios[mode])
-
-    def _init_root_path_form(self):
-        self._root_path_form = RootPathForm(
-            self._config.root_path,
-            self._on_root_path_change,
-            parent=self
-        )
-        box_add(self._box, self._root_path_form)
+        self._root_path_form.set_sensitive(self._config.mode == MODE_PATH)
+        self._custom_dirs_form.set_sensitive(self._config.mode == MODE_CUSTOM)
+        self._named_dirs_form.set_sensitive(self._config.mode == MODE_NAMED)
 
     def _on_root_path_change(self, root_path: Path):
         self._config.root_path = root_path
 
-    def _init_custom_dirs_form(self):
-        self._custom_dirs_form = CustomDirsForm(
-            self._config.custom_dirs,
-            self._on_custom_dirs_change,
-            parent=self
-        )
-        box_add(self._box, self._custom_dirs_form)
-
     def _on_custom_dirs_change(self, custom_dirs: List[Path]):
         self._config.custom_dirs = custom_dirs
 
-    def _init_named_dirs_form(self):
-        self._named_dirs_form = NamedDirsForm(
-            self._config.named_dirs,
-            self._on_named_dirs_change,
-            parent=self
-        )
-        box_add(self._box, self._named_dirs_form)
-
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):
         self._config.named_dirs = named_dirs
-
-    def _toggle_controls(self):
-        self._root_path_form.set_sensitive(
-            self._config.mode == MODE_PATH
-        )
-        self._custom_dirs_form.set_sensitive(
-            self._config.mode == MODE_CUSTOM
-        )
-        self._named_dirs_form.set_sensitive(
-            self._config.mode == MODE_NAMED
-        )
 
     def _show(self):
         response = self.run()

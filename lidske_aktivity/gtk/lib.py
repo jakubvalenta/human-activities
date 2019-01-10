@@ -45,8 +45,12 @@ def create_label(text: str) -> Gtk.Label:
 
 def create_button(label: str, callback: Callable):
     button = Gtk.Button.new_with_label(label)
-    button.connect('clicked', lambda button: callback())
+    button.connect('clicked', partial(on_button_clicked, callback=callback))
     return button
+
+
+def on_button_clicked(button: Gtk.Button, callback: Callable):
+    callback()
 
 
 class RadioConfig(NamedTuple):
@@ -76,7 +80,7 @@ def create_radio_group(
             group = radio_button
         radio_button.connect(
             'toggled',
-            lambda radio_button, value: callback(value),
+            partial(on_radio_toggled, callback=callback),
             radio_config.value
         )
         radio_button.set_active(radio_config.value == active_value)
@@ -84,12 +88,22 @@ def create_radio_group(
     return radio_buttons
 
 
+def on_radio_toggled(radio_button: Gtk.RadioButton,
+                     value: str,
+                     callback: Callable):
+    callback(value)
+
+
 def create_entry(value: str, callback: Callable) -> Gtk.Entry:
     entry = Gtk.Entry()
     if value:
         entry.set_text(value)
-    entry.connect('changed', lambda editable: callback(editable.get_text()))
+    entry.connect('changed', partial(on_entry_changed, callback=callback))
     return entry
+
+
+def on_entry_changed(entry: Gtk.Entry, callback: Callable):
+    callback(entry.get_text())
 
 
 def choose_dir(parent: Gtk.Window, callback: Callable[[str], None]):
@@ -144,9 +158,10 @@ class RootPathForm(Gtk.Box):
             value=str(self._root_path) if self._root_path else '',
             callback=self._on_text
         )
+        entry.set_hexpand(True)
         box_add(self, entry)
         button = create_button('Choose', self._on_button)
-        box_add(self, button)
+        box_add(self, button, expand=False)
         return entry
 
     def _on_text(self, path_str: str):
@@ -160,23 +175,10 @@ class RootPathForm(Gtk.Box):
         choose_dir(self._parent, callback)
 
 
-class ListBoxRowWithData(Gtk.ListBoxRow):
-    def __init__(self, data: str):
-        super().__init__()
-        self.data = data
-        self.add(Gtk.Label(data))
-
-
-def add_list_box_row(list_box: Gtk.ListBox, text: str):
-    row = Gtk.ListBoxRowWithData(text)
-    list_box.add(row)
-
-
-def insert_list_box_row(list_box: Gtk.ListBox,
-                        text: str,
-                        i: int) -> Gtk.ListBoxRow:
-    row = Gtk.ListBoxRowWithData(text)
-    list_box.insert(row, i)
+def create_list_box_row(text: str) -> Gtk.ListBoxRow:
+    row = Gtk.ListBoxRow()
+    row.data = text
+    row.add(create_label(text))
     return row
 
 
@@ -197,12 +199,13 @@ class CustomDirsForm(Gtk.Box):
 
     def _create_list_box(self) -> Gtk.ListBox:
         list_box = Gtk.ListBox()
-        list_box.connect('row-activated', self._on_button_change)
         for custom_dir in self._custom_dirs:
-            add_list_box_row(list_box, str(custom_dir))
+            row = create_list_box_row(str(custom_dir))
+            list_box.add(row)
+        list_box.set_hexpand(True)
         box_add(self, list_box)
 
-        vbox = create_box(spacing=5)
+        button_box = create_box(spacing=5)
         for label, callback in (
                 ('New', self._on_button_new),
                 ('Change', self._on_button_change),
@@ -210,42 +213,50 @@ class CustomDirsForm(Gtk.Box):
                 ('Clear', self._on_button_clear),
         ):
             button = create_button(label, callback)
-            box_add(vbox, button)
-        box_add(self, list_box)
+            box_add(button_box, button, expand=False)
+        box_add(self, button_box, expand=False)
         return list_box
 
     def _on_button_change(self):
         def callback(path_str: str):
             row = self._list_box.get_selected_row()
+            if not row:
+                return
             i = row.get_index()
             self._list_box.remove(row)
-            new_row = insert_list_box_row(self._list_box, path_str, i)
+            new_row = create_list_box_row(path_str)
+            self._list_box.insert(new_row, i)
             self._custom_dirs[i] = Path(path_str)
             self._on_change(self._custom_dirs)
             self._list_box.select_row(new_row)
+            self._list_box.show_all()
 
-        choose_dir(self, callback)
+        choose_dir(self._parent, callback)
 
     def _on_button_new(self):
         def callback(path_str: str):
             self._custom_dirs.append(Path(path_str))
             self._on_change(self._custom_dirs)
-            add_list_box_row(self._list_box, path_str)
+            row = create_list_box_row(path_str)
+            self._list_box.add(row)
+            self._list_box.show_all()
 
         choose_dir(self._parent, callback)
 
     def _on_button_delete(self):
         row = self._list_box.get_selected_row()
-        if row:
-            i = row.get_index()
-            del self._custom_dirs[i]
-            self._on_change(self._custom_dirs)
-            self._list_box.remove(row)
+        if not row:
+            return
+        i = row.get_index()
+        del self._custom_dirs[i]
+        self._on_change(self._custom_dirs)
+        self._list_box.remove(row)
 
     def _on_button_clear(self):
         self._custom_dirs[:] = []
         self._on_change(self._custom_dirs)
-        self._list_box.foreach(lambda row: self._list_box.remove(row))
+        for row in self._list_box.get_children():
+            self._list_box.remove(row)
 
 
 class NamedDir(NamedTuple):
