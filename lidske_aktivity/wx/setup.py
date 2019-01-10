@@ -28,19 +28,59 @@ def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
     sizer.AddSpacer(5)
 
 
-class Page(wx.adv.WizardPageSimple):
-    def __init__(self, parent: wx.adv.Wizard):
-        super().__init__(parent)
-        self.sizer = create_sizer(self)
+def init_wizard(wizard: wx.adv.Wizard,
+                page_funcs: List[Callable],
+                on_finish: Callable):
+    pages = []
+    for page_func in page_funcs:
+        page = wx.adv.WizardPageSimple(wizard)
+        page_func(page)
+        pages.append(page)
+    wx.adv.WizardPageSimple.Chain(*pages)
+    wizard.GetPageAreaSizer().Add(pages[0])
+    val = wizard.RunWizard(pages[0])
+    if val:
+        on_finish(wizard)
+
+
+def add_content_intro(parent: wx.Panel):
+    sizer = create_sizer(parent)
+    add_text_heading(parent, sizer, 'Lidské aktivity setup')
+    add_text_paragraph(
+        parent,
+        sizer,
+        'Please adjust your OS settings like this:'
+    )
+    add_text_list(
+        parent,
+        sizer,
+        [
+            'first do this',
+            'than that',
+            'and finally something different',
+        ]
+    )
 
 
 class Setup(wx.adv.Wizard):
     title = 'Lidské aktivity setup'
-    pages: List[Page]
+    config: Config
     text_controls: Dict[str, wx.TextCtrl]
     named_dirs_by_name: Dict[str, Path]
 
     def __init__(self, config: Config, on_finish: Callable, parent: wx.Frame):
+        self._init_config(config)
+        super().__init__(parent)
+        init_wizard(
+            self,
+            [
+                add_content_intro,
+                self._add_content_setup,
+            ],
+            on_finish
+        )
+
+    def _init_config(self, config: Config):
         self.config = config
         self.config.mode = MODE_NAMED
         if not self.config.named_dirs:
@@ -49,38 +89,9 @@ class Setup(wx.adv.Wizard):
             self.config.named_dirs.values(),
             self.config.named_dirs.keys(),
         ))
-        self.on_finish = on_finish
-        super().__init__(parent)
-        self.pages = [Page(self) for _ in range(2)]
-        self.init_text(self.pages[0], self.pages[0].sizer)
-        self.init_controls(self.pages[1], self.pages[1].sizer)
-        wx.adv.WizardPageSimple.Chain(*self.pages)
-        self.GetPageAreaSizer().Add(self.pages[0])
-        self.run()
 
-    def run(self):
-        val = self.RunWizard(self.pages[0])
-        if val:
-            self.on_finish(self)
-
-    def init_text(self, parent: wx.Panel, sizer: wx.BoxSizer):
-        add_text_heading(parent, sizer, 'Lidské aktivity setup')
-        add_text_paragraph(
-            parent,
-            sizer,
-            'Please adjust your OS settings like this:'
-        )
-        add_text_list(
-            parent,
-            sizer,
-            [
-                'first do this',
-                'than that',
-                'and finally something different',
-            ]
-        )
-
-    def init_controls(self, parent: wx.Panel, sizer: wx.BoxSizer):
+    def _add_content_setup(self, parent: wx.Panel):
+        sizer = create_sizer(parent)
         self.text_controls = {}
         for i, (path, name) in enumerate(self.config.named_dirs.items()):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
