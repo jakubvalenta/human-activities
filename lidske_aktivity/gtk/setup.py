@@ -1,12 +1,13 @@
 from functools import partial
-from pathlib import Path
-from typing import Callable, Dict, List, NamedTuple
+from typing import Callable, List, NamedTuple
 
 import gi
 
-from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
+from lidske_aktivity.config import (
+    DEFAULT_NAMED_DIRS, MODE_NAMED, Config, TNamedDirs,
+)
 from lidske_aktivity.gtk.lib import (
-    box_add, choose_dir, create_box, create_button, create_entry, create_label,
+    NamedDirsForm, box_add, create_box, create_label,
 )
 
 gi.require_version('Gdk', '3.0')
@@ -81,13 +82,14 @@ def on_assistant_cancel(assistant: Gtk.Assistant):
 
 
 class Setup:
-    config: Config
+    _config: Config
     assistant: Gtk.Assistant
-    entries: Dict[str, Gtk.Entry]
-    named_dirs_by_name: Dict[str, Path]
 
     def __init__(self, config: Config, on_finish: Callable, *args, **kwargs):
-        self._init_config(config)
+        self._config = config
+        self._config.mode = MODE_NAMED
+        if not self._config.named_dirs:
+            self._config.named_dirs = DEFAULT_NAMED_DIRS
         self._on_finish = on_finish
         super().__init__()
         self.assistant = create_assistant(
@@ -99,63 +101,18 @@ class Setup:
                 ),
                 Page(
                     title='Setup',
-                    content=self._create_content_setup(),
+                    content=NamedDirsForm(
+                        self._config.named_dirs,
+                        on_change=self._on_named_dirs_change
+                    ),
                     page_type=Gtk.AssistantPageType.CONFIRM
                 )
             ],
             self._on_assistant_apply
         )
 
+    def _on_named_dirs_change(self, named_dirs: TNamedDirs):
+        self._config.named_dirs = named_dirs
+
     def _on_assistant_apply(self):
-        self._on_finish(self.config)
-
-    def _init_config(self, config: Config):
-        self.config = config
-        self.config.mode = MODE_NAMED
-        if not self.config.named_dirs:
-            self.config.named_dirs = DEFAULT_NAMED_DIRS
-        self.named_dirs_by_name = dict(zip(
-            self.config.named_dirs.values(),
-            self.config.named_dirs.keys(),
-        ))
-
-    def _create_content_setup(self) -> Gtk.Grid:
-        box = create_box()
-        grid = Gtk.Grid()
-        grid.set_column_spacing(10)
-        grid.set_row_spacing(10)
-        self.entries = {}
-        for i, (path, name) in enumerate(self.config.named_dirs.items()):
-            label = create_label(name)
-            grid.attach(label, left=0, top=i, width=1, height=1)
-            entry = create_entry(
-                value=str(path) or '',
-                callback=partial(self._on_named_dir_text, name)
-            )
-            entry.set_hexpand(True)
-            grid.attach(entry, left=1, top=i, width=1, height=1)
-            button = create_button(
-                'Choose',
-                partial(self._on_named_dir_button, name)
-            )
-            grid.attach(button, left=2, top=i, width=1, height=1)
-            self.entries[name] = entry
-        box_add(box, grid)
-        return box
-
-    def _update_named_dirs(self, name: str, path: Path):
-        self.named_dirs_by_name[name] = path
-        self.config.named_dirs = dict(zip(
-            self.named_dirs_by_name.values(),
-            self.named_dirs_by_name.keys()
-        ))
-
-    def _on_named_dir_text(self, name: str, entry: Gtk.Entry, value: str):
-        self._update_named_dirs(name, Path(value))
-
-    def _on_named_dir_button(self, name: str, button: Gtk.Button):
-        def callback(path_str: str):
-            self._update_named_dirs(name, Path(path_str))
-            self.entries[name].set_text(path_str)
-
-        choose_dir(self.assistant, callback)
+        self._on_finish(self._config)
