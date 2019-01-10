@@ -1,10 +1,14 @@
 import logging
+from functools import partial
+from pathlib import Path
 from typing import (
     Callable, Dict, Iterable, Iterator, List, NamedTuple, Optional,
 )
 
 import gi
 from PIL import Image
+
+from lidske_aktivity.config import TNamedDirs
 
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('Gtk', '3.0')
@@ -115,3 +119,188 @@ def image_to_pixbuf(image: Image) -> GdkPixbuf:
 
 def call_tick(func: Callable):
     GLib.idle_add(func)
+
+
+class RootPathForm(Gtk.Box):
+    _root_path: Path
+    _entry: Gtk.Entry
+
+    def __init__(self,
+                 root_path: Path,
+                 on_change: Callable[[Path], None]):
+        self._root_path = root_path
+        self._on_change = on_change
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self._entry = self._create_entry()
+
+    def _create_entry(self) -> Gtk.Entry:
+        entry = create_entry(
+            value=str(self._root_path) if self._root_path else '',
+            callback=self._on_text
+        )
+        box_add(self, entry)
+        button = create_button('Choose', self._on_button)
+        box_add(self, button)
+        return entry
+
+    def _on_text(self, path_str: str):
+        self._on_change(Path(path_str))
+
+    def _on_button(self):
+        def callback(path_str: str):
+            self._on_change(Path(path_str))
+            self._entry.set_text(path_str)
+
+        choose_dir(self, callback)
+
+
+class ListBoxRowWithData(Gtk.ListBoxRow):
+    def __init__(self, data: str):
+        super().__init__()
+        self.data = data
+        self.add(Gtk.Label(data))
+
+
+def add_list_box_row(list_box: Gtk.ListBox, text: str):
+    row = Gtk.ListBoxRowWithData(text)
+    list_box.add(row)
+
+
+def insert_list_box_row(list_box: Gtk.ListBox,
+                        text: str,
+                        i: int) -> Gtk.ListBoxRow:
+    row = Gtk.ListBoxRowWithData(text)
+    list_box.insert(row, i)
+    return row
+
+
+class CustomDirsForm(Gtk.Box):
+    _custom_dirs: List[Path]
+    _list_box: Gtk.ListBox
+
+    def __init__(self,
+                 custom_dirs: List[Path],
+                 on_change: Callable[[List[Path]], None]):
+        self._custom_dirs = custom_dirs
+        self._on_change = on_change
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self._list_box = self._create_list_box()
+
+    def _create_list_box(self) -> Gtk.ListBox:
+        list_box = Gtk.ListBox()
+        list_box.connect('row-activated', self._on_button_change)
+        for custom_dir in self._custom_dirs:
+            add_list_box_row(list_box, str(custom_dir))
+        box_add(self, list_box)
+
+        vbox = create_box(spacing=5)
+        for i, (label, callback) in enumerate([
+                ('New', self._on_button_new),
+                ('Change', self._on_button_change),
+                ('Delete', self._on_button_delete),
+                ('Clear', self._on_button_clear),
+        ]):
+            button = create_button(label, callback)
+            box_add(vbox, button)
+        box_add(self, list_box)
+        return list_box
+
+    def _on_button_change(self, event):
+        def callback(path_str: str):
+            row = self._list_box.get_selected_row()
+            i = row.get_index()
+            self._list_box.remove(row)
+            new_row = insert_list_box_row(self._list_box, path_str, i)
+            self._custom_dirs[i] = Path(path_str)
+            self._on_change(self._custom_dirs)
+            self._list_box.select_row(new_row)
+
+        choose_dir(self, callback)
+
+    def _on_button_new(self, event):
+        def callback(path_str: str):
+            self._custom_dirs.append(Path(path_str))
+            self._on_change(self._custom_dirs)
+            add_list_box_row(self._list_box, path_str)
+
+        choose_dir(self, callback)
+
+    def _on_button_delete(self, event):
+        row = self._list_box.get_selected_row()
+        if row:
+            i = row.get_index()
+            del self._custom_dirs[i]
+            self._on_change(self._custom_dirs)
+            self._list_box.remove(row)
+
+    def _on_button_clear(self, event):
+        self._custom_dirs[:] = []
+        self._on_change(self._custom_dirs)
+        self._list_box.foreach(lambda row: self._list_box.remove(row))
+
+
+class NamedDir(NamedTuple):
+    path: Path
+    name: str
+
+
+class NamedDirsForm(Gtk.Grid):
+    _named_dirs_list: List[NamedDir]
+    _path_entries: List[Gtk.Entry]
+
+    def __init__(self,
+                 named_dirs: TNamedDirs,
+                 on_change: Callable[[TNamedDirs], None]):
+        self._named_dirs_list = [
+            NamedDir(path, name)
+            for path, name in named_dirs.items()
+        ]
+        self._on_change = on_change
+        super().__init__()
+        self.set_column_spacing(10)
+        self.set_row_spacing(10)
+        self._path_entries = list(self._create_entries())
+
+    def _create_entries(self) -> Iterator[Gtk.Entry]:
+        for i, named_dir in enumerate(self._named_dirs_list):
+            entry_name = create_entry(
+                value=named_dir.name or '',
+                callback=partial(self._on_name_text, named_dir)
+            )
+            entry_name.set_hexpand(True)
+            self.attach(entry_name, left=0, top=i, width=1, height=1)
+            entry_path = create_entry(
+                value=str(named_dir.path) or '',
+                callback=partial(self._on_path_text, named_dir)
+            )
+            entry_path.set_hexpand(True)
+            self.attach(entry_path, left=1, top=i, width=1, height=1)
+            button = create_button(
+                'Choose',
+                partial(self._on_path_button, named_dir)
+            )
+            self.attach(button, left=2, top=i, width=1, height=1)
+            yield entry_path
+
+    def _on_name_text(self, i: int, named_dir: NamedDir, name: str):
+        self.named_dirs_list[i] = named_dir._replace(name=name)
+        self._on_change(self._named_dirs)
+
+    def _on_path_text(self, i: int, named_dir: NamedDir, path_str: str):
+        self.named_dirs_list[i] = named_dir._replace(path=Path(path_str))
+        self._on_change(self._named_dirs)
+
+    def _on_path_button(self, i: int, named_dir: NamedDir):
+        def callback(path_str: str):
+            self.named_dirs_list[i] = named_dir._replace(path=Path(path_str))
+            self._on_change(self._named_dirs)
+            self._path_entries[i].set_text(path_str)
+
+        choose_dir(self, callback)
+
+    @property
+    def _named_dirs(self):
+        return {
+            named_dir.name: named_dir.path
+            for named_dir in self._named_dirs_list
+        }
