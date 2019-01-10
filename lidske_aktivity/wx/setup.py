@@ -30,7 +30,7 @@ def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
 
 def init_wizard(wizard: wx.adv.Wizard,
                 page_funcs: List[Callable],
-                on_finish: Callable):
+                callback: Callable):
     pages = []
     for page_func in page_funcs:
         page = wx.adv.WizardPageSimple(wizard)
@@ -40,7 +40,7 @@ def init_wizard(wizard: wx.adv.Wizard,
     wizard.GetPageAreaSizer().Add(pages[0])
     val = wizard.RunWizard(pages[0])
     if val:
-        on_finish()
+        callback()
 
 
 def add_content_intro(parent: wx.Panel):
@@ -65,7 +65,6 @@ def add_content_intro(parent: wx.Panel):
 class Setup(wx.adv.Wizard):
     title = 'Lidské aktivity setup'
     config: Config
-    on_finish: Callable
     text_controls: Dict[str, wx.TextCtrl]
     named_dirs_by_name: Dict[str, Path]
 
@@ -79,10 +78,10 @@ class Setup(wx.adv.Wizard):
                 add_content_intro,
                 self._add_content_setup,
             ],
-            self.on_finish
+            self._on_wizard_accept
         )
 
-    def on_finish(self):
+    def _on_wizard_accept(self):
         self._on_finish(self.config)
 
     def _init_config(self, config: Config):

@@ -158,7 +158,7 @@ class Menu(Gtk.ApplicationWindow):
     def update_radio_buttons(self, active_mode: str):
         pass
 
-    def _on_setup_button(self, event):
+    def _on_setup_button(self, button: Gtk.Button):
         self.hide()
         self.app.show_setup()
 
