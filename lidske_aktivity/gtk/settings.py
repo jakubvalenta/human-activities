@@ -71,13 +71,11 @@ class Settings(Gtk.Dialog):
         self._mode_radios = create_radio_group(
             radio_configs,
             active_value=self._config.mode,
-            callback=self._on_mode_radio
+            callback=self._on_mode_radio_toggled
         )
 
-    def _on_mode_radio(self, event):
-        for mode, radio in self._mode_radios.items():
-            if radio.GetValue():
-                self._config.mode = mode
+    def _on_mode_radio_toggled(self, mode: str):
+        self._config.mode = mode
         self._toggle_controls()
 
     def _add_mode_radio(self, mode: str):
@@ -86,7 +84,8 @@ class Settings(Gtk.Dialog):
     def _init_root_path_form(self):
         self._root_path_form = RootPathForm(
             self._config.root_path,
-            on_change=self._on_root_path_change
+            self._on_root_path_change,
+            parent=self
         )
         box_add(self._box, self._root_path_form)
 
@@ -96,7 +95,8 @@ class Settings(Gtk.Dialog):
     def _init_custom_dirs_form(self):
         self._custom_dirs_form = CustomDirsForm(
             self._config.custom_dirs,
-            on_change=self._on_custom_dirs_change
+            self._on_custom_dirs_change,
+            parent=self
         )
         box_add(self._box, self._custom_dirs_form)
 
@@ -106,7 +106,8 @@ class Settings(Gtk.Dialog):
     def _init_named_dirs_form(self):
         self._named_dirs_form = NamedDirsForm(
             self._config.named_dirs,
-            on_change=self._on_named_dirs_change
+            self._on_named_dirs_change,
+            parent=self
         )
         box_add(self._box, self._named_dirs_form)
 

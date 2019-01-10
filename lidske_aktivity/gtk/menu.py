@@ -149,14 +149,14 @@ class Menu(Gtk.ApplicationWindow):
         self.set_position(Gtk.WindowPosition.CENTER)
         self.present()
 
-    def _on_radio_toggled(self, button: Gtk.Button, mode: str):
+    def _on_radio_toggled(self, mode: str):
         logger.info('Radio toggled: new mode = "%s"', mode)
         self.app.set_active_mode(mode)
 
     def update_radio_buttons(self, active_mode: str):
         pass
 
-    def _on_setup_button(self, button: Gtk.Button):
+    def _on_setup_button(self):
         self.hide()
         self.app.show_setup()
 

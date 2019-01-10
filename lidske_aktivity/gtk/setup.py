@@ -49,7 +49,7 @@ def create_content_intro() -> Gtk.Box:
 
 class Page(NamedTuple):
     title: str
-    content: Gtk.Widget
+    content_func: Gtk.Widget
     page_type: Gtk.AssistantPageType
 
 
@@ -64,10 +64,11 @@ def create_assistant(pages: List[Page], callback: Callable) -> Gtk.Assistant:
     )
     assistant.connect('cancel', on_assistant_cancel)
     for page in pages:
-        assistant.append_page(page.content)
-        assistant.set_page_title(page.content, page.title)
-        assistant.set_page_type(page.content, page.page_type)
-        assistant.set_page_complete(page.content, True)
+        content = page.content_func(parent=assistant)
+        assistant.append_page(content)
+        assistant.set_page_title(content, page.title)
+        assistant.set_page_type(content, page.page_type)
+        assistant.set_page_complete(content, True)
     assistant.show_all()
     return assistant
 
@@ -85,7 +86,10 @@ class Setup:
     _config: Config
     assistant: Gtk.Assistant
 
-    def __init__(self, config: Config, on_finish: Callable, *args, **kwargs):
+    def __init__(self,
+                 config: Config,
+                 on_finish: Callable,
+                 parent: Gtk.Window):
         self._config = config
         self._config.mode = MODE_NAMED
         if not self._config.named_dirs:
@@ -96,14 +100,15 @@ class Setup:
             [
                 Page(
                     title='Intro',
-                    content=create_content_intro(),
+                    content_func=lambda parent: create_content_intro(),
                     page_type=Gtk.AssistantPageType.INTRO
                 ),
                 Page(
                     title='Setup',
-                    content=NamedDirsForm(
+                    content_func=partial(
+                        NamedDirsForm,
                         self._config.named_dirs,
-                        on_change=self._on_named_dirs_change
+                        self._on_named_dirs_change
                     ),
                     page_type=Gtk.AssistantPageType.CONFIRM
                 )
