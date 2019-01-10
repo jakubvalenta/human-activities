@@ -13,6 +13,8 @@ from gi.repository import Gdk, GLib, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
 
+T = TypeVar('T')
+
 
 def gen_bg_color_rule(selector: str, color: TColor) -> str:
     r, g, b, _ = color
@@ -44,7 +46,7 @@ def load_css():
 
 
 class Application(Gtk.Application):
-    frame: Optional[Gtk.ApplicationWindow] = None
+    _frame: Optional[Gtk.ApplicationWindow] = None
 
     def __init__(self, on_init: Callable, on_quit: Callable, *args, **kwargs):
         self.on_init = on_init
@@ -55,11 +57,14 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.on_init(self.frame)
+        self.on_init(self)
 
     def do_activate(self):
-        if not self.frame:
-            self.frame = Gtk.ApplicationWindow(application=self)
+        if not self._frame:
+            self._frame = Gtk.ApplicationWindow(application=self)
+
+    def spawn_frame(self, func: Callable[..., T], *args, **kwargs) -> T:
+        return func(*args, **kwargs)
 
     def quit(self):
         logger.info('App quit')

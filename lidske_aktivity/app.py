@@ -19,7 +19,6 @@ class AppError(Exception):
 
 class Application:
     model: Model
-    frame: Any
     ui_app: Any
     status_icon: Any
     last_ext_directories: Optional[TExtDirectories] = None
@@ -27,12 +26,15 @@ class Application:
     def __init__(self, ui: Any):
         self.model = Model()
         self.ui = ui
-        self.ui_app = self.ui.app.Application(self.on_init, self.on_quit)
-        self.ui_app.run()
+        self.ui.app.Application(self.on_init, self.on_quit).run()
 
-    def on_init(self, frame: Any):
+    def on_init(self, ui_app: Any):
+        self.ui_app = ui_app
         logger.info('On init')
-        self.menu = self.ui.menu.Menu(self, parent=frame)
+        self.menu = self.ui_app.spawn_frame(
+            self.ui.menu.Menu,
+            self
+        )
         self.menu.init(self.model.active_mode, self.model.ext_directories)
         self.status_icon = self.ui.status_icon.StatusIcon(self)
         if self.model.config.show_setup:
@@ -58,17 +60,17 @@ class Application:
         self.menu.popup_at(mouse_x, mouse_y)
 
     def show_setup(self):
-        self.ui.setup.Setup(
+        self.ui_app.spawn_frame(
+            self.ui.setup.Setup,
             self.model.config,
             on_finish=lambda setup: self.set_config(setup.config),
-            parent=self.ui_app.frame
         )
 
     def show_settings(self):
-        self.ui.settings.Settings(
+        self.ui_app.spawn_frame(
+            self.ui.settings.Settings,
             self.model.config,
             lambda settings: self.set_config(settings.config),
-            parent=self.ui_app.frame
         )
 
     def show_about(self):
