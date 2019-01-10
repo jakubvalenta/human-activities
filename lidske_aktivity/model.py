@@ -212,8 +212,4 @@ class Model:
 
     @property
     def percents(self) -> List[float]:
-        return [
-            ext_directory.percent
-            for ext_directory in self.ext_directories.values()
-            if ext_directory.percent
-        ]
+        return [x.percent for x in self.ext_directories.values()]
