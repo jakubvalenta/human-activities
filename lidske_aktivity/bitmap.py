@@ -17,7 +17,7 @@ TSliceRad = Tuple[float, float, TColor]
 
 
 def _frac_to_rad(frac: float) -> float:
-    return frac * 2 * math.pi
+    return min(frac, 1) * 2 * math.pi
 
 
 def _hash_to_fraction(s: str) -> float:
@@ -116,6 +116,9 @@ def _slices_frac_to_rad(
         return
     cumulative_frac = 0.0
     for i, frac in enumerate(slices_frac):
+        frac = round(frac, 2)
+        if frac == 0:
+            continue
         yield (
             _frac_to_rad(cumulative_frac),
             _frac_to_rad(cumulative_frac + frac),
