@@ -22,6 +22,8 @@ class Application:
     ui_app: Any
     status_icon: Any
     last_ext_directories: Optional[TExtDirectories] = None
+    tick_event_stop: Optional[Event] = None
+    tick_thread: Optional[Thread] = None
 
     def __init__(self, ui: Any):
         self.model = Model()
