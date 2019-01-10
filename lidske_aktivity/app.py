@@ -63,14 +63,14 @@ class Application:
         self.ui_app.spawn_frame(
             self.ui.setup.Setup,
             self.model.config,
-            on_finish=lambda setup: self.set_config(setup.config),
+            self.set_config
         )
 
     def show_settings(self):
         self.ui_app.spawn_frame(
             self.ui.settings.Settings,
             self.model.config,
-            lambda settings: self.set_config(settings.config),
+            self.set_config
         )
 
     def show_about(self):

@@ -55,7 +55,7 @@ class BaseDialog(wx.Dialog):
         self.Centre()
         val = self.ShowModal()
         if val == wx.ID_OK:
-            self.on_accept(self)
+            self.on_accept(self.config)
         self.Destroy()
 
     def fit(self):

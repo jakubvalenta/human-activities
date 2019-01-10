@@ -40,7 +40,7 @@ def init_wizard(wizard: wx.adv.Wizard,
     wizard.GetPageAreaSizer().Add(pages[0])
     val = wizard.RunWizard(pages[0])
     if val:
-        on_finish(wizard)
+        on_finish()
 
 
 def add_content_intro(parent: wx.Panel):
@@ -65,11 +65,13 @@ def add_content_intro(parent: wx.Panel):
 class Setup(wx.adv.Wizard):
     title = 'Lidské aktivity setup'
     config: Config
+    on_finish: Callable
     text_controls: Dict[str, wx.TextCtrl]
     named_dirs_by_name: Dict[str, Path]
 
     def __init__(self, config: Config, on_finish: Callable, parent: wx.Frame):
         self._init_config(config)
+        self._on_finish = on_finish
         super().__init__(parent)
         init_wizard(
             self,
@@ -77,8 +79,11 @@ class Setup(wx.adv.Wizard):
                 add_content_intro,
                 self._add_content_setup,
             ],
-            on_finish
+            self.on_finish
         )
+
+    def on_finish(self):
+        self._on_finish(self.config)
 
     def _init_config(self, config: Config):
         self.config = config
