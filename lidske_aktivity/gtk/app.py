@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Iterator, Optional
+from typing import Any, Callable, Iterator, Optional, TypeVar
 
 import gi
 

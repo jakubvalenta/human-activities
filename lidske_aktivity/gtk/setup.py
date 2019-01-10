@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Callable, List, NamedTuple
 
 import gi
@@ -51,8 +52,14 @@ class Page(NamedTuple):
     page_type: Gtk.AssistantPageType
 
 
-def init_assistant(pages: List[Page]):
+def init_assistant(pages: List[Page], on_finish: Callable):
     assistant = Gtk.Assistant()
+    assistant.use_header_bar = True
+    assistant.connect(
+        'apply',
+        partial(on_assistant_apply, on_finish=on_finish)
+    )
+    assistant.connect('cancel', on_assistant_cancel)
     for page in pages:
         assistant.append_page(page.content)
         assistant.set_page_title(page.content, page.title)
@@ -61,24 +68,41 @@ def init_assistant(pages: List[Page]):
     assistant.show_all()
 
 
+def on_assistant_apply(assistant: Gtk.Assistant, on_finish: Callable):
+    on_finish()
+    assistant.hide()
+
+
+def on_assistant_cancel(assistant: Gtk.Assistant):
+    assistant.hide()
+
+
 class Setup:
     config: Config
+    on_finish: Callable
 
     def __init__(self, config: Config, on_finish: Callable, *args, **kwargs):
         self._init_config(config)
+        self._on_finish = on_finish
         super().__init__()
-        init_assistant([
-            Page(
-                title='Intro',
-                content=create_content_intro(),
-                page_type=Gtk.AssistantPageType.INTRO
-            ),
-            Page(
-                title='Setup',
-                content=create_content_setup(),
-                page_type=Gtk.AssistantPageType.CONFIRM
-            )
-        ])
+        init_assistant(
+            [
+                Page(
+                    title='Intro',
+                    content=create_content_intro(),
+                    page_type=Gtk.AssistantPageType.INTRO
+                ),
+                Page(
+                    title='Setup',
+                    content=create_content_setup(),
+                    page_type=Gtk.AssistantPageType.CONFIRM
+                )
+            ],
+            self.on_finish
+        )
+
+    def on_finish(self):
+        self._on_finish(self.config)
 
     def _init_config(self, config: Config):
         self.config = config
