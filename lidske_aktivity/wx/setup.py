@@ -1,14 +1,13 @@
 from functools import partial
-from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, List
 
 import wx
 import wx.adv
 
-from lidske_aktivity.config import DEFAULT_NAMED_DIRS, MODE_NAMED, Config
-from lidske_aktivity.wx.lib import (
-    choose_dir, create_button, create_label, create_sizer, create_text_control,
+from lidske_aktivity.config import (
+    DEFAULT_NAMED_DIRS, MODE_NAMED, Config, TNamedDirs,
 )
+from lidske_aktivity.wx.lib import NamedDirsForm, create_label
 
 
 def add_text_heading(parent: wx.Window, sizer: wx.Sizer, text: str):
@@ -34,7 +33,8 @@ def init_wizard(wizard: wx.adv.Wizard,
     pages = []
     for page_func in page_funcs:
         page = wx.adv.WizardPageSimple(wizard)
-        page_func(page)
+        content = page_func(parent=page)
+        page.SetSizer(content)
         pages.append(page)
     wx.adv.WizardPageSimple.Chain(*pages)
     wizard.GetPageAreaSizer().Add(pages[0])
@@ -43,8 +43,8 @@ def init_wizard(wizard: wx.adv.Wizard,
         callback()
 
 
-def add_content_intro(parent: wx.Panel):
-    sizer = create_sizer(parent)
+def create_content_intro(parent: wx.Panel) -> wx.BoxSizer:
+    sizer = wx.BoxSizer()
     add_text_heading(parent, sizer, 'Lidské aktivity setup')
     add_text_paragraph(
         parent,
@@ -60,90 +60,35 @@ def add_content_intro(parent: wx.Panel):
             'and finally something different',
         ]
     )
+    return sizer
 
 
 class Setup(wx.adv.Wizard):
     title = 'Lidské aktivity setup'
-    config: Config
-    text_controls: Dict[str, wx.TextCtrl]
-    named_dirs_by_name: Dict[str, Path]
+    _config: Config
 
     def __init__(self, config: Config, on_finish: Callable, parent: wx.Frame):
-        self._init_config(config)
+        self._config = config
+        self._config.mode = MODE_NAMED
+        if not self._config.named_dirs:
+            self._config.named_dirs = DEFAULT_NAMED_DIRS
         self._on_finish = on_finish
         super().__init__(parent)
         init_wizard(
             self,
             [
-                add_content_intro,
-                self._add_content_setup,
+                create_content_intro,
+                partial(
+                    NamedDirsForm,
+                    self._config.named_dirs,
+                    self._on_named_dirs_change
+                ),
             ],
             self._on_wizard_accept
         )
 
+    def _on_named_dirs_change(self, named_dirs: TNamedDirs):
+        self._config.named_dirs = named_dirs
+
     def _on_wizard_accept(self):
-        self._on_finish(self.config)
-
-    def _init_config(self, config: Config):
-        self.config = config
-        self.config.mode = MODE_NAMED
-        if not self.config.named_dirs:
-            self.config.named_dirs = DEFAULT_NAMED_DIRS
-        self.named_dirs_by_name = dict(zip(
-            self.config.named_dirs.values(),
-            self.config.named_dirs.keys(),
-        ))
-
-    def _add_content_setup(self, parent: wx.Panel):
-        sizer = create_sizer(parent)
-        self.text_controls = {}
-        for i, (path, name) in enumerate(self.config.named_dirs.items()):
-            hbox = wx.BoxSizer(wx.HORIZONTAL)
-            label = create_label(parent, name)
-            hbox.Add(
-                label,
-                proportion=2,
-                flag=wx.EXPAND | wx.RIGHT,
-                border=10
-            )
-            text_control = create_text_control(
-                parent,
-                value=str(path) or '',
-                callback=partial(self.on_named_dir_text, name)
-            )
-            hbox.Add(
-                text_control,
-                proportion=3,
-                flag=wx.EXPAND | wx.RIGHT,
-                border=10
-            )
-            button = create_button(
-                parent,
-                parent,
-                'Choose',
-                partial(self.on_named_dir_button, name)
-            )
-            hbox.Add(button, proportion=1, flag=wx.EXPAND)
-            if i == 0:
-                flag = wx.EXPAND
-            else:
-                flag = wx.EXPAND | wx.TOP
-            sizer.Add(hbox, flag=flag, border=5)
-            self.text_controls[name] = text_control
-
-    def _update_named_dirs(self, name: str, path: Path):
-        self.named_dirs_by_name[name] = path
-        self.config.named_dirs = dict(zip(
-            self.named_dirs_by_name.values(),
-            self.named_dirs_by_name.keys()
-        ))
-
-    def on_named_dir_text(self, name: str, event):
-        self._update_named_dirs(name, Path(event.GetString()))
-
-    def on_named_dir_button(self, name: str, event):
-        def callback(path_str: str):
-            self._update_named_dirs(name, Path(path_str))
-            self.text_controls[name].SetValue(path_str)
-
-        choose_dir(self, callback)
+        self._on_finish(self._config)

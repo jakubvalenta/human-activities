@@ -214,7 +214,7 @@ class Menu(wx.PopupTransientWindow):
         for mode, radio_button in self.radio_buttons.items():
             radio_button.SetValue(mode == active_mode)
 
-    def _on_setup_button(self, event):
+    def _on_setup_button(self):
         self.Dismiss()
         self.app.show_setup()
 

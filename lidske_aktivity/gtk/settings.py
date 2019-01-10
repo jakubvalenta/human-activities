@@ -8,7 +8,7 @@ from lidske_aktivity.config import (
 )
 from lidske_aktivity.gtk.lib import (
     CustomDirsForm, NamedDirsForm, RadioConfig, RootPathForm, box_add,
-    create_box, create_label, create_radio_group,
+    create_label, create_radio_group,
 )
 
 gi.require_version('Gtk', '3.0')
