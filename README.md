@@ -65,7 +65,8 @@ make dist-debian-build dist-debian
 ### Mac
 
 ```
-make dist-pyinstaller
+pip install pyinstaller
+sh pyinstaller/pyinstaller_mac.sh
 ```
 
 ### Windows

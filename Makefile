@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup run run-debug run-wx dist-pyinstaller dist-pyinstaller-docker-build dist-pyinstaller-docker dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version backup help
+.PHONY: build install setup run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -35,13 +35,10 @@ run-debug:  ## Start the app with extended logging
 run-wx:  ## Start the app with the WxWidgets backend and extended logging
 	pipenv run python3 -m lidske_aktivity --verbose --wx
 
-dist-pyinstaller:  ## Build a PyInstaller-based package (without Docker)
-
-
-dist-pyinstaller-docker-build:
+dist-pyinstaller-build:
 	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
 
-dist-pyinstaller-docker: | dist-pyinstaller-build  ## Build a PyInstaller-based package (with Docker)
+dist-pyinstaller: | dist-pyinstaller-build  ## Build a PyInstaller-based package (with Docker)
 	docker run --rm --volume "$$(pwd):/app" -e PYTHONHASHSEED=1 \
 		lidske_aktivity_pyinstaller \
 		pipenv run pyinstaller \
