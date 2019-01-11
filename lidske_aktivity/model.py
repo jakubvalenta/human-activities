@@ -34,7 +34,7 @@ class ExtDirectory(NamedTuple):
     def text(self):
         if self.pending:
             return f'{self.label}: ...'
-        return f'{self.label}: {self.fraction:.2%}'
+        return f'{self.label}: {self.fraction:.0%}'
 
 
 TExtDirectories = Dict[Path, ExtDirectory]
