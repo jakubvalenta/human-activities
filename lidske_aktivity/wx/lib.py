@@ -146,9 +146,9 @@ class RootPathForm(wx.Panel):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent)
-        self._control = self._create_control()
+        self._control = self._init_control()
 
-    def _create_control(self) -> wx.TextCtrl:
+    def _init_control(self) -> wx.TextCtrl:
         hbox = create_sizer(self, wx.HORIZONTAL)
         control = create_text_control(
             self,
@@ -194,9 +194,9 @@ class CustomDirsForm(wx.Panel):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent)
-        self._list_box = self._create_list_box()
+        self._list_box = self._init_list_box()
 
-    def _create_list_box(self):
+    def _init_list_box(self):
         hbox = create_sizer(self, wx.HORIZONTAL)
 
         list_box = wx.ListBox(self)
@@ -287,9 +287,9 @@ class NamedDirsForm(wx.Panel):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent)
-        self._path_controls = list(self._create_controls())
+        self._path_controls = list(self._init_controls())
 
-    def _create_controls(self) -> Iterator[wx.TextCtrl]:
+    def _init_controls(self) -> Iterator[wx.TextCtrl]:
         vbox = create_sizer(self)
         for i, named_dir in enumerate(self._named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)

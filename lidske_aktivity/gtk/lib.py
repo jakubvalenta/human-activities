@@ -151,9 +151,9 @@ class RootPathForm(Gtk.Box):
         self._on_change = on_change
         self._parent = parent
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        self._entry = self._create_entry()
+        self._entry = self._init_entry()
 
-    def _create_entry(self) -> Gtk.Entry:
+    def _init_entry(self) -> Gtk.Entry:
         entry = create_entry(
             value=str(self._root_path) if self._root_path else '',
             callback=self._on_text
@@ -195,9 +195,9 @@ class CustomDirsForm(Gtk.Box):
         self._on_change = on_change
         self._parent = parent
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        self._list_box = self._create_list_box()
+        self._list_box = self._init_list_box()
 
-    def _create_list_box(self) -> Gtk.ListBox:
+    def _init_list_box(self) -> Gtk.ListBox:
         list_box = Gtk.ListBox()
         for custom_dir in self._custom_dirs:
             row = create_list_box_row(str(custom_dir))
@@ -281,9 +281,9 @@ class NamedDirsForm(Gtk.Grid):
         super().__init__()
         self.set_column_spacing(10)
         self.set_row_spacing(10)
-        self._path_entries = list(self._create_entries())
+        self._path_entries = list(self._init_entries())
 
-    def _create_entries(self) -> Iterator[Gtk.Entry]:
+    def _init_entries(self) -> Iterator[Gtk.Entry]:
         for i, named_dir in enumerate(self._named_dirs_list):
             entry_name = create_entry(
                 value=named_dir.name or '',
