@@ -74,3 +74,14 @@ make dist-pyinstaller
 pip install pyinstaller
 pyinstaller/bin/pyinstaller_win.cmd
 ```
+
+## Debugging
+
+### Ubuntu
+
+```
+# apt install libgtk-3-dev
+gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
+```
+
+Then start the app and run GTK Inspector with `CTRL+SHIFT+i`.
