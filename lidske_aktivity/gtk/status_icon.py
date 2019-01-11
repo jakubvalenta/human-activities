@@ -1,9 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING, Callable, Iterable, Iterator, List, Optional, Tuple,
-)
+from typing import TYPE_CHECKING, Callable, Iterable, List, Optional, Tuple
 
 import gi
 
@@ -68,29 +66,17 @@ def write_temp_file(lines: Iterable[str],
     return temp_dir
 
 
-def set_indicator_dynamic_icon(indicator: AppIndicator3.Indicator,
-                               svg: Iterator[str],
-                               icon_hash: str,
-                               tooltip: str) -> tempfile.TemporaryDirectory:
-    """Set an AppIndicator icon from a generated SVG file.
-
-    Return a reference to the temporary directory in which the icon was saved.
-    This reference should be stored in a variable, so that it's not
-    garbage-collected and the icon deleted.
-    """
-    icon_temp_dir = write_temp_file(
-        svg,
-        filename=icon_hash + '.svg',
-        prefix=__application_id__ + '-',
-    )
-    indicator.set_icon_full(icon_hash, tooltip)
-    indicator.set_icon_theme_path(icon_temp_dir.name)
+def set_indicator_icon(indicator: AppIndicator3.Indicator,
+                       icon_theme_path: str,
+                       icon_name: str,
+                       tooltip: str):
+    indicator.set_icon_full(icon_name, tooltip)
+    indicator.set_icon_theme_path(icon_theme_path)
     logger.info(
         'Set icon %s/%s',
         indicator.get_icon_theme_path(),
         indicator.get_icon()
     )
-    return icon_temp_dir
 
 
 class StatusIcon():
@@ -140,12 +126,18 @@ class StatusIcon():
     def update(self, percents: List[float], tooltip: str):
         svg = draw_pie_chart_svg(percents)
         icon_hash = calc_icon_hash(percents)
-        self.icon_temp_dir = set_indicator_dynamic_icon(
-            self.indicator,
+        icon_temp_dir = write_temp_file(
             svg,
-            icon_hash,
-            tooltip,
+            filename=icon_hash + '.svg',
+            prefix=__application_id__ + '-',
         )
+        set_indicator_icon(
+            self.indicator,
+            icon_theme_path=icon_temp_dir.name,
+            icon_name=icon_hash,
+            tooltip=tooltip
+        )
+        self.icon_temp_dir = icon_temp_dir
 
     def destroy(self):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
