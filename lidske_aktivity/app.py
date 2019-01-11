@@ -49,14 +49,12 @@ class Application:
             return
         self.model.active_mode = active_mode
         self.menu.update_radio_buttons(active_mode)
-        self.update_icon()
-        self.update_menu()
+        self.on_tick()
 
     def set_config(self, config: Config):
         self.model.config = config
         self.reset_menu()
-        self.update_icon()
-        self.update_menu()
+        self.on_tick()
 
     def show_menu(self, mouse_x: int, mouse_y: int):
         self.menu.popup_at(mouse_x, mouse_y)
@@ -106,14 +104,14 @@ class Application:
     def on_tick(self):
         if self.model.ext_directories != self.last_ext_directories:
             self.last_ext_directories = self.model.ext_directories
-            self.update_icon()
-        self.update_menu()  # Always update to keep GTK pulsing.
+            self._update_icon()
+        self._update_menu()  # Always update to keep GTK pulsing.
 
-    def update_icon(self):
+    def _update_icon(self):
         logger.info('Updating icon with slices %s', self.model.percents)
         self.status_icon.update(self.model.percents, self.model.tooltip)
 
-    def update_menu(self):
+    def _update_menu(self):
         logger.info('Update menu')
         pending = False
         if self.model.ext_directories:
