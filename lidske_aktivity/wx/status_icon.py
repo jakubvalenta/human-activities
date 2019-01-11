@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, List
 import wx
 import wx.adv
 
-from lidske_aktivity.bitmap import draw_pie_chart
+from lidske_aktivity.icon import draw_pie_chart
 from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
 
 if TYPE_CHECKING:

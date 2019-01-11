@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict
 
 import wx
 
-from lidske_aktivity.bitmap import color_from_index
+from lidske_aktivity.icon import color_from_index
 from lidske_aktivity.model import SIZE_MODES, TExtDirectories
 from lidske_aktivity.wx.lib import create_button, create_label, create_sizer
 

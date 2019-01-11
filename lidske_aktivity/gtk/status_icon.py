@@ -8,7 +8,7 @@ from typing import (
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
-from lidske_aktivity.bitmap import draw_pie_chart_svg
+from lidske_aktivity.icon import draw_pie_chart_svg
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
