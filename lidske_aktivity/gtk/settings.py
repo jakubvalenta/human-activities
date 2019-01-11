@@ -44,6 +44,7 @@ class Settings(Gtk.Dialog):
             )
         )
         self.set_default_size(500, 600)
+        self.set_position(Gtk.WindowPosition.CENTER)
         self._init_window()
         self._create_widgets()
         self._add_widgets()
