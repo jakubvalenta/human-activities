@@ -102,6 +102,9 @@ data/lidske-aktivity.svg:
 data/lidske-aktivity.png: data/lidske-aktivity.svg
 	data/bin/create_png
 
+data/lidske-aktivity.ico: data/lidske-aktivity.png
+	data/bin/create_ico
+
 generate-data: data/lidske-aktivity.png
 
 clean:  ## Clean distribution package
