@@ -235,7 +235,7 @@ class Menu(wx.PopupTransientWindow):
     def ProcessLeftDown(self, event: wx.MouseEvent):
         logger.info('Click outside menu')
         self.last_closed = time.time()
-        return super().ProcessLeftDown(self, event)
+        return super().ProcessLeftDown(event)
 
     def destroy(self):
         self.Destroy()
