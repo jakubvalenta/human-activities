@@ -133,7 +133,25 @@ def call_tick(func: Callable):
     wx.CallAfter(func)
 
 
-class RootPathForm(wx.Panel):
+class Form:
+    panel: wx.Panel
+
+    def __init__(self,
+                 parent: wx.Window,
+                 use_parent_panel: bool = False):
+        if use_parent_panel:
+            self.panel = parent
+        else:
+            self.panel = wx.Panel(parent)
+
+    def toggle(self, enabled: bool):
+        if enabled:
+            self.panel.Enable()
+        else:
+            self.panel.Disable()
+
+
+class RootPathForm(Form):
     _root_path: Path
     _control: wx.TextCtrl
     _parent: wx.Panel
@@ -141,17 +159,19 @@ class RootPathForm(wx.Panel):
     def __init__(self,
                  root_path: Path,
                  on_change: Callable[[Path], None],
-                 parent: wx.Panel):
+                 parent: wx.Panel,
+                 *args,
+                 **kwargs):
         self._root_path = root_path
         self._on_change = on_change
         self._parent = parent
-        super().__init__(self._parent)
+        super().__init__(self._parent, *args, **kwargs)
         self._control = self._init_control()
 
     def _init_control(self) -> wx.TextCtrl:
-        hbox = create_sizer(self, wx.HORIZONTAL)
+        hbox = create_sizer(self.panel, wx.HORIZONTAL)
         control = create_text_control(
-            self,
+            self.panel,
             value=str(self._root_path) if self._root_path else '',
             callback=self._on_text
         )
@@ -162,8 +182,8 @@ class RootPathForm(wx.Panel):
             border=10
         )
         button = create_button(
-            self,
-            self,
+            self.panel,
+            self.panel,
             'Choose',
             self._on_button
         )
@@ -178,10 +198,10 @@ class RootPathForm(wx.Panel):
             self._on_change(Path(path_str))
             self._control.SetValue(path_str)
 
-        choose_dir(self, callback)
+        choose_dir(self.panel, callback)
 
 
-class CustomDirsForm(wx.Panel):
+class CustomDirsForm(Form):
     _custom_dirs: List[Path]
     _list_box: wx.ListBox
     _parent: wx.Panel
@@ -189,18 +209,19 @@ class CustomDirsForm(wx.Panel):
     def __init__(self,
                  custom_dirs: List[Path],
                  on_change: Callable[[List[Path]], None],
-                 parent: wx.Panel):
+                 parent: wx.Panel,
+                 *args,
+                 **kwargs):
         self._custom_dirs = custom_dirs
         self._on_change = on_change
         self._parent = parent
-        super().__init__(self._parent)
+        super().__init__(self._parent, *args, **kwargs)
         self._list_box = self._init_list_box()
 
     def _init_list_box(self):
-        hbox = create_sizer(self, wx.HORIZONTAL)
-
-        list_box = wx.ListBox(self)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self._on_list_box_double_click)
+        hbox = create_sizer(self.panel, wx.HORIZONTAL)
+        list_box = wx.ListBox(self.panel)
+        self.panel.Bind(wx.EVT_LISTBOX_DCLICK, self._on_list_box_double_click)
         for custom_dir in self._custom_dirs:
             list_box.Append(str(custom_dir))
         hbox.Add(
@@ -218,8 +239,8 @@ class CustomDirsForm(wx.Panel):
                 ('Clear', self._on_button_clear),
         ]):
             button = create_button(
-                self,
-                self,
+                self.panel,
+                self.panel,
                 label,
                 callback
             )
@@ -244,7 +265,7 @@ class CustomDirsForm(wx.Panel):
             self._on_change(self._custom_dirs)
             self._list_box.SetSelection(item_id)
 
-        choose_dir(self, callback)
+        choose_dir(self.panel, callback)
 
     def _on_button_new(self):
         def callback(path_str: str):
@@ -252,7 +273,7 @@ class CustomDirsForm(wx.Panel):
             self._on_change(self._custom_dirs)
             self._list_box.Append(path_str)
 
-        choose_dir(self, callback)
+        choose_dir(self.panel, callback)
 
     def _on_button_delete(self):
         sel = self._list_box.GetSelection()
@@ -272,29 +293,31 @@ class NamedDir(NamedTuple):
     name: str
 
 
-class NamedDirsForm(wx.Panel):
+class NamedDirsForm(Form):
     _named_dirs_list: List[NamedDir]
     _path_controls: List[wx.TextCtrl]
 
     def __init__(self,
                  named_dirs: TNamedDirs,
                  on_change: Callable[[TNamedDirs], None],
-                 parent: wx.Panel):
+                 parent: wx.Panel,
+                 *args,
+                 **kwargs):
         self._named_dirs_list = [
             NamedDir(path, name)
             for path, name in named_dirs.items()
         ]
         self._on_change = on_change
         self._parent = parent
-        super().__init__(self._parent)
+        super().__init__(self._parent, *args, **kwargs)
         self._path_controls = list(self._init_controls())
 
     def _init_controls(self) -> Iterator[wx.TextCtrl]:
-        vbox = create_sizer(self)
+        vbox = create_sizer(self.panel)
         for i, named_dir in enumerate(self._named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
             text_control_name = create_text_control(
-                self,
+                self.panel,
                 value=named_dir.name or '',
                 callback=partial(self._on_name_text, i)
             )
@@ -305,7 +328,7 @@ class NamedDirsForm(wx.Panel):
                 border=10
             )
             control_path = create_text_control(
-                self,
+                self.panel,
                 value=str(named_dir.path) or '',
                 callback=partial(self._on_path_text, i)
             )
@@ -316,8 +339,8 @@ class NamedDirsForm(wx.Panel):
                 border=10
             )
             button = create_button(
-                self,
-                self,
+                self.panel,
+                self.panel,
                 'Choose',
                 partial(self._on_path_button, i)
             )
@@ -346,7 +369,7 @@ class NamedDirsForm(wx.Panel):
             self._on_change(self._named_dirs)
             self._path_controls[i].SetValue(path_str)
 
-        choose_dir(self, callback)
+        choose_dir(self.panel, callback)
 
     @property
     def _named_dirs(self) -> TNamedDirs:

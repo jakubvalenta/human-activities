@@ -84,11 +84,11 @@ class Settings(wx.Dialog):
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(self._mode_radios[MODE_HOME], flag=wx.ALL, border=5)
         self._sizer.Add(self._mode_radios[MODE_PATH], flag=wx.ALL, border=5)
-        self._sizer.Add(self._root_path_form, flag=wx.EXPAND)
+        self._sizer.Add(self._root_path_form.panel, flag=wx.EXPAND)
         self._sizer.Add(self._mode_radios[MODE_CUSTOM], flag=wx.ALL, border=5)
-        self._sizer.Add(self._custom_dirs_form, flag=wx.EXPAND)
+        self._sizer.Add(self._custom_dirs_form.panel, flag=wx.EXPAND)
         self._sizer.Add(self._mode_radios[MODE_NAMED], flag=wx.ALL, border=5)
-        self._sizer.Add(self._named_dirs_form, flag=wx.EXPAND)
+        self._sizer.Add(self._named_dirs_form.panel, flag=wx.EXPAND)
         self._toggle_controls()
 
     def _create_mode_radios(self):
@@ -104,18 +104,9 @@ class Settings(wx.Dialog):
         )
 
     def _toggle_controls(self):
-        if self._config.mode == MODE_PATH:
-            self._root_path_form.Enable()
-        else:
-            self._root_path_form.Disable()
-        if self._config.mode == MODE_CUSTOM:
-            self._custom_dirs_form.Enable()
-        else:
-            self._custom_dirs_form.Disable()
-        if self._config.mode == MODE_NAMED:
-            self._named_dirs_form.Enable()
-        else:
-            self._named_dirs_form.Disable()
+        self._root_path_form.toggle(self._config.mode == MODE_PATH)
+        self._custom_dirs_form.toggle(self._config.mode == MODE_CUSTOM)
+        self._named_dirs_form.toggle(self._config.mode == MODE_NAMED)
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode

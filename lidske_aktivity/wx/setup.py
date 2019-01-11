@@ -7,7 +7,7 @@ import wx.adv
 from lidske_aktivity.config import (
     DEFAULT_NAMED_DIRS, MODE_NAMED, Config, TNamedDirs,
 )
-from lidske_aktivity.wx.lib import NamedDirsForm, create_label
+from lidske_aktivity.wx.lib import NamedDirsForm, create_label, create_sizer
 
 
 def add_text_heading(parent: wx.Window, sizer: wx.Sizer, text: str):
@@ -27,24 +27,8 @@ def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
     sizer.AddSpacer(5)
 
 
-def init_wizard(wizard: wx.adv.Wizard,
-                page_funcs: List[Callable],
-                callback: Callable):
-    pages = []
-    for page_func in page_funcs:
-        page = wx.adv.WizardPageSimple(wizard)
-        content = page_func(parent=page)
-        page.SetSizer(content)
-        pages.append(page)
-    wx.adv.WizardPageSimple.Chain(*pages)
-    wizard.GetPageAreaSizer().Add(pages[0])
-    val = wizard.RunWizard(pages[0])
-    if val:
-        callback()
-
-
-def create_content_intro(parent: wx.Panel) -> wx.BoxSizer:
-    sizer = wx.BoxSizer()
+def add_content_intro(parent: wx.Panel):
+    sizer = create_sizer(parent)
     add_text_heading(parent, sizer, 'Lidské aktivity setup')
     add_text_paragraph(
         parent,
@@ -60,7 +44,21 @@ def create_content_intro(parent: wx.Panel) -> wx.BoxSizer:
             'and finally something different',
         ]
     )
-    return sizer
+
+
+def init_wizard(wizard: wx.adv.Wizard,
+                page_funcs: List[Callable],
+                callback: Callable):
+    pages = []
+    for page_func in page_funcs:
+        page = wx.adv.WizardPageSimple(wizard)
+        page_func(page)
+        pages.append(page)
+    wx.adv.WizardPageSimple.Chain(*pages)
+    wizard.GetPageAreaSizer().Add(pages[0])
+    val = wizard.RunWizard(pages[0])
+    if val:
+        callback()
 
 
 class Setup(wx.adv.Wizard):
@@ -77,12 +75,13 @@ class Setup(wx.adv.Wizard):
         init_wizard(
             self,
             [
-                create_content_intro,
+                add_content_intro,
                 partial(
                     NamedDirsForm,
                     self._config.named_dirs,
-                    self._on_named_dirs_change
-                ),
+                    self._on_named_dirs_change,
+                    use_parent_panel=True
+                )
             ],
             self._on_wizard_accept
         )
