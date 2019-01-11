@@ -30,6 +30,12 @@ class ExtDirectory(NamedTuple):
     pending: bool = True
     tooltip: str = ''
 
+    @property
+    def text(self):
+        if self.pending:
+            return f'{self.label}: ...'
+        return f'{self.label}: {self.fraction:.2%}'
+
 
 TExtDirectories = Dict[Path, ExtDirectory]
 TFractions = Dict[Path, float]
@@ -204,11 +210,8 @@ class Model:
         )
 
     @property
-    def tooltip(self):
-        return '\n'.join(
-            f'{ext_directory.label}: {ext_directory.fraction:.2%}'
-            for ext_directory in self.ext_directories.values()
-        )
+    def texts(self) -> List[str]:
+        return [x.text for x in self.ext_directories.values()]
 
     @property
     def percents(self) -> List[float]:

@@ -50,9 +50,10 @@ class StatusIcon(wx.adv.TaskBarIcon):
         context_menu.Append(wx.ID_EXIT, '&Quit')
         return context_menu
 
-    def update(self, percents: List[float], tooltip: str):
+    def update(self, percents: List[float], texts: List[str]):
         image = draw_pie_chart(self.icon_size, percents)
         icon = create_icon_from_image(image)
+        tooltip = '\n'.join(texts)
         self.SetIcon(icon, tooltip)
 
     @property

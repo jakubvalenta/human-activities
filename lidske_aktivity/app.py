@@ -109,7 +109,7 @@ class Application:
 
     def _update_icon(self):
         logger.info('Updating icon with slices %s', self.model.percents)
-        self.status_icon.update(self.model.percents, self.model.tooltip)
+        self.status_icon.update(self.model.percents, self.model.texts)
 
     def _update_menu(self):
         logger.info('Update menu')

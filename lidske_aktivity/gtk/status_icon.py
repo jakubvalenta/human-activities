@@ -1,7 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, Iterable, List, Optional
 
 import gi
 
@@ -19,8 +19,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def create_menu_item(menu: Gtk.Menu,
-                     label: str,
+def create_menu_item(label: str,
                      callback: Callable = None,
                      icon: Optional[str] = None) -> Gtk.MenuItem:
     if icon:
@@ -34,26 +33,16 @@ def create_menu_item(menu: Gtk.Menu,
         menu_item.connect('activate', callback)
     else:
         menu_item.set_sensitive(False)
-    menu.append(menu_item)
     return menu_item
 
 
-def create_menu_separator(menu: Gtk.Menu):
-    menu_item = Gtk.SeparatorMenuItem()
-    menu.append(menu_item)
-
-
-def create_indicator(
-        menu: Gtk.Menu,
-        secondary_target: Gtk.MenuItem) -> AppIndicator3.Indicator:
+def create_indicator() -> AppIndicator3.Indicator:
     indicator = AppIndicator3.Indicator.new(
         id=__application_id__,
         icon_name=__application_name__,
         category=AppIndicator3.IndicatorCategory.APPLICATION_STATUS
     )
     indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-    indicator.set_menu(menu)
-    indicator.set_secondary_activate_target(secondary_target)
     return indicator
 
 
@@ -81,51 +70,58 @@ def set_indicator_icon(indicator: AppIndicator3.Indicator,
 
 class StatusIcon():
     app: 'Application'
-    indicator: AppIndicator3.Indicator
+    _menu: Gtk.Menu
+    _dynamic_menu_items: List[Gtk.MenuItem]
+    _indicator: AppIndicator3.Indicator
 
     # The directory is deleted as soon as this variable is garbage-collected.
     icon_temp_dir: tempfile.TemporaryDirectory
 
     def __init__(self, app: 'Application'):
         self.app = app
-        menu, secondary_target = self._create_menu()
-        self.indicator = create_indicator(menu, secondary_target)
+        self._indicator = create_indicator()
+        self._init_menu([])
 
-    def _create_menu(self) -> Tuple[Gtk.Menu, Gtk.MenuItem]:
+    def _init_menu(self, texts: List[str]):
         menu = Gtk.Menu()
         secondary_target = create_menu_item(
-            menu,
             'Show',
             lambda event: self.app.show_menu(0, 0),
             icon='lidske-aktivity'
         )
-        create_menu_separator(menu)
-        create_menu_item(
-            menu,
-            'Setup',
-            lambda event: self.app.show_setup()
-        )
-        create_menu_item(
-            menu,
-            'Advanced configuration',
-            lambda event: self.app.show_settings()
-        )
-        create_menu_item(
-            menu,
-            'About',
-            lambda event: self.app.show_about(),
-            icon='help-about'
-        )
-        create_menu_item(
-            menu,
-            'Quit',
-            lambda event: self.app.quit(),
-            icon='application-exit'
-        )
+        menu_items = [
+            secondary_target,
+            Gtk.SeparatorMenuItem(),
+        ] + [
+            create_menu_item(text) for text in texts
+        ] + [
+            Gtk.SeparatorMenuItem(),
+            create_menu_item(
+                'Setup',
+                lambda event: self.app.show_setup()
+            ),
+            create_menu_item(
+                'Advanced configuration',
+                lambda event: self.app.show_settings()
+            ),
+            create_menu_item(
+                'About',
+                lambda event: self.app.show_about(),
+                icon='help-about'
+            ),
+            create_menu_item(
+                'Quit',
+                lambda event: self.app.quit(),
+                icon='application-exit'
+            ),
+        ]
+        for menu_item in menu_items:
+            menu.append(menu_item)
         menu.show_all()
-        return menu, secondary_target
+        self._indicator.set_menu(menu)
+        self._indicator.set_secondary_activate_target(secondary_target)
 
-    def update(self, percents: List[float], tooltip: str):
+    def update(self, percents: List[float], texts: List[str]):
         svg = draw_pie_chart_svg(percents)
         icon_hash = calc_icon_hash(percents)
         icon_temp_dir = write_temp_file(
@@ -133,13 +129,15 @@ class StatusIcon():
             filename=icon_hash + '.svg',
             prefix=__application_id__ + '-',
         )
+        tooltip = '\n'.join(texts)
         set_indicator_icon(
-            self.indicator,
+            self._indicator,
             icon_theme_path=icon_temp_dir.name,
             icon_name=icon_hash,
             tooltip=tooltip
         )
-        self.icon_temp_dir = icon_temp_dir
+        self._icon_temp_dir = icon_temp_dir
+        self._init_menu(texts)
 
     def destroy(self):
-        self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+        self._indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
