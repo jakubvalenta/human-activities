@@ -18,13 +18,14 @@ T = TypeVar('T')
 
 def gen_bg_color_rule(selector: str, color: TColor) -> str:
     r, g, b, _ = color
-    return f'{selector} {{ background-color: rgb({r}, {g}, {b}) }}'
+    return f'{selector} {{ background: rgb({r}, {g}, {b}) }}'
 
 
 def gen_color_rules() -> Iterator[str]:
     for i in range(MAX_COLORS):
         yield gen_bg_color_rule(f'.bg-{i} progress', color_from_index(i))
     yield gen_bg_color_rule('progress.pulse', color_from_index(-1))
+    yield 'progress { border-color: transparent }'
 
 
 def gen_stylesheet() -> bytes:
