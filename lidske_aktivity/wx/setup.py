@@ -63,6 +63,7 @@ def init_wizard(wizard: wx.adv.Wizard,
 
 class Setup(wx.adv.Wizard):
     title = 'Lidské aktivity setup'
+
     _config: Config
 
     def __init__(self, config: Config, on_finish: Callable, parent: wx.Frame):
@@ -71,7 +72,7 @@ class Setup(wx.adv.Wizard):
         if not self._config.named_dirs:
             self._config.named_dirs = DEFAULT_NAMED_DIRS
         self._on_finish = on_finish
-        super().__init__(parent)
+        super().__init__(parent, title=self.title)
         init_wizard(
             self,
             [

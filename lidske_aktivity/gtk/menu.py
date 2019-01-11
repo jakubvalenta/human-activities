@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import gi
 
+from lidske_aktivity import __title__
 from lidske_aktivity.gtk.lib import (
     RadioConfig, box_add, create_box, create_button, create_label,
     create_radio_group,
@@ -58,6 +59,8 @@ class ProgressBar(Gtk.ProgressBar):
 
 
 class Menu(Gtk.ApplicationWindow):
+    title = __title__
+
     app: 'Application'
     active_mode: str
     box: Gtk.Box

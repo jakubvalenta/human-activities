@@ -85,8 +85,8 @@ class Menu(wx.PopupTransientWindow):
     mouse_y: int = 0
     last_closed: float = 0
 
-    def __init__(self, app: 'Application', *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app: 'Application', parent: wx.Frame):
+        super().__init__(parent)
         self.app = app
 
     def init(self, active_mode: str, ext_directories: TExtDirectories):

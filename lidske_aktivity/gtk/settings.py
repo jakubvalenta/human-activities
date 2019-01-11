@@ -17,7 +17,7 @@ from gi.repository import GdkPixbuf, Gtk, GLib  # noqa:E402  # isort:skip
 
 
 class Settings(Gtk.Dialog):
-    title = 'Lidské aktivity advanced settings'
+    title = 'Lidské aktivity advanced configuration'
 
     _config: Config
     _box: Gtk.Box

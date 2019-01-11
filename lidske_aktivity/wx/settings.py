@@ -13,7 +13,7 @@ from lidske_aktivity.wx.lib import (
 
 
 class Settings(wx.Dialog):
-    title = 'Lidské aktivity advanced settings'
+    title = 'Lidské aktivity advanced configuration'
 
     config: Config
     _panel: wx.Panel
