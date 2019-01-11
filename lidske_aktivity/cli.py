@@ -15,7 +15,7 @@ def is_appindicator_available() -> bool:
         gi.require_version('AppIndicator3', '0.1')
         logger.info('AppIndicator is available')
         return True
-    except ValueError:
+    except (ModuleNotFoundError, ValueError):
         logger.info('AppIndicator is not available')
         return False
 
