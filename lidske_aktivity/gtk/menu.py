@@ -67,16 +67,16 @@ class Menu(Gtk.ApplicationWindow):
     last_closed: float = 0
     _size: Tuple[int, int]
 
-    def __init__(self, app: 'Application', *args, **kwargs):
+    def __init__(self, app: 'Application', parent: Gtk.Window):
         super().__init__(
-            *args,
             application=app.ui_app,
+            modal=True,
+            transient_for=parent,
             gravity=Gdk.Gravity.CENTER,
             resizable=False,
             decorated=False,
             skip_taskbar_hint=True,
             skip_pager_hint=True,
-            **kwargs
         )
         self.app = app
 
