@@ -72,7 +72,7 @@ make dist-pyinstaller
 
 ```
 pip install pyinstaller
-pyinstaller/bin/pyinstaller_win.cmd
+pyinstaller/pyinstaller_win.cmd
 ```
 
 ## Debugging
