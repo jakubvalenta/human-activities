@@ -100,8 +100,7 @@ data/lidske-aktivity.svg:
 	pipenv run python3 -c 'from lidske_aktivity import icon; icon.print_default_svg_icon()' > data/lidske-aktivity.svg
 
 data/lidske-aktivity.png: data/lidske-aktivity.svg
-	cd data && rsvg-convert -w 48 -h 48 \
-		lidske-aktivity.svg > lidske-aktivity.png
+	data/bin/create_png
 
 generate-data: data/lidske-aktivity.png
 
