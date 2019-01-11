@@ -53,10 +53,18 @@ class Page(NamedTuple):
     page_type: Gtk.AssistantPageType
 
 
-def create_assistant(pages: List[Page], callback: Callable) -> Gtk.Assistant:
-    assistant = Gtk.Assistant()
+def create_assistant(parent: Gtk.Window,
+                     pages: List[Page],
+                     callback: Callable) -> Gtk.Assistant:
+    assistant = Gtk.Assistant(
+        modal=True,
+        transient_for=parent,
+        gravity=Gdk.Gravity.CENTER,
+        resizable=False,
+        skip_taskbar_hint=True,
+        skip_pager_hint=True,
+    )
     assistant.set_default_size(500, 400)
-    assistant.set_gravity(Gdk.Gravity.CENTER)
     assistant.set_position(Gtk.WindowPosition.CENTER)
     assistant.connect(
         'apply',
@@ -97,6 +105,7 @@ class Setup:
         self._on_finish = on_finish
         super().__init__()
         self.assistant = create_assistant(
+            parent,
             [
                 Page(
                     title='Intro',
