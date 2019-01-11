@@ -8,7 +8,7 @@ from typing import (
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
-from lidske_aktivity.icon import draw_pie_chart_svg
+from lidske_aktivity.icon import calc_icon_hash, draw_pie_chart_svg
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
@@ -70,6 +70,7 @@ def write_temp_file(lines: Iterable[str],
 
 def set_indicator_dynamic_icon(indicator: AppIndicator3.Indicator,
                                svg: Iterator[str],
+                               icon_hash: str,
                                tooltip: str) -> tempfile.TemporaryDirectory:
     """Set an AppIndicator icon from a generated SVG file.
 
@@ -79,10 +80,10 @@ def set_indicator_dynamic_icon(indicator: AppIndicator3.Indicator,
     """
     icon_temp_dir = write_temp_file(
         svg,
-        filename=__application_name__ + '.svg',
+        filename=icon_hash + '.svg',
         prefix=__application_id__ + '-',
     )
-    indicator.set_icon_full(__application_name__, tooltip)
+    indicator.set_icon_full(icon_hash, tooltip)
     indicator.set_icon_theme_path(icon_temp_dir.name)
     logger.info(
         'Set icon %s/%s',
@@ -138,10 +139,12 @@ class StatusIcon():
 
     def update(self, percents: List[float], tooltip: str):
         svg = draw_pie_chart_svg(percents)
+        icon_hash = calc_icon_hash(percents)
         self.icon_temp_dir = set_indicator_dynamic_icon(
             self.indicator,
             svg,
-            tooltip
+            icon_hash,
+            tooltip,
         )
 
     def destroy(self):

@@ -159,6 +159,10 @@ def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[TSliceFrac]:
         yield frac
 
 
+def calc_icon_hash(slices_frac: List[TSliceFrac]) -> str:
+    return '_'.join(f'{frac*100:.0f}' for frac in slices_frac)
+
+
 def print_default_svg_icon():
     slices_frac = [0.35, 0.25, 0.20, 0.15, 0.05]
     svg = draw_pie_chart_svg(slices_frac)
