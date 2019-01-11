@@ -4,7 +4,7 @@ from typing import Callable, Iterator, Optional, TypeVar
 import gi
 
 from lidske_aktivity import __application_id__, __title__
-from lidske_aktivity.bitmap import MAX_COLORS, TColor, color_from_index
+from lidske_aktivity.icon import MAX_COLORS, TColor, color_from_index
 
 gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
