@@ -196,6 +196,7 @@ class NamedDir(NamedTuple):
 
 class NamedDirsForm(Form):
     _named_dirs_list: List[NamedDir]
+    _vbox: wx.BoxSizer
 
     def __init__(self,
                  named_dirs: TNamedDirs,
@@ -213,7 +214,7 @@ class NamedDirsForm(Form):
         self._init_controls()
 
     def _init_controls(self) -> Iterator[wx.TextCtrl]:
-        vbox = create_sizer(self.panel)
+        self._vbox = create_sizer(self.panel)
         for i, named_dir in enumerate(self._named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
             name_control = create_text_control(
@@ -235,13 +236,39 @@ class NamedDirsForm(Form):
             hbox.Add(
                 path_button,
                 proportion=3,
+                flag=wx.EXPAND | wx.RIGHT,
+                border=10
+            )
+            remove_button = create_button(
+                self.panel,
+                self.panel,
+                'Remove',
+                callback=partial(self._on_remove_clicked, i)
+            )
+            hbox.Add(
+                remove_button,
+                proportion=1,
                 flag=wx.EXPAND
             )
             if i == 0:
                 flag = wx.EXPAND
             else:
                 flag = wx.EXPAND | wx.TOP
-            vbox.Add(hbox, flag=flag, border=5)
+            self._vbox.Add(hbox, flag=flag, border=5)
+        add_button = create_button(
+            self.panel,
+            self.panel,
+            'Add',
+            callback=self._on_add_clicked
+        )
+        self._vbox.Add(add_button, flag=wx.TOP, border=10)
+
+    def _clear(self):
+        try:
+            self.panel.PopEventHandler(deleteHandler=True)
+        except wx.wxAssertionError:
+            pass
+        self._vbox.Destroy()
 
     def _on_name_changed(self, i: int, name: str):
         named_dir = self._named_dirs_list[i]
@@ -252,6 +279,22 @@ class NamedDirsForm(Form):
         named_dir = self._named_dirs_list[i]
         self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
         self._on_change(self._named_dirs)
+
+    def _on_remove_clicked(self, i: int):
+        del self._named_dirs_list[i]
+        self._on_change(self._named_dirs)
+        self._clear()
+        self._init_controls()
+
+    def _on_add_clicked(self):
+        new_named_dir = NamedDir(
+            path=Path(),
+            name=''
+        )
+        self._named_dirs_list.append(new_named_dir)
+        self._on_change(self._named_dirs)
+        self._clear()
+        self._init_controls()
 
     @property
     def _named_dirs(self) -> TNamedDirs:
