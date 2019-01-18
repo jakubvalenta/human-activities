@@ -7,6 +7,7 @@ from typing import (
 )
 
 import wx
+import wx.lib.filebrowsebutton
 from PIL import Image
 
 from lidske_aktivity.config import TNamedDirs
@@ -108,16 +109,24 @@ def on_text_control_changed(event: wx.KeyEvent, callback: Callable):
     callback(event.GetString())
 
 
-def choose_dir(parent: wx.Window, callback: Callable[[str], None]):
-    dialog = wx.DirDialog(
+class DirBrowserButtonWithoutLabel(wx.lib.filebrowsebutton.DirBrowseButton):
+    def createLabel(self):
+        return wx.Window(self)
+
+
+def create_dir_browse_button(parent: wx.Window,
+                             value: Optional[str],
+                             callback: Callable[[str], None]):
+    button = DirBrowserButtonWithoutLabel(
         parent,
-        'Choose a directory:',
-        style=wx.DD_DIR_MUST_EXIST
-        # TODO: Fill in current dir
+        changeCallback=partial(on_dir_change, callback=callback)
     )
-    if dialog.ShowModal() == wx.ID_OK:
-        path = dialog.GetPath()
-        callback(path)
+    button.SetValue(value)
+    return button
+
+
+def on_dir_change(event: wx.Event, callback: Callable):
+    callback(event.GetString())
 
 
 def create_icon_from_image(image: Image) -> wx.Icon:
@@ -153,7 +162,6 @@ class Form:
 
 class RootPathForm(Form):
     _root_path: Path
-    _control: wx.TextCtrl
     _parent: wx.Panel
 
     def __init__(self,
@@ -166,39 +174,19 @@ class RootPathForm(Form):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent, *args, **kwargs)
-        self._control = self._init_control()
+        self._init_control()
 
-    def _init_control(self) -> wx.TextCtrl:
-        hbox = create_sizer(self.panel, wx.HORIZONTAL)
-        control = create_text_control(
+    def _init_control(self):
+        vbox = create_sizer(self.panel)
+        button = create_dir_browse_button(
             self.panel,
             value=str(self._root_path) if self._root_path else '',
-            callback=self._on_text
+            callback=self._on_dir_changed
         )
-        hbox.Add(
-            control,
-            proportion=5,
-            flag=wx.EXPAND | wx.RIGHT,
-            border=10
-        )
-        button = create_button(
-            self.panel,
-            self.panel,
-            'Choose',
-            self._on_button
-        )
-        hbox.Add(button, proportion=1, flag=wx.EXPAND)
-        return control
+        vbox.Add(button, flag=wx.EXPAND)
 
-    def _on_text(self, path_str: str):
+    def _on_dir_changed(self, path_str: str):
         self._on_change(Path(path_str))
-
-    def _on_button(self):
-        def callback(path_str: str):
-            self._on_change(Path(path_str))
-            self._control.SetValue(path_str)
-
-        choose_dir(self.panel, callback)
 
 
 class NamedDir(NamedTuple):
@@ -208,7 +196,6 @@ class NamedDir(NamedTuple):
 
 class NamedDirsForm(Form):
     _named_dirs_list: List[NamedDir]
-    _path_controls: List[wx.TextCtrl]
 
     def __init__(self,
                  named_dirs: TNamedDirs,
@@ -223,66 +210,48 @@ class NamedDirsForm(Form):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent, *args, **kwargs)
-        self._path_controls = list(self._init_controls())
+        self._init_controls()
 
     def _init_controls(self) -> Iterator[wx.TextCtrl]:
         vbox = create_sizer(self.panel)
         for i, named_dir in enumerate(self._named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
-            text_control_name = create_text_control(
+            name_control = create_text_control(
                 self.panel,
                 value=named_dir.name or '',
-                callback=partial(self._on_name_text, i)
+                callback=partial(self._on_name_changed, i)
             )
             hbox.Add(
-                text_control_name,
+                name_control,
                 proportion=2,
                 flag=wx.EXPAND | wx.RIGHT,
                 border=10
             )
-            control_path = create_text_control(
+            path_button = create_dir_browse_button(
                 self.panel,
                 value=str(named_dir.path) or '',
-                callback=partial(self._on_path_text, i)
+                callback=partial(self._on_path_changed, i)
             )
             hbox.Add(
-                control_path,
+                path_button,
                 proportion=3,
-                flag=wx.EXPAND | wx.RIGHT,
-                border=10
+                flag=wx.EXPAND
             )
-            button = create_button(
-                self.panel,
-                self.panel,
-                'Choose',
-                partial(self._on_path_button, i)
-            )
-            hbox.Add(button, proportion=1, flag=wx.EXPAND)
             if i == 0:
                 flag = wx.EXPAND
             else:
                 flag = wx.EXPAND | wx.TOP
             vbox.Add(hbox, flag=flag, border=5)
-            yield control_path
 
-    def _on_name_text(self, i: int, name: str):
+    def _on_name_changed(self, i: int, name: str):
         named_dir = self._named_dirs_list[i]
         self._named_dirs_list[i] = named_dir._replace(name=name)
         self._on_change(self._named_dirs)
 
-    def _on_path_text(self, i: int, path_str: str):
+    def _on_path_changed(self, i: int, path_str: str):
         named_dir = self._named_dirs_list[i]
         self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
         self._on_change(self._named_dirs)
-
-    def _on_path_button(self, i: int):
-        def callback(path_str: str):
-            named_dir = self._named_dirs_list[i]
-            self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
-            self._on_change(self._named_dirs)
-            self._path_controls[i].SetValue(path_str)
-
-        choose_dir(self.panel, callback)
 
     @property
     def _named_dirs(self) -> TNamedDirs:

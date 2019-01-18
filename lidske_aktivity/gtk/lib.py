@@ -171,7 +171,6 @@ class NamedDir(NamedTuple):
 
 class NamedDirsForm(Gtk.Grid):
     _named_dirs_list: List[NamedDir]
-    _path_entries: List[Gtk.Entry]
 
     def __init__(self,
                  named_dirs: TNamedDirs,
