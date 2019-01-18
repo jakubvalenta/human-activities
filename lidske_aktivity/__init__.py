@@ -10,5 +10,5 @@ __uri__ = 'https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'
 __authors__ = ['Jakub Valenta', 'Jiří Skála']
 __author_email__ = 'jakub@jakubvalenta.cz'
 
-__license__ = 'GNU GPL'
-__copyright__ = '\u00a9 2018-2019 Jakub Valenta, Jiří Skála'
+__license__ = 'GNU GPL 3'
+__copyright__ = '\N{COPYRIGHT SIGN} 2018-2019 Jakub Valenta, Jiří Skála'
