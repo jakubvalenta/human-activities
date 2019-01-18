@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -24,6 +24,9 @@ endif
 
 setup:  ## Create Pipenv virtual environment and install dependencies.
 	pipenv --three --site-packages
+	pipenv install --dev
+
+setup-dev:  ## Install development dependencies
 	pipenv install --dev
 
 run:  ## Start the app

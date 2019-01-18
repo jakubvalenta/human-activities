@@ -86,3 +86,23 @@ gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
 ```
 
 Then start the app and run GTK Inspector with `CTRL+SHIFT+i`.
+
+## Development
+
+### Installation
+
+```
+make setup-dev
+```
+
+### Testing
+
+```
+make test
+```
+
+### Linting
+
+```
+make lint
+```
