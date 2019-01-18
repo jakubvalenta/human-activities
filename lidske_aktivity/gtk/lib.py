@@ -195,17 +195,28 @@ class NamedDirsForm(Gtk.Grid):
                 callback=partial(self._on_name_changed, i)
             )
             name_entry.set_hexpand(True)
-            self.attach(name_entry, left=0, top=i, width=1, height=1)
+            self.attach(name_entry, left=0, top=i, width=2, height=1)
             choose_button = create_file_chooser_button(
                 value=str(named_dir.path) if named_dir.path else None,
                 callback=partial(self._on_path_changed, i),
             )
-            self.attach(choose_button, left=2, top=i, width=1, height=1)
+            self.attach(choose_button, left=2, top=i, width=2, height=1)
             remove_button = create_button(
                 stock_id=Gtk.STOCK_REMOVE,
                 callback=partial(self._on_remove_clicked, i),
             )
-            self.attach(remove_button, left=3, top=i, width=1, height=1)
+            self.attach(remove_button, left=4, top=i, width=1, height=1)
+        add_button = create_button(
+            stock_id=Gtk.STOCK_ADD,
+            callback=self._on_add_clicked
+        )
+        self.attach(
+            add_button,
+            left=4,
+            top=len(self._named_dirs_list),
+            width=1,
+            height=1
+        )
         self.show_all()
 
     def _clear(self):
@@ -228,7 +239,7 @@ class NamedDirsForm(Gtk.Grid):
         self._clear()
         self._init_entries()
 
-    def _on_add_clicked(self, i: int):
+    def _on_add_clicked(self):
         new_named_dir = NamedDir(
             path=Path(),
             name=''
