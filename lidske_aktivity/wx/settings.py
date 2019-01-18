@@ -4,7 +4,7 @@ from typing import Callable, Dict, List
 import wx
 
 from lidske_aktivity.config import (
-    MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES, Config,
+    MODE_CUSTOM, MODE_NAMED, MODE_PATH, MODES, Config,
 )
 from lidske_aktivity.wx.lib import (
     CustomDirsForm, NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs,
@@ -82,7 +82,6 @@ class Settings(wx.Dialog):
     def _add_widgets(self):
         label = create_label(self._panel, 'Scan mode')
         self._sizer.Add(label, flag=wx.ALL, border=5)
-        self._sizer.Add(self._mode_radios[MODE_HOME], flag=wx.ALL, border=5)
         self._sizer.Add(self._mode_radios[MODE_PATH], flag=wx.ALL, border=5)
         self._sizer.Add(self._root_path_form.panel, flag=wx.EXPAND)
         self._sizer.Add(self._mode_radios[MODE_CUSTOM], flag=wx.ALL, border=5)

@@ -4,7 +4,7 @@ from typing import Callable, Dict, List
 import gi
 
 from lidske_aktivity.config import (
-    MODE_CUSTOM, MODE_HOME, MODE_NAMED, MODE_PATH, MODES, Config, TNamedDirs,
+    MODE_CUSTOM, MODE_NAMED, MODE_PATH, MODES, Config, TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
     CustomDirsForm, NamedDirsForm, RadioConfig, RootPathForm, box_add,
@@ -77,7 +77,6 @@ class Settings(Gtk.Dialog):
     def _add_widgets(self):
         for widget in (
                 create_label('Scan mode'),
-                self._mode_radios[MODE_HOME],
                 self._mode_radios[MODE_PATH],
                 self._root_path_form,
                 self._mode_radios[MODE_CUSTOM],
