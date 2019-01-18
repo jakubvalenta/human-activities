@@ -92,10 +92,13 @@ class StatusIcon():
         menu_items = [
             secondary_target,
             Gtk.SeparatorMenuItem(),
-        ] + [
-            create_menu_item(text) for text in texts
-        ] + [
-            Gtk.SeparatorMenuItem(),
+        ]
+        if texts:
+            # TODO: Limit the maximum number of items shown.
+            for text in texts:
+                menu_items.append(create_menu_item(text))
+            menu_items.append(Gtk.SeparatorMenuItem())
+        menu_items += [
             create_menu_item(
                 'Setup',
                 lambda event: self.app.show_setup()
