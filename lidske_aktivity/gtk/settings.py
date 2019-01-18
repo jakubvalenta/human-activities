@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, Dict
 
 import gi
 
 from lidske_aktivity.config import (
-    MODE_NAMED, MODE_PATH, MODES, Config, TNamedDirs,
+    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, Config, TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, box_add, create_label,
@@ -71,9 +71,9 @@ class Settings(Gtk.Dialog):
     def _add_widgets(self):
         for widget in (
                 create_label('Scan mode'),
-                self._mode_radios[MODE_PATH],
+                self._mode_radios[MODE_ROOT_PATH],
                 self._root_path_form,
-                self._mode_radios[MODE_NAMED],
+                self._mode_radios[MODE_NAMED_DIRS],
                 self._named_dirs_form,
         ):
             box_add(self._box, widget, expand=False)
@@ -91,8 +91,12 @@ class Settings(Gtk.Dialog):
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
-        self._root_path_form.set_sensitive(self._config.mode == MODE_PATH)
-        self._named_dirs_form.set_sensitive(self._config.mode == MODE_NAMED)
+        self._root_path_form.set_sensitive(
+            self._config.mode == MODE_ROOT_PATH
+        )
+        self._named_dirs_form.set_sensitive(
+            self._config.mode == MODE_NAMED_DIRS
+        )
 
     def _on_root_path_change(self, root_path: Path):
         self._config.root_path = root_path

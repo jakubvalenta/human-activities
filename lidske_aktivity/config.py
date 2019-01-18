@@ -3,7 +3,7 @@ import logging
 import os.path
 import platform
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from lidske_aktivity import __application_id__, __application_name__
 
@@ -39,11 +39,11 @@ def get_config_dir():
 CACHE_PATH = Path(get_cache_dir()) / 'cache.csv'
 CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
-MODE_PATH = 'path'
-MODE_NAMED = 'named'
+MODE_ROOT_PATH = 'path'
+MODE_NAMED_DIRS = 'named'
 MODES = {
-    MODE_PATH: 'All directories in selected directory',
-    MODE_NAMED: 'Predefined directories',
+    MODE_ROOT_PATH: 'All directories in selected directory',
+    MODE_NAMED_DIRS: 'Predefined directories',
 }
 DEFAULT_NAMED_DIRS: TNamedDirs = {
     Path('~/Paid work').expanduser(): 'Honorovaná práce',
@@ -57,7 +57,7 @@ DEFAULT_NAMED_DIRS: TNamedDirs = {
 class Config:
     root_path: Optional[Path] = None
     test: bool = False
-    mode: str = MODE_NAMED
+    mode: str = MODE_NAMED_DIRS
     named_dirs: Dict[Path, str]
     show_setup: bool = True
 

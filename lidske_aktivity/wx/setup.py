@@ -5,7 +5,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity.config import (
-    DEFAULT_NAMED_DIRS, MODE_NAMED, Config, TNamedDirs,
+    DEFAULT_NAMED_DIRS, MODE_NAMED_DIRS, Config, TNamedDirs,
 )
 from lidske_aktivity.wx.lib import NamedDirsForm, create_label, create_sizer
 
@@ -68,7 +68,7 @@ class Setup(wx.adv.Wizard):
 
     def __init__(self, config: Config, on_finish: Callable, parent: wx.Frame):
         self._config = config
-        self._config.mode = MODE_NAMED
+        self._config.mode = MODE_NAMED_DIRS
         if not self._config.named_dirs:
             self._config.named_dirs = DEFAULT_NAMED_DIRS
         self._on_finish = on_finish

@@ -4,7 +4,7 @@ from typing import Callable, List, NamedTuple
 import gi
 
 from lidske_aktivity.config import (
-    DEFAULT_NAMED_DIRS, MODE_NAMED, Config, TNamedDirs,
+    DEFAULT_NAMED_DIRS, MODE_NAMED_DIRS, Config, TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm, box_add, create_box, create_label,
@@ -99,7 +99,7 @@ class Setup:
                  on_finish: Callable,
                  parent: Gtk.Window):
         self._config = config
-        self._config.mode = MODE_NAMED
+        self._config.mode = MODE_NAMED_DIRS
         if not self._config.named_dirs:
             self._config.named_dirs = DEFAULT_NAMED_DIRS
         self._on_finish = on_finish

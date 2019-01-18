@@ -5,8 +5,8 @@ from threading import Event, Thread
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 from lidske_aktivity.config import (
-    CACHE_PATH, MODE_NAMED, MODE_PATH, Config, TNamedDirs, load_config,
-    save_config,
+    CACHE_PATH, MODE_NAMED_DIRS, MODE_ROOT_PATH, Config, TNamedDirs,
+    load_config, save_config,
 )
 from lidske_aktivity.directories import (
     Directory, TDirectories, init_directories_from_paths,
@@ -88,7 +88,7 @@ def calc_size_new(directories: TDirectories) -> Tuple[TFractions, TFractions]:
 
 
 def format_label(path: Path, config_mode: str, named_dirs: TNamedDirs) -> str:
-    if (config_mode == MODE_NAMED and path in named_dirs):
+    if (config_mode == MODE_NAMED_DIRS and path in named_dirs):
         return named_dirs[path]
     return path.name
 
@@ -100,10 +100,10 @@ def format_tooltip(fraction: float, active_mode: str):
 
 def load_directories(config: Config) -> TDirectories:
     init_funcs = {
-        MODE_PATH: lambda: init_directories_from_root_path(
+        MODE_ROOT_PATH: lambda: init_directories_from_root_path(
             CACHE_PATH, config.root_path
         ),
-        MODE_NAMED: lambda: init_directories_from_paths(
+        MODE_NAMED_DIRS: lambda: init_directories_from_paths(
             CACHE_PATH, config.named_dirs.keys()
         )
     }

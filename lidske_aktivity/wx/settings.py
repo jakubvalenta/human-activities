@@ -3,7 +3,9 @@ from typing import Callable, Dict
 
 import wx
 
-from lidske_aktivity.config import MODE_NAMED, MODE_PATH, MODES, Config
+from lidske_aktivity.config import (
+    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, Config,
+)
 from lidske_aktivity.wx.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs, create_label,
     create_radio_group, create_sizer,
@@ -74,9 +76,17 @@ class Settings(wx.Dialog):
     def _add_widgets(self):
         label = create_label(self._panel, 'Scan mode')
         self._sizer.Add(label, flag=wx.ALL, border=5)
-        self._sizer.Add(self._mode_radios[MODE_PATH], flag=wx.ALL, border=5)
+        self._sizer.Add(
+            self._mode_radios[MODE_ROOT_PATH],
+            flag=wx.ALL,
+            border=5
+        )
         self._sizer.Add(self._root_path_form.panel, flag=wx.EXPAND)
-        self._sizer.Add(self._mode_radios[MODE_NAMED], flag=wx.ALL, border=5)
+        self._sizer.Add(
+            self._mode_radios[MODE_NAMED_DIRS],
+            flag=wx.ALL,
+            border=5
+        )
         self._sizer.Add(self._named_dirs_form.panel, flag=wx.EXPAND)
         self._toggle_controls()
 
@@ -93,8 +103,8 @@ class Settings(wx.Dialog):
         )
 
     def _toggle_controls(self):
-        self._root_path_form.toggle(self._config.mode == MODE_PATH)
-        self._named_dirs_form.toggle(self._config.mode == MODE_NAMED)
+        self._root_path_form.toggle(self._config.mode == MODE_ROOT_PATH)
+        self._named_dirs_form.toggle(self._config.mode == MODE_NAMED_DIRS)
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
