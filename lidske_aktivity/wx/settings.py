@@ -1,14 +1,12 @@
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, Dict
 
 import wx
 
-from lidske_aktivity.config import (
-    MODE_CUSTOM, MODE_NAMED, MODE_PATH, MODES, Config,
-)
+from lidske_aktivity.config import MODE_NAMED, MODE_PATH, MODES, Config
 from lidske_aktivity.wx.lib import (
-    CustomDirsForm, NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs,
-    create_label, create_radio_group, create_sizer,
+    NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs, create_label,
+    create_radio_group, create_sizer,
 )
 
 
@@ -21,7 +19,6 @@ class Settings(wx.Dialog):
     _border_sizer: wx.Sizer
     _mode_radios: Dict[str, wx.RadioButton]
     _root_path_form: RootPathForm
-    _custom_dirs_form: CustomDirsForm
     _named_dirs_form: NamedDirsForm
 
     def __init__(self, config: Config, on_accept: Callable, parent: wx.Frame):
@@ -67,11 +64,6 @@ class Settings(wx.Dialog):
             self._on_root_path_change,
             parent=self._panel
         )
-        self._custom_dirs_form = CustomDirsForm(
-            self._config.custom_dirs,
-            self._on_custom_dirs_change,
-            parent=self._panel
-        )
         self._named_dirs_form = NamedDirsForm(
             self._config.named_dirs,
             self._on_named_dirs_change,
@@ -84,8 +76,6 @@ class Settings(wx.Dialog):
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(self._mode_radios[MODE_PATH], flag=wx.ALL, border=5)
         self._sizer.Add(self._root_path_form.panel, flag=wx.EXPAND)
-        self._sizer.Add(self._mode_radios[MODE_CUSTOM], flag=wx.ALL, border=5)
-        self._sizer.Add(self._custom_dirs_form.panel, flag=wx.EXPAND)
         self._sizer.Add(self._mode_radios[MODE_NAMED], flag=wx.ALL, border=5)
         self._sizer.Add(self._named_dirs_form.panel, flag=wx.EXPAND)
         self._toggle_controls()
@@ -104,7 +94,6 @@ class Settings(wx.Dialog):
 
     def _toggle_controls(self):
         self._root_path_form.toggle(self._config.mode == MODE_PATH)
-        self._custom_dirs_form.toggle(self._config.mode == MODE_CUSTOM)
         self._named_dirs_form.toggle(self._config.mode == MODE_NAMED)
 
     def _on_mode_radio_toggled(self, mode: str):
@@ -113,9 +102,6 @@ class Settings(wx.Dialog):
 
     def _on_root_path_change(self, root_path: Path):
         self._config.root_path = root_path
-
-    def _on_custom_dirs_change(self, custom_dirs: List[Path]):
-        self._config.custom_dirs = custom_dirs
 
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):
         self._config.named_dirs = named_dirs

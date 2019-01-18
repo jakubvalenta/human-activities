@@ -5,8 +5,8 @@ from threading import Event, Thread
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 from lidske_aktivity.config import (
-    CACHE_PATH, MODE_CUSTOM, MODE_NAMED, MODE_PATH, Config, TNamedDirs,
-    load_config, save_config,
+    CACHE_PATH, MODE_NAMED, MODE_PATH, Config, TNamedDirs, load_config,
+    save_config,
 )
 from lidske_aktivity.directories import (
     Directory, TDirectories, init_directories_from_paths,
@@ -102,9 +102,6 @@ def load_directories(config: Config) -> TDirectories:
     init_funcs = {
         MODE_PATH: lambda: init_directories_from_root_path(
             CACHE_PATH, config.root_path
-        ),
-        MODE_CUSTOM: lambda: init_directories_from_paths(
-            CACHE_PATH, config.custom_dirs
         ),
         MODE_NAMED: lambda: init_directories_from_paths(
             CACHE_PATH, config.named_dirs.keys()

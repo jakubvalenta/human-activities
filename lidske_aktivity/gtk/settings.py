@@ -4,11 +4,11 @@ from typing import Callable, Dict, List
 import gi
 
 from lidske_aktivity.config import (
-    MODE_CUSTOM, MODE_NAMED, MODE_PATH, MODES, Config, TNamedDirs,
+    MODE_NAMED, MODE_PATH, MODES, Config, TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
-    CustomDirsForm, NamedDirsForm, RadioConfig, RootPathForm, box_add,
-    create_label, create_radio_group,
+    NamedDirsForm, RadioConfig, RootPathForm, box_add, create_label,
+    create_radio_group,
 )
 
 gi.require_version('Gtk', '3.0')
@@ -23,7 +23,6 @@ class Settings(Gtk.Dialog):
     _box: Gtk.Box
     _mode_radios: Dict[str, Gtk.RadioButton]
     _root_path_form: RootPathForm
-    _custom_dirs_form: CustomDirsForm
     _named_dirs_form: NamedDirsForm
 
     def __init__(self,
@@ -62,11 +61,6 @@ class Settings(Gtk.Dialog):
             self._on_root_path_change,
             parent=self
         )
-        self._custom_dirs_form = CustomDirsForm(
-            self._config.custom_dirs,
-            self._on_custom_dirs_change,
-            parent=self
-        )
         self._named_dirs_form = NamedDirsForm(
             self._config.named_dirs,
             self._on_named_dirs_change,
@@ -79,8 +73,6 @@ class Settings(Gtk.Dialog):
                 create_label('Scan mode'),
                 self._mode_radios[MODE_PATH],
                 self._root_path_form,
-                self._mode_radios[MODE_CUSTOM],
-                self._custom_dirs_form,
                 self._mode_radios[MODE_NAMED],
                 self._named_dirs_form,
         ):
@@ -100,14 +92,10 @@ class Settings(Gtk.Dialog):
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
         self._root_path_form.set_sensitive(self._config.mode == MODE_PATH)
-        self._custom_dirs_form.set_sensitive(self._config.mode == MODE_CUSTOM)
         self._named_dirs_form.set_sensitive(self._config.mode == MODE_NAMED)
 
     def _on_root_path_change(self, root_path: Path):
         self._config.root_path = root_path
-
-    def _on_custom_dirs_change(self, custom_dirs: List[Path]):
-        self._config.custom_dirs = custom_dirs
 
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):
         self._config.named_dirs = named_dirs

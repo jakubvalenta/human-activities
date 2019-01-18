@@ -40,11 +40,9 @@ CACHE_PATH = Path(get_cache_dir()) / 'cache.csv'
 CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
 MODE_PATH = 'path'
-MODE_CUSTOM = 'custom'
 MODE_NAMED = 'named'
 MODES = {
     MODE_PATH: 'All directories in selected directory',
-    MODE_CUSTOM: 'Custom directories',
     MODE_NAMED: 'Predefined directories',
 }
 DEFAULT_NAMED_DIRS: TNamedDirs = {
@@ -60,12 +58,10 @@ class Config:
     root_path: Optional[Path] = None
     test: bool = False
     mode: str = MODE_NAMED
-    custom_dirs: List[Path]
     named_dirs: Dict[Path, str]
     show_setup: bool = True
 
     def __init__(self):
-        self.custom_dirs = []
         self.named_dirs = {}
 
     def to_json(self) -> str:
@@ -73,7 +69,6 @@ class Config:
             'root_path': str(self.root_path) if self.root_path else None,
             'test': self.test,
             'mode': self.mode,
-            'custom_dirs': [str(path) for path in self.custom_dirs],
             'named_dirs': {
                 str(path): name for path, name in self.named_dirs.items()
             },
@@ -96,13 +91,6 @@ def _load_config_mode(config_json: Any, config: Config):
         config.mode = config_json['mode']
 
 
-def _load_config_custom_dirs(config_json: Any, config: Config):
-    config.custom_dirs = [
-        Path(path_str)
-        for path_str in config_json['custom_dirs']
-    ]
-
-
 def _load_config_named_dirs(config_json: Any, config: Config):
     config.named_dirs = {
         Path(path_str): str(name)
@@ -123,7 +111,6 @@ def load_config() -> Config:
                 _load_config_root_path,
                 _load_config_test,
                 _load_config_mode,
-                _load_config_custom_dirs,
                 _load_config_named_dirs,
                 _load_config_show_setup,
             ]:
