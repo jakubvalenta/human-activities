@@ -116,7 +116,7 @@ class Menu(Gtk.ApplicationWindow):
     def _init_empty(self):
         label = create_label('No directories found')
         box_add(self.box, label)
-        button = create_button('Open app setup', self._on_setup_button)
+        button = create_button(self._on_setup_button, 'Open app setup')
         box_add(self.box, button)
 
     def _init_progress_bars(self, ext_directories: TExtDirectories):

@@ -1,9 +1,7 @@
 import logging
 from functools import partial
 from pathlib import Path
-from typing import (
-    Callable, Dict, Iterable, Iterator, List, NamedTuple, Optional,
-)
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
 
 import gi
 from PIL import Image
@@ -43,8 +41,13 @@ def create_label(text: str) -> Gtk.Label:
     return label
 
 
-def create_button(label: str, callback: Callable):
-    button = Gtk.Button.new_with_label(label)
+def create_button(callback: Callable,
+                  label: Optional[str] = None,
+                  stock_id: Optional[str] = None) -> Gtk.Button:
+    if label:
+        button = Gtk.Button.new_with_label(label)
+    else:
+        button = Gtk.Button.new_from_stock(stock_id)
     button.connect('clicked', partial(on_button_clicked, callback=callback))
     return button
 
@@ -106,24 +109,21 @@ def on_entry_changed(entry: Gtk.Entry, callback: Callable):
     callback(entry.get_text())
 
 
-def choose_dir(parent: Gtk.Window, callback: Callable[[str], None]):
-    dialog = Gtk.FileChooserDialog(
+def create_file_chooser_button(
+        value: Optional[str],
+        callback: Callable[[str], None]) -> Gtk.FileChooserButton:
+    button = Gtk.FileChooserButton.new(
         'Please choose a directory',
-        parent,
-        Gtk.FileChooserAction.SELECT_FOLDER,
-        (
-            Gtk.STOCK_CANCEL,
-            Gtk.ResponseType.CANCEL,
-            'Select',
-            Gtk.ResponseType.OK
-        )
+        Gtk.FileChooserAction.SELECT_FOLDER
     )
-    dialog.set_default_size(800, 400)
-    response = dialog.run()
-    if response == Gtk.ResponseType.OK:
-        path = dialog.get_filename()
-        callback(path)
-    dialog.destroy()
+    if value:
+        button.set_filename(value)
+    button.connect('file_set', partial(on_file_set, callback=callback))
+    return button
+
+
+def on_file_set(button: Gtk.FileChooserButton, callback: Callable):
+    callback(button.get_filename())
 
 
 def image_to_pixbuf(image: Image) -> GdkPixbuf:
@@ -140,7 +140,6 @@ def call_tick(func: Callable):
 
 class RootPathForm(Gtk.Box):
     _root_path: Path
-    _entry: Gtk.Entry
     _parent: Gtk.Window
 
     def __init__(self,
@@ -151,28 +150,18 @@ class RootPathForm(Gtk.Box):
         self._on_change = on_change
         self._parent = parent
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        self._entry = self._init_entry()
+        self._init_entry()
 
-    def _init_entry(self) -> Gtk.Entry:
-        entry = create_entry(
-            value=str(self._root_path) if self._root_path else '',
-            callback=self._on_text
+    def _init_entry(self):
+        button = create_file_chooser_button(
+            value=str(self._root_path) if self._root_path else None,
+            callback=self._on_path_changed
         )
-        entry.set_hexpand(True)
-        box_add(self, entry)
-        button = create_button('Choose', self._on_button)
-        box_add(self, button, expand=False)
-        return entry
+        button.set_hexpand(True)
+        box_add(self, button)
 
-    def _on_text(self, path_str: str):
+    def _on_path_changed(self, path_str: str):
         self._on_change(Path(path_str))
-
-    def _on_button(self):
-        def callback(path_str: str):
-            self._on_change(Path(path_str))
-            self._entry.set_text(path_str)
-
-        choose_dir(self._parent, callback)
 
 
 class NamedDir(NamedTuple):
@@ -197,47 +186,57 @@ class NamedDirsForm(Gtk.Grid):
         super().__init__()
         self.set_column_spacing(10)
         self.set_row_spacing(10)
-        self._path_entries = list(self._init_entries())
+        self._init_entries()
 
-    def _init_entries(self) -> Iterator[Gtk.Entry]:
+    def _init_entries(self):
         for i, named_dir in enumerate(self._named_dirs_list):
-            entry_name = create_entry(
+            name_entry = create_entry(
                 value=named_dir.name or '',
-                callback=partial(self._on_name_text, i)
+                callback=partial(self._on_name_changed, i)
             )
-            entry_name.set_hexpand(True)
-            self.attach(entry_name, left=0, top=i, width=1, height=1)
-            entry_path = create_entry(
-                value=str(named_dir.path) or '',
-                callback=partial(self._on_path_text, i)
+            name_entry.set_hexpand(True)
+            self.attach(name_entry, left=0, top=i, width=1, height=1)
+            choose_button = create_file_chooser_button(
+                value=str(named_dir.path) if named_dir.path else None,
+                callback=partial(self._on_path_changed, i),
             )
-            entry_path.set_hexpand(True)
-            self.attach(entry_path, left=1, top=i, width=1, height=1)
-            button = create_button(
-                'Choose',
-                partial(self._on_path_button, i)
+            self.attach(choose_button, left=2, top=i, width=1, height=1)
+            remove_button = create_button(
+                stock_id=Gtk.STOCK_REMOVE,
+                callback=partial(self._on_remove_clicked, i),
             )
-            self.attach(button, left=2, top=i, width=1, height=1)
-            yield entry_path
+            self.attach(remove_button, left=3, top=i, width=1, height=1)
+        self.show_all()
 
-    def _on_name_text(self, i: int, name: str):
+    def _clear(self):
+        for row in self.get_children():
+            self.remove(row)
+
+    def _on_name_changed(self, i: int, name: str):
         named_dir = self._named_dirs_list[i]
         self._named_dirs_list[i] = named_dir._replace(name=name)
         self._on_change(self._named_dirs)
 
-    def _on_path_text(self, i: int, path_str: str):
+    def _on_path_changed(self, i: int, path_str: str):
         named_dir = self._named_dirs_list[i]
         self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
         self._on_change(self._named_dirs)
 
-    def _on_path_button(self, i: int):
-        def callback(path_str: str):
-            named_dir = self._named_dirs_list[i]
-            self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
-            self._on_change(self._named_dirs)
-            self._path_entries[i].set_text(path_str)
+    def _on_remove_clicked(self, i: int):
+        del self._named_dirs_list[i]
+        self._on_change(self._named_dirs)
+        self._clear()
+        self._init_entries()
 
-        choose_dir(self._parent, callback)
+    def _on_add_clicked(self, i: int):
+        new_named_dir = NamedDir(
+            path=Path(),
+            name=''
+        )
+        self._named_dirs_list.append(new_named_dir)
+        self._on_change(self._named_dirs)
+        self._clear()
+        self._init_entries()
 
     @property
     def _named_dirs(self) -> TNamedDirs:
