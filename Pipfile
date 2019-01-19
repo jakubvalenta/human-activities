@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pillow = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 "flake8" = "*"

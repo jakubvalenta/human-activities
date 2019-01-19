@@ -1,61 +1,81 @@
 import logging
 import os
+import os.path
 import stat
-from pathlib import Path
 from threading import Event
-from typing import List, Optional, Tuple
+from typing import List, NamedTuple, Optional
 
 logger = logging.getLogger(__name__)
 
 
-def has_hidden_attribute(path: Path) -> bool:
+def has_hidden_attribute(entry: os.DirEntry) -> bool:
     """See https://stackoverflow.com/a/6365265"""
-    return bool(getattr(path.stat(), 'st_file_attributes', 0) &
+    return bool(getattr(entry.stat(), 'st_file_attributes', 0) &
                 stat.FILE_ATTRIBUTE_HIDDEN)  # type: ignore
 
 
-def is_hidden(path: Path) -> bool:
-    return path.name.startswith('.') or has_hidden_attribute(path)
+def is_hidden(entry: os.DirEntry) -> bool:
+    return entry.name.startswith('.') or has_hidden_attribute(entry)
 
 
-def list_dirs(path: Path) -> List[Path]:
+def list_dirs(path: str) -> List[str]:
     return sorted(
-        p for p in path.iterdir()
-        if p.is_dir() and not is_hidden(p)
+        entry.path for entry in os.scandir(path)
+        if entry.is_dir() and not is_hidden(entry)
     )
 
 
+class DirSize(NamedTuple):
+    size_bytes_all: Optional[int] = None
+    size_bytes_new: Optional[int] = None
+    num_files_all: Optional[int] = None
+    num_files_new: Optional[int] = None
+
+
 def calc_dir_size(path: str,
-                  threshold: float,
-                  event_stop: Event) -> Tuple[Optional[int], Optional[int]]:
+                  threshold_seconds: float,
+                  event_stop: Event) -> DirSize:
     try:
         entries = os.scandir(path)
     except FileNotFoundError:
         logger.info('Directory not found "%s"', path)
-        return None, None
+        return DirSize()
     except PermissionError:
         logger.info('No permissions to read directory "%s"', path)
-        return None, None
-    total_size = 0
-    total_size_new = 0
+        return DirSize()
+    size_bytes_all = 0
+    size_bytes_new = 0
+    num_files_all = 0
+    num_files_new = 0
     for entry in entries:
         if event_stop.is_set():
-            logger.warn('Stopping calculation')
-            return None, None
+            logger.warning('Stopping calculation')
+            return DirSize()
         if not entry.is_symlink():
             if entry.is_file():
                 stat_result = entry.stat()
-                total_size += stat_result.st_size
-                if stat_result.st_mtime > threshold:
-                    total_size_new += stat_result.st_size
+                size_bytes_all += stat_result.st_size
+                num_files_all += 1
+                if stat_result.st_mtime > threshold_seconds:
+                    size_bytes_new += stat_result.st_size
+                    num_files_new += 1
             elif entry.is_dir():
-                sub_size, sub_size_new = calc_dir_size(
+                sub_dir_size = calc_dir_size(
                     entry.path,
-                    threshold,
+                    threshold_seconds,
                     event_stop
                 )
-                if sub_size is not None:
-                    total_size += sub_size
-                if sub_size_new is not None:
-                    total_size_new += sub_size_new
-    return total_size, total_size_new
+                if sub_dir_size.size_bytes_all is not None:
+                    size_bytes_all += sub_dir_size.size_bytes_all
+                if sub_dir_size.size_bytes_new:
+                    size_bytes_new += sub_dir_size.size_bytes_new
+                if sub_dir_size.num_files_all:
+                    num_files_all += sub_dir_size.num_files_all
+                if sub_dir_size.num_files_new:
+                    num_files_new += sub_dir_size.num_files_new
+    return DirSize(
+        size_bytes_all,
+        size_bytes_new,
+        num_files_all,
+        num_files_new
+    )

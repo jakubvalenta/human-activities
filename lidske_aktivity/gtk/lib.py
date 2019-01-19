@@ -1,6 +1,5 @@
 import logging
 from functools import partial
-from pathlib import Path
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
 
 import gi
@@ -139,12 +138,12 @@ def call_tick(func: Callable):
 
 
 class RootPathForm(Gtk.Box):
-    _root_path: Path
+    _root_path: str
     _parent: Gtk.Window
 
     def __init__(self,
-                 root_path: Path,
-                 on_change: Callable[[Path], None],
+                 root_path: str,
+                 on_change: Callable[[str], None],
                  parent: Gtk.Window):
         self._root_path = root_path
         self._on_change = on_change
@@ -154,19 +153,19 @@ class RootPathForm(Gtk.Box):
 
     def _init_entry(self):
         button = create_file_chooser_button(
-            value=str(self._root_path) if self._root_path else None,
+            value=self._root_path or None,
             callback=self._on_path_changed
         )
         button.set_hexpand(True)
         box_add(self, button)
 
-    def _on_path_changed(self, path_str: str):
-        self._on_change(Path(path_str))
+    def _on_path_changed(self, path: str):
+        self._on_change(path)
 
 
 class NamedDir(NamedTuple):
-    path: Path
-    name: str
+    path: str = ''
+    name: str = ''
 
 
 class NamedDirsForm(Gtk.Grid):
@@ -196,7 +195,7 @@ class NamedDirsForm(Gtk.Grid):
             name_entry.set_hexpand(True)
             self.attach(name_entry, left=0, top=i, width=2, height=1)
             choose_button = create_file_chooser_button(
-                value=str(named_dir.path) if named_dir.path else None,
+                value=named_dir.path or None,
                 callback=partial(self._on_path_changed, i),
             )
             self.attach(choose_button, left=2, top=i, width=2, height=1)
@@ -227,9 +226,9 @@ class NamedDirsForm(Gtk.Grid):
         self._named_dirs_list[i] = named_dir._replace(name=name)
         self._on_change(self._named_dirs)
 
-    def _on_path_changed(self, i: int, path_str: str):
+    def _on_path_changed(self, i: int, path: str):
         named_dir = self._named_dirs_list[i]
-        self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
+        self._named_dirs_list[i] = named_dir._replace(path=path)
         self._on_change(self._named_dirs)
 
     def _on_remove_clicked(self, i: int):
@@ -239,10 +238,7 @@ class NamedDirsForm(Gtk.Grid):
         self._init_entries()
 
     def _on_add_clicked(self):
-        new_named_dir = NamedDir(
-            path=Path(),
-            name=''
-        )
+        new_named_dir = NamedDir()
         self._named_dirs_list.append(new_named_dir)
         self._on_change(self._named_dirs)
         self._clear()

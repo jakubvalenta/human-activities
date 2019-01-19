@@ -1,20 +1,24 @@
 import logging
 import textwrap
-from pathlib import Path
+import time
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, wait
 from threading import Event, Thread
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Callable, Dict, NamedTuple, Optional, Sequence
 
-from lidske_aktivity.config import (
-    CACHE_PATH, MODE_NAMED_DIRS, MODE_ROOT_PATH, Config, TNamedDirs,
-    load_config, save_config,
-)
-from lidske_aktivity.directories import (
-    Directory, TDirectories, init_directories_from_paths,
-    init_directories_from_root_path, scan_directories,
-)
-from lidske_aktivity.utils import math
+from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
+
+from lidske_aktivity.config import Config, TNamedDirs, load_config, save_config
+from lidske_aktivity.utils import filesystem, func, math
 
 logger = logging.getLogger(__name__)
+
+Base = declarative_base()
+engine = create_engine('sqlite:///:memory:')  # TODO: echo=True
+Session = sessionmaker(bind=engine)
+session = Session()
 
 
 class SizeMode(NamedTuple):
@@ -22,23 +26,6 @@ class SizeMode(NamedTuple):
     label: str
     tooltip: str
 
-
-class ExtDirectory(NamedTuple):
-    label: str
-    fraction: Optional[float] = 0
-    percent: Optional[float] = 0
-    pending: bool = True
-    tooltip: str = ''
-
-    @property
-    def text(self):
-        if self.pending:
-            return f'{self.label}: ...'
-        return f'{self.label}: {self.fraction:.0%}'
-
-
-TExtDirectories = Dict[Path, ExtDirectory]
-TFractions = Dict[Path, float]
 
 SIZE_MODE_SIZE = 'size'
 SIZE_MODE_SIZE_NEW = 'size_new'
@@ -56,70 +43,217 @@ SIZE_MODES = (
     ),
 )
 
-TOOLTIPS = {
-    SIZE_MODE_SIZE: '{:.2%} of the size of all configured directories',
-    SIZE_MODE_SIZE_NEW: (
-        '{:.2%} of the files in this directory was modified in the past 30'
-        'days'
-    )
-}
+
+class Stat(Base):  # type: ignore
+    __tablename__ = 'stats'
+
+    id = Column(Integer, primary_key=True)
+    size_bytes = Column(Integer)
+    num_files = Column(Integer)
+    threshold_days_ago = Column(Integer)
+    directory_id = Column(Integer, ForeignKey('directories.id'))
+    directory = relationship('Directory', back_populates='stats')
+
+    fractions: Dict[str, float]
+
+    def __repr__(self) -> str:
+        return (f'Stat(size_bytes={self.size_bytes}, '
+                f'num_files={self.num_files})')
 
 
-def calc_size(directories: TDirectories) -> Tuple[TFractions, TFractions]:
-    total_size = sum(d.size or 0 for d in directories.values())
-    fractions = {
-        path: math.safe_div(directory.size, total_size)
-        for path, directory in directories.items()
-    }
-    return fractions, fractions
+TScanCallback = Callable[['Directory'], None]
 
 
-def calc_size_new(directories: TDirectories) -> Tuple[TFractions, TFractions]:
-    fractions = {
-        path: math.safe_div(directory.size_new, directory.size)
-        for path, directory in directories.items()
-    }
-    total_fractions = sum(fractions.values())
-    percents = {
-        path: math.safe_div(fraction, total_fractions)
-        for path, fraction in fractions.items()
-    }
-    return fractions, percents
+class Directory(Base):  # type: ignore
+    __tablename__ = 'directories'
 
+    id = Column(Integer, primary_key=True)
+    path = Column(String, nullable=False, unique=True)
+    stats = relationship('Stat', back_populates='directory')
 
-def format_label(path: Path, config_mode: str, named_dirs: TNamedDirs) -> str:
-    if (config_mode == MODE_NAMED_DIRS and path in named_dirs):
-        return named_dirs[path]
-    return path.name
+    label: str = ''
+    pending: bool = False
 
-
-def format_tooltip(fraction: float, active_mode: str):
-    s = TOOLTIPS[active_mode].format(fraction)
-    return textwrap.fill(s)
-
-
-def load_directories(config: Config) -> TDirectories:
-    init_funcs = {
-        MODE_ROOT_PATH: lambda: init_directories_from_root_path(
-            CACHE_PATH, config.root_path
-        ),
-        MODE_NAMED_DIRS: lambda: init_directories_from_paths(
-            CACHE_PATH, config.named_dirs.keys()
+    @func.measure_time
+    def scan(self,
+             callback: TScanCallback,
+             event_stop: Event,
+             threshold_days_ago: int,
+             test: bool = False):
+        logger.info('Calculating size of "%s"', self.path)
+        self.pending = True
+        threshold_seconds_ago = threshold_days_ago * 24 * 3600
+        threshold_seconds = time.time() - threshold_seconds_ago
+        dir_size = filesystem.calc_dir_size(
+            self.path,
+            threshold_seconds=threshold_seconds,
+            event_stop=event_stop
         )
-    }
-    init_func = init_funcs[config.mode]
-    return init_func()
+        self.stats = [
+            Stat(
+                size_bytes=dir_size.size_bytes_all,
+                num_files=dir_size.num_files_all,
+                threshold_days_ago=threshold_days_ago
+            ),
+            Stat(
+                size_bytes=dir_size.size_bytes_new,
+                num_files=dir_size.num_files_new,
+                threshold_days_ago=None
+            )
+        ]
+        if test:
+            func.random_wait(event_stop)
+        self.pending = False
+        logger.info('Calculated size of "%s": %s', self.path, self.stats)
+        callback(self)
+
+    def __repr__(self) -> str:
+        return (f'Directory(path={self.path}, label={self.label}, '
+                f'stats={self.stats})')
+
+
+Base.metadata.create_all(engine)
+
+
+class DirectoryView:
+    directory: Directory
+    _value_name: str
+    _threshold_days_ago: Optional[int]
+
+    fraction: float
+    text: str
+    tooltip: str
+
+    def __init__(self,
+                 directory: Directory,
+                 value_name: str,
+                 threshold_days_ago: Optional[int]):
+        self.directory = directory
+        self._value_name = value_name
+        self._threshold_days_ago = threshold_days_ago
+
+        self.fraction = self._get_fraction()
+        self.text = self._get_text()
+        self.tooltip = self._get_tooltip()
+
+    def _get_text(self) -> str:
+        if self.directory.pending:
+            return f'{self.directory.label}: ...'
+        return f'{self.directory.label}: {self.fraction:.0%}'
+
+    def _get_tooltip(self) -> str:
+        value_text = {
+            'size_bytes': 'size',
+            'num_files': 'number',
+        }[self._value_name]
+        if self._threshold_days_ago is None:
+            set_text = 'all configured directories'
+        else:
+            set_text = (f'the files modified in the past '
+                        f'{self._threshold_days_ago} days')
+        s = f'{self.fraction:.2%} of the {value_text} of {set_text}'
+        return textwrap.fill(s)
+
+    def _get_fraction(self) -> float:
+        for stat in self.directory.stats:
+            if stat.threshold_days_ago == self._threshold_days_ago:
+                return stat.fractions[self._value_name]
+        return 0
+
+    def __repr__(self) -> str:
+        return (f'DirectoryView(directory={self.directory}, '
+                f'fraction={self.fraction})')
+
+
+class Directories(list):
+    _scan_event_stop: Optional[Event] = None
+    _scan_thread: Thread
+
+    def __init__(self,
+                 configured_dirs: TNamedDirs,
+                 on_scan: Callable,
+                 threshold_days_ago: int,
+                 test: bool = False):
+        """Create directories for all paths, load from cache if available."""
+        super().__init__()
+        self._on_scan = on_scan
+        paths = list(configured_dirs.values())
+        query = (
+            session.query(Directory)
+            .filter(Directory.path.in_(paths))
+            .order_by(Directory.path)
+        )
+        directories_dict = {
+            directory.path: directory
+            for directory in query
+        }
+        for path, label in configured_dirs.items():
+            if path in directories_dict:
+                directory = directories_dict[path]
+            else:
+                directory = Directory(path=path)
+            directory.label = label
+            logger.info('Created %s', directory)
+            self.append(directory)
+        self._scan_start(threshold_days_ago, test=test)
+
+    def save(self):
+        session.add_all(self)
+
+    def _scan_start(self, threshold_days_ago: int, test: bool = False):
+        self._scan_event_stop = Event()
+
+        def orchestrator():
+            with ThreadPoolExecutor() as executor:
+                futures = [
+                    executor.submit(
+                        directory.scan,
+                        self._on_directory_scanned,
+                        self._scan_event_stop,
+                        threshold_days_ago,
+                        test
+                    )
+                    for directory in self
+                ]
+                wait(futures)
+                self.save()
+
+        self._scan_thread = Thread(target=orchestrator)
+        self._scan_thread.start()
+
+    def scan_stop(self):
+        if self._scan_event_stop:
+            self._scan_event_stop.set()
+            self._scan_thread.join()
+            logger.info('Scan stopped')
+
+    def _on_directory_scanned(self, directory: Directory):
+        total: Dict[str, Dict[int, int]] = {
+            'size_bytes': defaultdict(int),
+            'num_files': defaultdict(int),
+        }
+        for directory in self:
+            for stat in directory.stats:
+                for value_name in total:
+                    value = getattr(stat, value_name)
+                    total[value_name][stat.threshold_days_ago] += value
+        for directory in self:
+            for stat in directory.stats:
+                stat.fractions = {
+                    value_name: math.safe_div(
+                        getattr(stat, value_name),
+                        total[value_name][stat.threshold_days_ago]
+                    )
+                    for value_name in total
+                }
+        self._on_scan()
 
 
 class Model:
     _config: Config
-    _directories: TDirectories
-    ext_directories: TExtDirectories
     _active_mode: str = SIZE_MODE_SIZE
-
-    scan_event_stop: Optional[Event] = None
-    scan_thread: Thread
-    last_percents: Optional[TFractions] = None
+    _directories: Directories
+    _directory_views: Sequence[DirectoryView] = ()
 
     def __init__(self):
         self.config = load_config()
@@ -132,57 +266,12 @@ class Model:
     def config(self, config: Config):
         self._config = config
         save_config(config)
-        self._init()
-
-    def _init(self):
-        self.scan_stop()
-        self._directories = load_directories(self._config)
-        self._create_ext_directories()
-        self._scan_start()
-
-    def _scan_start(self):
-        self.scan_event_stop = Event()
-        self.scan_thread = scan_directories(
-            self._directories,
-            cache_path=CACHE_PATH,
-            callback=self._update_directory,
-            event_stop=self.scan_event_stop,
-            test=self.config.test
+        self._directories = Directories(
+            self._config.configured_dirs,
+            self._update_directory_views,
+            self._config.threshold_days_ago,
+            test=self._config.test
         )
-
-    def scan_stop(self):
-        if self.scan_event_stop:
-            self.scan_event_stop.set()
-            self.scan_thread.join()
-            logger.info('Scan stopped')
-
-    def _create_ext_directories(self):
-        self.ext_directories = {
-            path: ExtDirectory(
-                label=format_label(
-                    path,
-                    self.config.mode,
-                    self.config.named_dirs
-                )
-            )
-            for path, directory in self._directories.items()
-        }
-
-    def _update_ext_directories(self):
-        calc_funcs = {
-            SIZE_MODE_SIZE: calc_size,
-            SIZE_MODE_SIZE_NEW: calc_size_new,
-        }
-        calc_func = calc_funcs[self.active_mode]
-        fractions, percents = calc_func(self._directories)
-        self.ext_directories = {
-            path: ext_directory._replace(
-                fraction=fractions[path],
-                percent=percents[path],
-                tooltip=format_tooltip(fractions[path], self.active_mode),
-            )
-            for path, ext_directory in self.ext_directories.items()
-        }
 
     @property
     def active_mode(self):
@@ -191,22 +280,20 @@ class Model:
     @active_mode.setter
     def active_mode(self, mode: str):
         self._active_mode = mode
-        self._update_ext_directories()
-
-    def _update_directory(self, path: Path, directory: Directory):
-        self._directories[path] = self._directories[path]._replace(
-            size=directory.size,
-            size_new=directory.size_new,
-        )
-        self._update_ext_directories()
-        self.ext_directories[path] = self.ext_directories[path]._replace(
-            pending=False
-        )
 
     @property
-    def texts(self) -> List[str]:
-        return [x.text for x in self.ext_directories.values()]
+    def directory_views(self) -> Sequence[DirectoryView]:
+        return self._directory_views
 
-    @property
-    def percents(self) -> List[float]:
-        return [x.percent or 0 for x in self.ext_directories.values()]
+    def _update_directory_views(self):
+        self._directory_views = [
+            DirectoryView(
+                directory,
+                self._config.value_name,
+                self._config.threshold_days_ago
+            )
+            for directory in self._directories
+        ]
+
+    def scan_stop(self):
+        self._directories.scan_stop()

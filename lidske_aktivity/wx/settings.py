@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Callable, Dict
 
 import wx
@@ -110,7 +109,7 @@ class Settings(wx.Dialog):
         self._config.mode = mode
         self._toggle_controls()
 
-    def _on_root_path_change(self, root_path: Path):
+    def _on_root_path_change(self, root_path: str):
         self._config.root_path = root_path
 
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):

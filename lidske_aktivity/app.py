@@ -1,14 +1,14 @@
 import logging
 import time
 from threading import Event, Thread
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
 from lidske_aktivity.config import Config
 from lidske_aktivity.icon import draw_pie_chart, gen_random_slices
-from lidske_aktivity.model import Model, TExtDirectories
+from lidske_aktivity.model import DirectoryView, Model
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class Application:
     model: Model
     ui_app: Any
     status_icon: Any
-    last_ext_directories: Optional[TExtDirectories] = None
+    last_directory_views: Sequence[DirectoryView] = ()
     tick_event_stop: Optional[Event] = None
     tick_thread: Optional[Thread] = None
 
@@ -37,7 +37,7 @@ class Application:
             self.ui.menu.Menu,
             self
         )
-        self.menu.init(self.model.active_mode, self.model.ext_directories)
+        self.menu.init(self.model.active_mode, self.model.directory_views)
         self.status_icon = self.ui.status_icon.StatusIcon(self)
         if self.model.config.show_setup:
             self.model.config.show_setup = False
@@ -102,34 +102,41 @@ class Application:
             time.sleep(1)
 
     def on_tick(self):
-        if self.model.ext_directories != self.last_ext_directories:
-            self.last_ext_directories = self.model.ext_directories
+        if self.model.directory_views != self.last_directory_views:
+            self.last_directory_views = self.model.directory_views
             self._update_icon()
-        self._update_menu()  # Always update to keep GTK pulsing.
+        self._update_menu()  # Keep GTK pulsing.
 
     def _update_icon(self):
-        logger.info('Updating icon with slices %s', self.model.percents)
-        self.status_icon.update(self.model.percents, self.model.texts)
+        fractions, texts = zip(*(
+            (directory_view.fraction, directory_view.text)
+            for directory_view in self.model.directory_views
+        ))
+        logger.info(
+            'Updating icon with slices %s',
+            [f'{fraction:.2f}' for fraction in fractions]
+        )
+        self.status_icon.update(fractions, texts)
 
     def _update_menu(self):
         logger.info('Update menu')
         pending = False
-        if self.model.ext_directories:
-            for path, ext_directory in self.model.ext_directories.items():
-                if ext_directory.pending:
+        if self.model.directory_views:
+            for directory_view in self.model.directory_views:
+                if directory_view.directory.pending:
                     pending = True
-                    self.menu.pulse_progress_bar(path)
+                    self.menu.pulse_progress_bar(directory_view.directory.path)
                 else:
                     self.menu.update_progress_bar(
-                        path,
-                        ext_directory.fraction,
-                        ext_directory.tooltip
+                        directory_view.directory.path,
+                        directory_view.fraction,
+                        directory_view.tooltip
                     )
         if not pending:
             self.menu.hide_spinner()
 
     def reset_menu(self):
-        self.menu.reset(self.model.active_mode, self.model.ext_directories)
+        self.menu.reset(self.model.active_mode, self.model.directory_views)
 
     def quit(self):
         logger.info('Menu quit')

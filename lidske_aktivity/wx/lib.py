@@ -1,10 +1,7 @@
 import io
 import logging
 from functools import partial
-from pathlib import Path
-from typing import (
-    Callable, Dict, Iterable, Iterator, List, NamedTuple, Optional,
-)
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
 
 import wx
 import wx.lib.filebrowsebutton
@@ -161,12 +158,12 @@ class Form:
 
 
 class RootPathForm(Form):
-    _root_path: Path
+    _root_path: str
     _parent: wx.Panel
 
     def __init__(self,
-                 root_path: Path,
-                 on_change: Callable[[Path], None],
+                 root_path: str,
+                 on_change: Callable[[str], None],
                  parent: wx.Panel,
                  *args,
                  **kwargs):
@@ -180,18 +177,18 @@ class RootPathForm(Form):
         vbox = create_sizer(self.panel)
         button = create_dir_browse_button(
             self.panel,
-            value=str(self._root_path) if self._root_path else '',
+            value=self._root_path or '',
             callback=self._on_dir_changed
         )
         vbox.Add(button, flag=wx.EXPAND)
 
-    def _on_dir_changed(self, path_str: str):
-        self._on_change(Path(path_str))
+    def _on_dir_changed(self, path: str):
+        self._on_change(path)
 
 
 class NamedDir(NamedTuple):
-    path: Path
-    name: str
+    path: str = ''
+    name: str = ''
 
 
 class NamedDirsForm(Form):
@@ -213,7 +210,7 @@ class NamedDirsForm(Form):
         super().__init__(self._parent, *args, **kwargs)
         self._init_controls()
 
-    def _init_controls(self) -> Iterator[wx.TextCtrl]:
+    def _init_controls(self):
         self._vbox = create_sizer(self.panel)
         for i, named_dir in enumerate(self._named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -230,7 +227,7 @@ class NamedDirsForm(Form):
             )
             path_button = create_dir_browse_button(
                 self.panel,
-                value=str(named_dir.path) or '',
+                value=named_dir.path or '',
                 callback=partial(self._on_path_changed, i)
             )
             hbox.Add(
@@ -275,9 +272,9 @@ class NamedDirsForm(Form):
         self._named_dirs_list[i] = named_dir._replace(name=name)
         self._on_change(self._named_dirs)
 
-    def _on_path_changed(self, i: int, path_str: str):
+    def _on_path_changed(self, i: int, path: str):
         named_dir = self._named_dirs_list[i]
-        self._named_dirs_list[i] = named_dir._replace(path=Path(path_str))
+        self._named_dirs_list[i] = named_dir._replace(path=path)
         self._on_change(self._named_dirs)
 
     def _on_remove_clicked(self, i: int):
@@ -287,10 +284,7 @@ class NamedDirsForm(Form):
         self._init_controls()
 
     def _on_add_clicked(self):
-        new_named_dir = NamedDir(
-            path=Path(),
-            name=''
-        )
+        new_named_dir = NamedDir()
         self._named_dirs_list.append(new_named_dir)
         self._on_change(self._named_dirs)
         self._clear()

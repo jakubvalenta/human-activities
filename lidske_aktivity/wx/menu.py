@@ -2,12 +2,12 @@ import logging
 import time
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List
 
 import wx
 
 from lidske_aktivity.icon import color_from_index
-from lidske_aktivity.model import SIZE_MODES, TExtDirectories
+from lidske_aktivity.model import SIZE_MODES, DirectoryView
 from lidske_aktivity.wx.lib import create_button, create_label, create_sizer
 
 if TYPE_CHECKING:
@@ -89,12 +89,12 @@ class Menu(wx.PopupTransientWindow):
         super().__init__(parent)
         self.app = app
 
-    def init(self, active_mode: str, ext_directories: TExtDirectories):
+    def init(self, active_mode: str, directory_views: List[DirectoryView]):
         self._init_window()
-        if ext_directories:
+        if directory_views:
             self._init_radio_buttons()
             self.update_radio_buttons(active_mode)
-            self._init_progress_bars(ext_directories)
+            self._init_progress_bars(directory_views)
         else:
             self._init_empty()
         self._init_spinner()
@@ -134,17 +134,17 @@ class Menu(wx.PopupTransientWindow):
         )
         self.sizer.Add(button, flag=wx.EXPAND)
 
-    def _init_progress_bars(self, ext_directories: TExtDirectories):
+    def _init_progress_bars(self, directory_views: List[DirectoryView]):
         self.progress_bars = {}
         self.sizer.AddSpacer(10)
-        for i, (path, ext_directory) in enumerate(ext_directories.items()):
+        for i, directory_view in enumerate(directory_views):
             progress_bar = ProgressBar(
                 parent=self.panel,
-                text=ext_directory.label,
+                text=directory_view.directory.label,
                 i=i
             )
             self.sizer.Add(progress_bar, flag=wx.EXPAND)
-            self.progress_bars[path] = progress_bar
+            self.progress_bars[directory_view.directory.path] = progress_bar
 
     def _init_spinner(self):
         self.spinner = create_label(self, 'calculating...')
@@ -172,9 +172,9 @@ class Menu(wx.PopupTransientWindow):
         self.spinner.Hide()
         self._fit()
 
-    def reset(self, active_mode: str, ext_directories: TExtDirectories):
+    def reset(self, active_mode: str, directory_views: List[DirectoryView]):
         self._empty()
-        self.init(active_mode, ext_directories)
+        self.init(active_mode, directory_views)
         self._position()
 
     def popup_at(self, mouse_x: int, mouse_y: int):

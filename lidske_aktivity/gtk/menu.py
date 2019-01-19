@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 import gi
 
@@ -9,7 +9,7 @@ from lidske_aktivity.gtk.lib import (
     RadioConfig, box_add, create_box, create_button, create_label,
     create_radio_group,
 )
-from lidske_aktivity.model import SIZE_MODES, TExtDirectories
+from lidske_aktivity.model import SIZE_MODES, DirectoryView
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
@@ -83,11 +83,11 @@ class Menu(Gtk.ApplicationWindow):
         )
         self.app = app
 
-    def init(self, active_mode: str, ext_directories: TExtDirectories):
+    def init(self, active_mode: str, directory_views: List[DirectoryView]):
         self._init_window()
-        if ext_directories:
+        if directory_views:
             self._init_radio_buttons(active_mode)
-            self._init_progress_bars(ext_directories)
+            self._init_progress_bars(directory_views)
         else:
             self._init_empty()
         self._init_spinner()
@@ -119,12 +119,15 @@ class Menu(Gtk.ApplicationWindow):
         button = create_button(self._on_setup_button, 'Open app setup')
         box_add(self.box, button)
 
-    def _init_progress_bars(self, ext_directories: TExtDirectories):
+    def _init_progress_bars(self, directory_views: List[DirectoryView]):
         self.progress_bars = {}
-        for i, (path, ext_directory) in enumerate(ext_directories.items()):
-            progress_bar = ProgressBar(text=ext_directory.label, i=i)
+        for i, directory_view in enumerate(directory_views):
+            progress_bar = ProgressBar(
+                text=directory_view.directory.label,
+                i=i
+            )
             box_add(self.box, progress_bar)
-            self.progress_bars[path] = progress_bar
+            self.progress_bars[directory_view.directory.path] = progress_bar
 
     def _init_spinner(self):
         self._size_remember()
@@ -144,9 +147,9 @@ class Menu(Gtk.ApplicationWindow):
         self.spinner.hide()
         self._size_restore()
 
-    def reset(self, active_mode: str, ext_directories: TExtDirectories):
+    def reset(self, active_mode: str, directory_views: List[DirectoryView]):
         self._empty()
-        self.init(active_mode, ext_directories)
+        self.init(active_mode, directory_views)
 
     def popup_at(self, mouse_x: int, mouse_y: int):
         self.set_position(Gtk.WindowPosition.CENTER)
