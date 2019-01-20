@@ -81,7 +81,7 @@ class Application:
 
     def tick(self):
         while not self.tick_event_stop.is_set():
-            logger.info('Tick')
+            logger.debug('Tick')
             self.ui.lib.call_tick(self._update_status_icon)
             time.sleep(1)
 
@@ -91,7 +91,7 @@ class Application:
         self.last_directory_views = self.model.directory_views
         logger.info(
             'Updating icon with slices %s',
-            [f'{dv.fraction:.2f}' for dv in self.model.directory_views]
+            [f'{fract:.2f}' for fract in self.model.directory_views.fractions]
         )
         self.status_icon.update(self.model.directory_views)
 

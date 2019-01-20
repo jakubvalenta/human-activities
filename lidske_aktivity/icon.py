@@ -84,9 +84,8 @@ def color_from_index(i: int,
                      default_color: Color = COLOR_GRAY,
                      **kwargs) -> Color:
     if i == -1:
-        rgb = default_color
-    else:
-        rgb = _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
+        return default_color
+    rgb = _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
     return Color(*rgb)
 
 

@@ -92,7 +92,7 @@ class StatusIcon():
     def __init__(self, app: 'Application'):
         self.app = app
         self._indicator = create_indicator()
-        self._init_menu([])
+        self._init_menu()
 
     def _create_menu_items(
             self,
@@ -134,10 +134,11 @@ class StatusIcon():
             icon_name='application-exit'
         )
 
-    def _init_menu(self, directory_views: DirectoryViews):
+    def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
         menu = Gtk.Menu()
-        for menu_item in self._create_menu_items(directory_views):
-            menu.append(menu_item)
+        if directory_views:
+            for menu_item in self._create_menu_items(directory_views):
+                menu.append(menu_item)
         menu.show_all()
         self._indicator.set_menu(menu)
 

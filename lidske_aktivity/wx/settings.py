@@ -123,7 +123,7 @@ class Settings(wx.Dialog):
     def _on_value_name_radio_toggled(self, value_name: str):
         self._config.value_name = value_name
 
-    def _on_threshold_days_ago_changed(self, threshold_days_ago: str):
+    def _on_threshold_days_ago_changed(self, threshold_days_ago: int):
         self._config.threshold_days_ago = threshold_days_ago
 
     def _create_mode_radios(self):

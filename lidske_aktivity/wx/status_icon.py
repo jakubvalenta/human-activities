@@ -52,9 +52,9 @@ class StatusIcon(wx.adv.TaskBarIcon):
             wx.adv.EVT_TASKBAR_LEFT_DOWN,
             lambda event: self._show_menu()
         )
-        self._init_menu([])
+        self._init_menu()
 
-    def _init_menu(self, directory_views: DirectoryViews):
+    def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
         # TODO: Limit the maximum number of items shown.
         menu = wx.Menu()
         if directory_views:
