@@ -266,6 +266,7 @@ class Model:
     def config(self, config: Config):
         self._config = config
         save_config(config)
+        self.scan_stop()
         self._directories = Directories(
             self._config.configured_dirs,
             self._update_directory_views,
@@ -296,4 +297,5 @@ class Model:
         ]
 
     def scan_stop(self):
-        self._directories.scan_stop()
+        if self._directories:
+            self._directories.scan_stop()
