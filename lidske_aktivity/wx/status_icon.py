@@ -112,8 +112,8 @@ class StatusIcon(wx.adv.TaskBarIcon):
         return context_menu
 
     def update(self, directory_views: List[DirectoryView]):
-        percents = (dv.fraction for dv in directory_views)
-        texts = (dv.text for dv in directory_views)
+        percents = [dv.fraction for dv in directory_views]
+        texts = [dv.text for dv in directory_views]
         image = draw_pie_chart_png(self.icon_size, percents)
         icon = create_icon_from_image(image)
         tooltip = '\n'.join(texts)

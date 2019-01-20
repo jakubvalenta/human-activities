@@ -124,8 +124,8 @@ class StatusIcon():
         self._indicator.set_menu(menu)
 
     def update(self, directory_views: List[DirectoryView]):
-        percents = (dv.fraction for dv in directory_views)
-        texts = (dv.text for dv in directory_views)
+        percents = [dv.fraction for dv in directory_views]
+        texts = [dv.text for dv in directory_views]
         svg = draw_pie_chart_svg(percents)
         icon_hash = calc_icon_hash(percents)
         icon_temp_dir = write_temp_file(
