@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_menu_item(label: str,
-                     callback: Callable = None,
+                     callback: Optional[Callable] = None,
                      tooltip: Optional[str] = None,
                      icon: Optional[str] = None) -> Gtk.MenuItem:
     if icon:

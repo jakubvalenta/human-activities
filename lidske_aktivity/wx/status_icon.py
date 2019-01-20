@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, List
+from functools import partial
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 import wx
 import wx.adv
@@ -11,11 +12,37 @@ if TYPE_CHECKING:
     from lidske_aktivity.app import Application
 
 
-def add_menu_item(menu: wx.Menu, text: str, tooltip: str = ''):
-    menu_item = wx.MenuItem(menu, wx.ID_ANY, text, helpString=tooltip)
+def create_menu_item(parent: wx.Window,
+                     menu: wx.Menu,
+                     text: str,
+                     tooltip: str = '',
+                     id: int = wx.ID_ANY,
+                     callback: Optional[Callable] = None):
+    """Create menu item
+
+    The tooltip is actually not visible, menu items with tooltips are not
+    supported by WxWidgets.
+    """
+    menu_item = wx.MenuItem(menu, id, text, helpString=tooltip)
     menu.Append(menu_item)
-    menu_item.Enable(False)
+    if callback:
+        parent.Bind(
+            wx.EVT_MENU,
+            partial(on_menu_item, callback=callback),
+            id=id
+        )
+    else:
+        menu_item.Enable(False)
     return menu_item
+
+
+def on_menu_item(event: wx.MouseEvent, callback: Callable):
+    callback()
+
+
+def on_menu_item_tooltip(parent: wx.Window, tooltip: str):
+    print('TIP')
+    wx.TipWindow(parent, text=tooltip)
 
 
 class StatusIcon(wx.adv.TaskBarIcon):
@@ -30,26 +57,6 @@ class StatusIcon(wx.adv.TaskBarIcon):
             wx.adv.EVT_TASKBAR_LEFT_DOWN,
             lambda event: self._show_menu()
         )
-        self.Bind(
-            wx.EVT_MENU,
-            lambda event: self.app.show_setup(),
-            id=self.id_setup
-        )
-        self.Bind(
-            wx.EVT_MENU,
-            lambda event: self.app.show_settings(),
-            id=wx.ID_SETUP
-        )
-        self.Bind(
-            wx.EVT_MENU,
-            lambda event: self.app.show_about(),
-            id=wx.ID_ABOUT
-        )
-        self.Bind(
-            wx.EVT_MENU,
-            lambda event: self.app.quit(),
-            id=wx.ID_EXIT
-        )
         self._init_menu([])
 
     def _init_menu(self, directory_views: List[DirectoryView]):
@@ -57,13 +64,14 @@ class StatusIcon(wx.adv.TaskBarIcon):
         menu = wx.Menu()
         if directory_views:
             for directory_view in directory_views:
-                add_menu_item(
+                create_menu_item(
+                    self,
                     menu,
                     directory_view.text,
                     directory_view.tooltip
                 )
         else:
-            add_menu_item(menu, 'No directories configured')
+            create_menu_item(self, menu, 'No directories configured')
             menu.AppendSeparator()
             menu.Append(self.id_setup, '&Setup')
         self._menu = menu
@@ -73,10 +81,34 @@ class StatusIcon(wx.adv.TaskBarIcon):
 
     def CreatePopupMenu(self) -> wx.Menu:
         context_menu = wx.Menu()
-        context_menu.Append(self.id_setup, '&Setup')
-        context_menu.Append(wx.ID_SETUP, 'Advanced &configuration')
-        context_menu.Append(wx.ID_ABOUT, '&About')
-        context_menu.Append(wx.ID_EXIT, '&Quit')
+        create_menu_item(
+            self,
+            context_menu,
+            '&Setup',
+            id=self.id_setup,
+            callback=self.app.show_setup
+        )
+        create_menu_item(
+            self,
+            context_menu,
+            'Advanced &configuration',
+            id=wx.ID_SETUP,
+            callback=self.app.show_settings
+        )
+        create_menu_item(
+            self,
+            context_menu,
+            '&About',
+            id=wx.ID_ABOUT,
+            callback=self.app.show_about
+        )
+        create_menu_item(
+            self,
+            context_menu,
+            '&Quit',
+            id=wx.ID_EXIT,
+            callback=self.app.quit
+        )
         return context_menu
 
     def update(self, directory_views: List[DirectoryView]):
