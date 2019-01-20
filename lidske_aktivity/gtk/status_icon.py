@@ -1,18 +1,22 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterable, Iterator, List, Optional
+from typing import TYPE_CHECKING, Callable, Iterable, Iterator, Optional
 
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
-from lidske_aktivity.icon import calc_icon_hash, draw_pie_chart_svg
-from lidske_aktivity.model import DirectoryView
+from lidske_aktivity.gtk.lib import image_to_pixbuf
+from lidske_aktivity.icon import (
+    calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
+)
+from lidske_aktivity.model import DirectoryViews
 
-gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
+gi.require_version('GdkPixbuf', '2.0')
+gi.require_version('Gtk', '3.0')
 
-from gi.repository import AppIndicator3, Gtk  # noqa:E402  # isort:skip
+from gi.repository import AppIndicator3, GdkPixbuf, Gtk  # noqa:E402  # isort:skip
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
@@ -20,13 +24,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def create_menu_item(label: str,
-                     callback: Optional[Callable] = None,
-                     tooltip: Optional[str] = None,
-                     icon: Optional[str] = None) -> Gtk.MenuItem:
-    if icon:
+def create_menu_item(
+        label: str,
+        callback: Optional[Callable] = None,
+        tooltip: Optional[str] = None,
+        icon_name: Optional[str] = None,
+        icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None) -> Gtk.MenuItem:
+    if icon_name:
         menu_item = Gtk.ImageMenuItem()
-        image = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.MENU)
+        image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
+        menu_item.set_image(image)
+    elif icon_pixbuf:
+        menu_item = Gtk.ImageMenuItem()
+        image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
         menu_item.set_image(image)
     else:
         menu_item = Gtk.MenuItem()
@@ -86,13 +96,21 @@ class StatusIcon():
 
     def _create_menu_items(
             self,
-            directory_views: List[DirectoryView]) -> Iterator[Gtk.MenuItem]:
+            directory_views: DirectoryViews) -> Iterator[Gtk.MenuItem]:
         # TODO: Limit the maximum number of items shown.
         if directory_views:
-            for directory_view in directory_views:
+            for i, directory_view in enumerate(directory_views):
+                _, icon_size, _ = Gtk.IconSize.lookup(Gtk.IconSize.MENU)
+                icon_image = draw_pie_chart_png(
+                    icon_size,
+                    directory_views.fractions,
+                    directory_views.get_colors_with_one_highlighted(i)
+                )
+                icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(
                     directory_view.text,
-                    tooltip=directory_view.tooltip
+                    tooltip=directory_view.tooltip,
+                    icon_pixbuf=icon_pixbuf
                 )
         else:
             yield create_menu_item('No directories configured')
@@ -108,37 +126,34 @@ class StatusIcon():
         yield create_menu_item(
             'About',
             lambda event: self.app.show_about(),
-            icon='help-about'
+            icon_name='help-about'
         )
         yield create_menu_item(
             'Quit',
             lambda event: self.app.quit(),
-            icon='application-exit'
+            icon_name='application-exit'
         )
 
-    def _init_menu(self, directory_views: List[DirectoryView]):
+    def _init_menu(self, directory_views: DirectoryViews):
         menu = Gtk.Menu()
         for menu_item in self._create_menu_items(directory_views):
             menu.append(menu_item)
         menu.show_all()
         self._indicator.set_menu(menu)
 
-    def update(self, directory_views: List[DirectoryView]):
-        percents = [dv.fraction for dv in directory_views]
-        texts = [dv.text for dv in directory_views]
-        svg = draw_pie_chart_svg(percents)
-        icon_hash = calc_icon_hash(percents)
+    def update(self, directory_views: DirectoryViews):
+        svg = draw_pie_chart_svg(directory_views.fractions)
+        icon_hash = calc_icon_hash(directory_views.fractions)
         icon_temp_dir = write_temp_file(
             svg,
             filename=icon_hash + '.svg',
             prefix=__application_id__ + '-',
         )
-        tooltip = '\n'.join(texts)
         set_indicator_icon(
             self._indicator,
             icon_theme_path=icon_temp_dir.name,
             icon_name=icon_hash,
-            tooltip=tooltip
+            tooltip=directory_views.tooltip
         )
         self._icon_temp_dir = icon_temp_dir
         self._init_menu(directory_views)

@@ -1,11 +1,11 @@
 from functools import partial
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 import wx
 import wx.adv
 
 from lidske_aktivity.icon import draw_pie_chart_png
-from lidske_aktivity.model import DirectoryView
+from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
 
 if TYPE_CHECKING:
@@ -40,11 +40,6 @@ def on_menu_item(event: wx.MouseEvent, callback: Callable):
     callback()
 
 
-def on_menu_item_tooltip(parent: wx.Window, tooltip: str):
-    print('TIP')
-    wx.TipWindow(parent, text=tooltip)
-
-
 class StatusIcon(wx.adv.TaskBarIcon):
     app: 'Application'
     id_setup = new_id_ref_compat()
@@ -59,7 +54,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
         )
         self._init_menu([])
 
-    def _init_menu(self, directory_views: List[DirectoryView]):
+    def _init_menu(self, directory_views: DirectoryViews):
         # TODO: Limit the maximum number of items shown.
         menu = wx.Menu()
         if directory_views:
@@ -111,13 +106,10 @@ class StatusIcon(wx.adv.TaskBarIcon):
         )
         return context_menu
 
-    def update(self, directory_views: List[DirectoryView]):
-        percents = [dv.fraction for dv in directory_views]
-        texts = [dv.text for dv in directory_views]
-        image = draw_pie_chart_png(self.icon_size, percents)
+    def update(self, directory_views: DirectoryViews):
+        image = draw_pie_chart_png(self.icon_size, directory_views.fractions)
         icon = create_icon_from_image(image)
-        tooltip = '\n'.join(texts)
-        self.SetIcon(icon, tooltip)
+        self.SetIcon(icon, directory_views.tooltip)
         self._init_menu(directory_views)
 
     @property

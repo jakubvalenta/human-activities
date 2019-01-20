@@ -4,7 +4,7 @@ import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, wait
 from threading import Event, Thread
-from typing import Callable, Dict, Optional, Sequence
+from typing import Callable, Dict, List, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,6 +14,7 @@ from lidske_aktivity.config import (
     VALUE_NAME_NUM_FILES, VALUE_NAME_SIZE_BYTES, VALUE_NAMES, Config,
     TNamedDirs, load_config, save_config,
 )
+from lidske_aktivity.icon import COLOR_GRAY, Color, color_from_index
 from lidske_aktivity.utils import filesystem, func, math
 
 logger = logging.getLogger(__name__)
@@ -150,6 +151,26 @@ class DirectoryView:
                 f'threshold_days_ago={self._threshold_days_ago})')
 
 
+class DirectoryViews(list):
+
+    @property
+    def fractions(self) -> List[float]:
+        return [directory_view.fraction for directory_view in self]
+
+    @property
+    def texts(self) -> List[str]:
+        return [directory_view.text for directory_view in self]
+
+    @property
+    def tooltip(self) -> str:
+        return '\n'.join(self.texts)
+
+    def get_colors_with_one_highlighted(self, i: int) -> List[Color]:
+        colors = [COLOR_GRAY for i in range(len(self))]
+        colors[i] = color_from_index(i)
+        return colors
+
+
 class Directories(list):
     _scan_event_stop: Optional[Event] = None
     _scan_thread: Thread
@@ -237,7 +258,7 @@ class Directories(list):
 class Model:
     _config: Config
     _directories: Optional[Directories] = None
-    _directory_views: Sequence[DirectoryView] = ()
+    _directory_views: DirectoryViews = ()
 
     def __init__(self):
         # Use the config setter to immediatelly trigger config saving.
@@ -260,18 +281,18 @@ class Model:
         )
 
     @property
-    def directory_views(self) -> Sequence[DirectoryView]:
+    def directory_views(self) -> DirectoryViews:
         return self._directory_views
 
     def _update_directory_views(self):
-        self._directory_views = [
+        self._directory_views = DirectoryViews(
             DirectoryView(
                 directory,
                 self._config.value_name,
                 self._config.threshold_days_ago
             )
             for directory in self._directories
-        ]
+        )
 
     def scan_stop(self):
         if self._directories:

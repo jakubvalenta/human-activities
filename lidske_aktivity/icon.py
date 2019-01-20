@@ -3,7 +3,7 @@ import random
 import sys
 from functools import lru_cache, partial
 from hashlib import sha1
-from typing import Callable, Iterator, List, NamedTuple, Optional
+from typing import Callable, Iterator, List, NamedTuple, Optional, Tuple
 
 from PIL import Image
 
@@ -14,13 +14,18 @@ class Color(NamedTuple):
     r: int
     g: int
     b: int
-    a: int
+    a: int = 255
 
 
 class Slice(NamedTuple):
     start: float
     end: float
     color: Color
+
+
+COLOR_TRANSPARENT = Color(0, 0, 0, 0)
+COLOR_WHITE = Color(255, 255, 255)
+COLOR_GRAY = Color(147, 161, 161)
 
 
 def _frac_to_rad(frac: float) -> float:
@@ -51,7 +56,7 @@ def _hue_to_rgb(p: float, q: float, t: float) -> float:
     return p
 
 
-def _hsl_to_rgb(h: float, s: float, l: float) -> Color:
+def _hsl_to_rgb(h: float, s: float, l: float) -> Tuple[int, int, int]:
     """https://stackoverflow.com/a/9493060"""
     if s == 0:
         r = g = b = l  # achromatic
@@ -61,7 +66,7 @@ def _hsl_to_rgb(h: float, s: float, l: float) -> Color:
         r = _hue_to_rgb(p, q, h + 1/3)
         g = _hue_to_rgb(p, q, h)
         b = _hue_to_rgb(p, q, h - 1/3)
-    return round(r * 255), round(g * 255), round(b * 255), 255
+    return round(r * 255), round(g * 255), round(b * 255)
 
 
 def hue_from_index(i: int, steps: int = 6) -> float:
@@ -76,11 +81,13 @@ def hue_from_index(i: int, steps: int = 6) -> float:
 def color_from_index(i: int,
                      s: float = 0.8,
                      l: float = 0.5,
-                     default_color: Color = (147, 161, 161, 255),
+                     default_color: Color = COLOR_GRAY,
                      **kwargs) -> Color:
     if i == -1:
-        return default_color
-    return _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
+        rgb = default_color
+    else:
+        rgb = _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
+    return Color(*rgb)
 
 
 def _pie_chart_shader(x: int,
@@ -88,7 +95,7 @@ def _pie_chart_shader(x: int,
                       w: int,
                       h: int,
                       slices: List[Slice],
-                      background_color: Color = (0, 0, 0, 0)) -> Color:
+                      background_color: Color = COLOR_TRANSPARENT) -> Color:
     center = w / 2, h / 2
     radius = min(center)
     coord = x - center[0], y - center[1]
@@ -106,7 +113,7 @@ def _pie_chart_shader(x: int,
 def _draw_image(w: int,
                 h: int,
                 shader: Callable,
-                background_color: Color = (0, 0, 0, 0)) -> Image:
+                background_color: Color = COLOR_TRANSPARENT) -> Image:
     image = Image.new('RGBA', (w, h), background_color)
     pixels = image.load()
     for x in range(w):
@@ -115,10 +122,9 @@ def _draw_image(w: int,
     return image
 
 
-def _create_slices(
-        fractions: List[float],
-        colors: Optional[List[Color]] = None,
-        default_color: Color = (255, 255, 255, 255)) -> Iterator[Slice]:
+def _create_slices(fractions: List[float],
+                   colors: Optional[List[Color]] = None,
+                   default_color: Color = COLOR_WHITE) -> Iterator[Slice]:
     if not fractions or sum(fractions) == 0:
         yield Slice(
             start=0,
@@ -141,7 +147,8 @@ def _create_slices(
         cumulative_frac += frac
 
 
-def draw_pie_chart_png(size: int, fractions: List[float],
+def draw_pie_chart_png(size: int,
+                       fractions: List[float],
                        colors: Optional[List[Color]] = None) -> Image:
     slices = list(_create_slices(fractions, colors))
     return _draw_image(
