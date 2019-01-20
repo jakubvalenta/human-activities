@@ -125,7 +125,7 @@ def _slices_frac_to_rad(
         cumulative_frac += frac
 
 
-def draw_pie_chart(size: int, slices_frac: List[TSliceFrac]) -> Image:
+def draw_pie_chart_png(size: int, slices_frac: List[TSliceFrac]) -> Image:
     slices_rad = list(_slices_frac_to_rad(slices_frac))
     return _draw_image(
         w=size,

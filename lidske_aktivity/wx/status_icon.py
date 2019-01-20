@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 import wx
 import wx.adv
 
-from lidske_aktivity.icon import draw_pie_chart
+from lidske_aktivity.icon import draw_pie_chart_png
 from lidske_aktivity.model import DirectoryView
 from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
 
@@ -114,7 +114,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
     def update(self, directory_views: List[DirectoryView]):
         percents = (dv.fraction for dv in directory_views)
         texts = (dv.text for dv in directory_views)
-        image = draw_pie_chart(self.icon_size, percents)
+        image = draw_pie_chart_png(self.icon_size, percents)
         icon = create_icon_from_image(image)
         tooltip = '\n'.join(texts)
         self.SetIcon(icon, tooltip)
