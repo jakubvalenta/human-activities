@@ -108,6 +108,25 @@ def on_entry_changed(entry: Gtk.Entry, callback: Callable):
     callback(entry.get_text())
 
 
+def create_spin_button(value: int,
+                       callback: Callable,
+                       min_val: int = 0,
+                       max_val: int = 9999,
+                       step: int = 1) -> Gtk.SpinButton:
+    spin_button = Gtk.SpinButton.new_with_range(min_val, max_val, step)
+    if value:
+        spin_button.set_value(value)
+    spin_button.connect(
+        'value_changed',
+        partial(on_spin_button_changed, callback=callback)
+    )
+    return spin_button
+
+
+def on_spin_button_changed(spin_button: Gtk.SpinButton, callback: Callable):
+    callback(spin_button.get_value_as_int())
+
+
 def create_file_chooser_button(
         value: Optional[str],
         callback: Callable[[str], None]) -> Gtk.FileChooserButton:

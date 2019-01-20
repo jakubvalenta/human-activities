@@ -3,11 +3,11 @@ from typing import Callable, Dict
 import wx
 
 from lidske_aktivity.config import (
-    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, Config,
+    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, VALUE_NAMES, Config,
 )
 from lidske_aktivity.wx.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs, create_label,
-    create_radio_group, create_sizer,
+    create_radio_group, create_sizer, create_text_control,
 )
 
 
@@ -18,6 +18,8 @@ class Settings(wx.Dialog):
     _panel: wx.Panel
     _sizer: wx.Sizer
     _border_sizer: wx.Sizer
+    _value_name_radios: Dict[str, wx.RadioButton]
+    _threshold_days_ago_control: Dict[str, wx.RadioButton]
     _mode_radios: Dict[str, wx.RadioButton]
     _root_path_form: RootPathForm
     _named_dirs_form: NamedDirsForm
@@ -60,6 +62,12 @@ class Settings(wx.Dialog):
         )
 
     def _create_widgets(self):
+        self._create_value_name_radios()
+        self._threshold_days_ago_control = create_text_control(
+            self,
+            value=self._config.threshold_days_ago,
+            callback=self._on_threshold_days_ago_changed
+        )
         self._root_path_form = RootPathForm(
             self._config.root_path,
             self._on_root_path_change,
@@ -73,6 +81,13 @@ class Settings(wx.Dialog):
         self._create_mode_radios()
 
     def _add_widgets(self):
+        label = create_label('Value')
+        self._sizer.Add(label, flag=wx.ALL, border=5)
+        for radio in self._value_name_radios.values():
+            self._sizer.Add(radio, flag=wx.ALL, border=5)
+        label = create_label('Threshold'),
+        self._sizer.Add(label, flag=wx.ALL, border=5)
+        self._sizer.Add(self._threshold_days_ago_entry, flag=wx.ALL, border=5)
         label = create_label(self._panel, 'Scan mode')
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(
@@ -88,6 +103,24 @@ class Settings(wx.Dialog):
         )
         self._sizer.Add(self._named_dirs_form.panel, flag=wx.EXPAND)
         self._toggle_controls()
+
+    def _create_value_name_radios(self):
+        radio_configs = [
+            RadioConfig(value, label)
+            for value, label in VALUE_NAMES.items()
+        ]
+        self._value_name_radios = create_radio_group(
+            self._panel,
+            radio_configs,
+            active_value=self._config.value_name,
+            callback=self._on_value_name_radio_toggled
+        )
+
+    def _on_value_name_radio_toggled(self, value_name: str):
+        self._config.value_name = value_name
+
+    def _on_threshold_days_ago_changed(self, threshold_days_ago: str):
+        self._config.threshold_days_ago = threshold_days_ago
 
     def _create_mode_radios(self):
         radio_configs = [

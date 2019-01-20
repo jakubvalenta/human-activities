@@ -3,11 +3,11 @@ from typing import Callable, Dict
 import gi
 
 from lidske_aktivity.config import (
-    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, Config, TNamedDirs,
+    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, VALUE_NAMES, Config, TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, box_add, create_label,
-    create_radio_group,
+    create_radio_group, create_spin_button,
 )
 
 gi.require_version('Gtk', '3.0')
@@ -20,6 +20,8 @@ class Settings(Gtk.Dialog):
 
     _config: Config
     _box: Gtk.Box
+    _value_name_radios: Dict[str, Gtk.RadioButton]
+    _threshold_days_ago_entry: Dict[str, Gtk.Entry]
     _mode_radios: Dict[str, Gtk.RadioButton]
     _root_path_form: RootPathForm
     _named_dirs_form: NamedDirsForm
@@ -55,6 +57,11 @@ class Settings(Gtk.Dialog):
         self._box.set_spacing(10)
 
     def _create_widgets(self):
+        self._create_value_name_radios()
+        self._threshold_days_ago_entry = create_spin_button(
+            value=self._config.threshold_days_ago,
+            callback=self._on_threshold_days_ago_changed
+        )
         self._root_path_form = RootPathForm(
             self._config.root_path,
             self._on_root_path_change,
@@ -65,17 +72,41 @@ class Settings(Gtk.Dialog):
             self._on_named_dirs_change,
             parent=self
         )
+        # Mode radios must be created after the forms, because the radio
+        # callback immediately tries to set sensitivity of the forms.
         self._create_mode_radios()
 
     def _add_widgets(self):
-        for widget in (
-                create_label('Scan mode'),
-                self._mode_radios[MODE_ROOT_PATH],
-                self._root_path_form,
-                self._mode_radios[MODE_NAMED_DIRS],
-                self._named_dirs_form,
-        ):
+        widgets = [
+            create_label('Value')
+        ] + list(self._value_name_radios.values()) + [
+            create_label('Threshold'),
+            self._threshold_days_ago_entry,
+            create_label('Scan mode'),
+            self._mode_radios[MODE_ROOT_PATH],
+            self._root_path_form,
+            self._mode_radios[MODE_NAMED_DIRS],
+            self._named_dirs_form,
+        ]
+        for widget in widgets:
             box_add(self._box, widget, expand=False)
+
+    def _create_value_name_radios(self):
+        radio_configs = [
+            RadioConfig(value, label)
+            for value, label in VALUE_NAMES.items()
+        ]
+        self._value_name_radios = create_radio_group(
+            radio_configs,
+            active_value=self._config.value_name,
+            callback=self._on_value_name_radio_toggled
+        )
+
+    def _on_value_name_radio_toggled(self, value_name: str):
+        self._config.value_name = value_name
+
+    def _on_threshold_days_ago_changed(self, threshold_days_ago: int):
+        self._config.threshold_days_ago = threshold_days_ago
 
     def _create_mode_radios(self):
         radio_configs = [

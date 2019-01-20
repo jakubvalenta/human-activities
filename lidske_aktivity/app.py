@@ -97,7 +97,7 @@ class Application:
             'Updating icon with slices %s',
             [f'{fraction:.2f}' for fraction in fractions]
         )
-        self.status_icon.update(fractions, texts)
+        self.status_icon.update(fractions, texts)  # TODO: tooltips
 
     def quit(self):
         logger.info('Menu quit')

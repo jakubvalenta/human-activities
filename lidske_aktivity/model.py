@@ -4,13 +4,15 @@ import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, wait
 from threading import Event, Thread
-from typing import Callable, Dict, NamedTuple, Optional, Sequence
+from typing import Callable, Dict, Optional, Sequence
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from lidske_aktivity.config import Config, TNamedDirs, load_config, save_config
+from lidske_aktivity.config import (
+    VALUE_NAMES, Config, TNamedDirs, load_config, save_config,
+)
 from lidske_aktivity.utils import filesystem, func, math
 
 logger = logging.getLogger(__name__)
@@ -123,10 +125,7 @@ class DirectoryView:
         return f'{self.directory.label}: {self.fraction:.0%}'
 
     def _get_tooltip(self) -> str:
-        value_text = {
-            'size_bytes': 'size',
-            'num_files': 'number',
-        }[self._value_name]
+        value_text = VALUE_NAMES[self._value_name]
         if self._threshold_days_ago == 0:
             set_text = 'all configured directories'
         else:
@@ -211,8 +210,8 @@ class Directories(list):
 
     def _on_directory_scanned(self, directory: Directory):
         total: Dict[str, Dict[int, int]] = {
-            'size_bytes': defaultdict(int),
-            'num_files': defaultdict(int),
+            value_name: defaultdict(int)
+            for value_name in VALUE_NAMES
         }
         for directory in self:
             for stat in directory.stats:
