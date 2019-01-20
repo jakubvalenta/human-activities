@@ -7,7 +7,7 @@ from lidske_aktivity.config import (
 )
 from lidske_aktivity.wx.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs, create_label,
-    create_radio_group, create_sizer, create_text_control,
+    create_radio_group, create_sizer, create_spin_control,
 )
 
 
@@ -63,7 +63,7 @@ class Settings(wx.Dialog):
 
     def _create_widgets(self):
         self._create_value_name_radios()
-        self._threshold_days_ago_control = create_text_control(
+        self._threshold_days_ago_control = create_spin_control(
             self,
             value=self._config.threshold_days_ago,
             callback=self._on_threshold_days_ago_changed
@@ -81,13 +81,17 @@ class Settings(wx.Dialog):
         self._create_mode_radios()
 
     def _add_widgets(self):
-        label = create_label('Value')
+        label = create_label(self._panel, 'Value')
         self._sizer.Add(label, flag=wx.ALL, border=5)
         for radio in self._value_name_radios.values():
             self._sizer.Add(radio, flag=wx.ALL, border=5)
-        label = create_label('Threshold'),
+        label = create_label(self._panel, 'Threshold')
         self._sizer.Add(label, flag=wx.ALL, border=5)
-        self._sizer.Add(self._threshold_days_ago_entry, flag=wx.ALL, border=5)
+        self._sizer.Add(
+            self._threshold_days_ago_control,
+            flag=wx.ALL,
+            border=5
+        )
         label = create_label(self._panel, 'Scan mode')
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(

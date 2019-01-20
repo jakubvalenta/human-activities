@@ -106,6 +106,25 @@ def on_text_control_changed(event: wx.KeyEvent, callback: Callable):
     callback(event.GetString())
 
 
+def create_spin_control(parent: wx.Window,
+                        value: int,
+                        callback: Callable,
+                        min_val: int = 0,
+                        max_val: int = 9999) -> wx.SpinCtrl:
+    spin_control = wx.SpinCtrl(
+        parent,
+        value=str(value),
+        min=min_val,
+        max=max_val
+    )
+    parent.Bind(
+        wx.EVT_TEXT,
+        partial(on_text_control_changed, callback=callback),
+        spin_control
+    )
+    return spin_control
+
+
 class DirBrowserButtonWithoutLabel(wx.lib.filebrowsebutton.DirBrowseButton):
     def createLabel(self):
         return wx.Window(self)
