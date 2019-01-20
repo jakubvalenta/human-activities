@@ -109,7 +109,7 @@ def _draw_image(w: int,
 def _slices_frac_to_rad(
         slices_frac: List[TSliceFrac],
         default_color: TColor = (255, 255, 255, 255)) -> Iterator[TSliceRad]:
-    if not slices_frac:
+    if not slices_frac or sum(slices_frac) == 0:
         yield (0, _frac_to_rad(1), default_color)
         return
     cumulative_frac = 0.0
