@@ -1,7 +1,7 @@
 import logging
 import time
 from threading import Event, Thread
-from typing import Any, Optional, Sequence
+from typing import Any, List, Optional
 
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
@@ -21,7 +21,7 @@ class Application:
     model: Model
     ui_app: Any
     status_icon: Any
-    last_directory_views: Sequence[DirectoryView] = ()
+    last_directory_views_list: Optional[List[DirectoryView]] = None
     tick_event_stop: Optional[Event] = None
     tick_thread: Optional[Thread] = None
 
@@ -86,9 +86,10 @@ class Application:
             time.sleep(1)
 
     def _update_status_icon(self):
-        if self.model.directory_views == self.last_directory_views:
+        directory_views_list = list(self.model.directory_views.values())
+        if directory_views_list == self.last_directory_views_list:
             return
-        self.last_directory_views = self.model.directory_views
+        self.last_directory_views_list = directory_views_list
         logger.info(
             'Updating icon with slices %s',
             [f'{fract:.2f}' for fract in self.model.directory_views.fractions]

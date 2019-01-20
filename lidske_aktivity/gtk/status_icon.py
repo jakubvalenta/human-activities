@@ -99,7 +99,7 @@ class StatusIcon():
             directory_views: DirectoryViews) -> Iterator[Gtk.MenuItem]:
         # TODO: Limit the maximum number of items shown.
         if directory_views:
-            for i, directory_view in enumerate(directory_views):
+            for i, directory_view in enumerate(directory_views.values()):
                 _, icon_size, _ = Gtk.IconSize.lookup(Gtk.IconSize.MENU)
                 icon_image = draw_pie_chart_png(
                     icon_size,

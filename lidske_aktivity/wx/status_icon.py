@@ -58,7 +58,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
         # TODO: Limit the maximum number of items shown.
         menu = wx.Menu()
         if directory_views:
-            for directory_view in directory_views:
+            for directory_view in directory_views.values():
                 create_menu_item(
                     self,
                     menu,

@@ -1,21 +1,22 @@
 import logging
 import textwrap
 import time
-from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, wait
 from threading import Event, Thread
-from typing import Callable, Dict, List, Optional
+from typing import Iterable, List, NamedTuple
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
+from sqlalchemy.orm.session import Session
 
 from lidske_aktivity.config import (
-    VALUE_NAME_NUM_FILES, VALUE_NAME_SIZE_BYTES, VALUE_NAMES, Config,
+    CACHE_PATH, VALUE_NAME_NUM_FILES, VALUE_NAME_SIZE_BYTES, Config,
     TNamedDirs, load_config, save_config,
 )
 from lidske_aktivity.icon import COLOR_GRAY, Color, color_from_index
-from lidske_aktivity.utils import filesystem, func, math
+from lidske_aktivity.utils import filesystem, func
+from lidske_aktivity.utils.math import safe_div
 
 logger = logging.getLogger(__name__)
 
@@ -34,15 +35,10 @@ class Stat(Base):  # type: ignore
     directory_id = Column(Integer, ForeignKey('directories.id'))
     directory = relationship('Directory', back_populates='stats')
 
-    fractions: Dict[str, float]
-
     def __repr__(self) -> str:
         return (f'Stat(size_bytes={self.size_bytes}, '
                 f'num_files={self.num_files}, '
                 f'threshold_days_ago={self.threshold_days_ago})')
-
-
-TScanCallback = Callable[['Directory'], None]
 
 
 class Directory(Base):  # type: ignore
@@ -50,115 +46,161 @@ class Directory(Base):  # type: ignore
 
     id = Column(Integer, primary_key=True)
     path = Column(String, nullable=False, unique=True)
-    stats = relationship('Stat', back_populates='directory')
+    stats = relationship(
+        'Stat',
+        back_populates='directory',
+        cascade='all, delete, delete-orphan'
+    )
 
-    label: str = ''
-    pending: bool = False
-
-    @func.measure_time
-    def scan(self,
-             callback: TScanCallback,
-             event_stop: Event,
-             threshold_days_ago: int,
-             test: bool = False):
-        logger.info('Calculating size of "%s"', self.path)
-        self.pending = True
-        threshold_seconds_ago = threshold_days_ago * 24 * 3600
-        threshold_seconds = time.time() - threshold_seconds_ago
-        dir_size = filesystem.calc_dir_size(
-            self.path,
-            threshold_seconds=threshold_seconds,
-            event_stop=event_stop
-        )
-        self.stats = [
-            Stat(
-                size_bytes=dir_size.size_bytes_all,
-                num_files=dir_size.num_files_all,
-                threshold_days_ago=0
-            )
-        ]
-        if threshold_days_ago != 0:
-            self.stats.append(
-                Stat(
-                    size_bytes=dir_size.size_bytes_new,
-                    num_files=dir_size.num_files_new,
-                    threshold_days_ago=threshold_days_ago
-                )
-            )
-        if test:
-            func.random_wait(event_stop)
-        self.pending = False
-        logger.info('Calculated size of "%s": %s', self.path, self.stats)
-        callback(self)
+    def get_value(self, value_name: str, threshold_days_ago: int) -> float:
+        for stat in self.stats:
+            if stat.threshold_days_ago == threshold_days_ago:
+                return getattr(stat, value_name)
+        return 0
 
     def __repr__(self) -> str:
-        return (f'Directory(path={self.path}, label={self.label}, '
-                f'stats={self.stats})')
+        return f'Directory(path={self.path}, stats={self.stats})'
 
 
 Base.metadata.create_all(engine)
 
 
-class DirectoryView:
-    directory: Directory
+class Directories(list):
+    _session: Session
+
+    def __init__(self, paths: List[str]):
+        self._session = scoped_session(session_factory)
+        self.load(paths)
+
+    def load(self, paths: Iterable[str]):
+        """Create Directory objects for all passed paths.
+
+        Either load from database (cache) or create new.
+        """
+        paths = list(paths)
+        query = (
+            self._session.query(Directory)
+            .filter(Directory.path.in_(paths))
+            .order_by(Directory.path)
+        )
+        directories_dict = {
+            directory.path: directory
+            for directory in query
+        }
+        for path in paths:
+            if path in directories_dict:
+                directory = directories_dict[path]
+                logger.info('DB: Loaded %s', directory)
+            else:
+                directory = Directory(path=path)
+                logger.info('DB: Inserting %s', directory)
+                self._session.add(directory)
+            self.append(directory)
+
+    def clear(self):
+        for directory in self:
+            logger.info('DB: Deleting %s', directory)
+            self._session.delete(directory)
+        super().clear()
+
+    def save(self):
+        self._session.commit()
+
+    def __del__(self):
+        self._session.close()
+
+
+class DirectoryView(NamedTuple):
+    label: str
+    value: float = 0
+    fraction: float = 0
+    text: str = ''
+    tooltip: str = ''
+    pending: bool = True
+
+
+class DirectoryViews(dict):
     _value_name: str
     _threshold_days_ago: int
 
-    fraction: float
-    text: str
-    tooltip: str
-
     def __init__(self,
-                 directory: Directory,
                  value_name: str,
                  threshold_days_ago: int):
-        self.directory = directory
         self._value_name = value_name
         self._threshold_days_ago = threshold_days_ago
 
-        self.fraction = self._get_fraction()
-        self.text = self._get_text()
-        self.tooltip = self._get_tooltip()
+    def load(self, configured_dirs: TNamedDirs):
+        self.clear()
+        for path, label in configured_dirs.items():
+            self[path] = DirectoryView(label)
 
-    def _get_text(self) -> str:
-        if self.directory.pending:
-            return f'{self.directory.label}: ...'
-        return f'{self.directory.label}: {self.fraction:.0%}'
+    def update_all(self, directories: Directories):
+        for directory in directories:
+            value = directory.get_value(
+                self._value_name,
+                self._threshold_days_ago
+            )
+            self[directory.path] = self[directory.path]._replace(value=value)
+        self._recalculate()
 
-    def _get_tooltip(self) -> str:
+    def update_one(self, directory: Directory):
+        value = directory.get_value(
+            self._value_name,
+            self._threshold_days_ago
+        )
+        self[directory.path] = self[directory.path]._replace(
+            value=value,
+            pending=False
+        )
+        self._recalculate()
+
+    def _recalculate(self):
+        total = sum(directory_view.value for directory_view in self.values())
+        for path, directory_view in self.items():
+            fraction = safe_div(directory_view.value, total)
+            if directory_view.pending:
+                text = f'{directory_view.label}: ...'
+            else:
+                text = f'{directory_view.label}: {fraction:.0%}'
+            tooltip = self._format_tooltip(
+                fraction,
+                self._value_name,
+                self._threshold_days_ago
+            )
+            self[path] = directory_view._replace(
+                fraction=fraction,
+                text=text,
+                tooltip=tooltip
+            )
+        logger.info('Recalculated fractions: %s', self.fractions)
+
+    @staticmethod
+    def _format_tooltip(fraction: float,
+                        value_name: str,
+                        threshold_days_ago: int) -> str:
         value_text = {
             VALUE_NAME_SIZE_BYTES: 'of the size ',
             VALUE_NAME_NUM_FILES: '',
-        }[self._value_name]
-        if self._threshold_days_ago == 0:
+        }[value_name]
+        if threshold_days_ago == 0:
             set_text = 'all files in configured directories'
         else:
             set_text = (f'the files modified in the past '
-                        f'{self._threshold_days_ago} days')
-        s = f'{self.fraction:.2%} {value_text}of {set_text}'
+                        f'{threshold_days_ago} days')
+        s = f'{fraction:.2%} {value_text}of {set_text}'
         return textwrap.fill(s)
 
-    def _get_fraction(self) -> float:
-        for stat in self.directory.stats:
-            if stat.threshold_days_ago == self._threshold_days_ago:
-                return stat.fractions[self._value_name]
-        return 0
-
-    def __repr__(self) -> str:
-        return (f'DirectoryView(directory={self.directory.path}, '
-                f'fraction={self.fraction}, value_name={self._value_name}, '
-                f'threshold_days_ago={self._threshold_days_ago})')
-
-
-class DirectoryViews(list):
+    @property
+    def paths(self) -> List[str]:
+        return list(self.keys())
 
     @property
     def fractions(self) -> List[float]:
-        return [directory_view.fraction for directory_view in self]
+        return [dv.fraction for dv in self.values()]
 
     @property
     def texts(self) -> List[str]:
-        return [directory_view.text for directory_view in self]
+        return [dv.text for dv in self.values()]
 
     @property
     def tooltip(self) -> str:
@@ -170,98 +212,31 @@ class DirectoryViews(list):
         return colors
 
 
-class Directories(list):
-    _scan_event_stop: Optional[Event] = None
-    _scan_thread: Thread
-
-    def __init__(self,
-                 configured_dirs: TNamedDirs,
-                 on_scan: Callable,
-                 threshold_days_ago: int,
-                 test: bool = False):
-        """Create directories for all paths, load from cache if available."""
-        super().__init__()
-        self._on_scan = on_scan
-        paths = list(configured_dirs.values())
-        query = (
-            session.query(Directory)
-            .filter(Directory.path.in_(paths))
-            .order_by(Directory.path)
-        )
-        directories_dict = {
-            directory.path: directory
-            for directory in query
-        }
-        for path, label in configured_dirs.items():
-            if path in directories_dict:
-                directory = directories_dict[path]
-            else:
-                directory = Directory(path=path)
-            directory.label = label
-            logger.info('Created %s', directory)
-            self.append(directory)
-        self._scan_start(threshold_days_ago, test=test)
-
-    def save(self):
-        session.add_all(self)
-
-    def _scan_start(self, threshold_days_ago: int, test: bool = False):
-        self._scan_event_stop = Event()
-
-        def orchestrator():
-            with ThreadPoolExecutor() as executor:
-                futures = [
-                    executor.submit(
-                        directory.scan,
-                        self._on_directory_scanned,
-                        self._scan_event_stop,
-                        threshold_days_ago,
-                        test
-                    )
-                    for directory in self
-                ]
-                wait(futures)
-                self.save()
-
-        self._scan_thread = Thread(target=orchestrator)
-        self._scan_thread.start()
-
-    def scan_stop(self):
-        if self._scan_event_stop:
-            self._scan_event_stop.set()
-            self._scan_thread.join()
-            logger.info('Scan stopped')
-
-    def _on_directory_scanned(self, directory: Directory):
-        total: Dict[str, Dict[int, int]] = {
-            value_name: defaultdict(int)
-            for value_name in VALUE_NAMES
-        }
-        for directory in self:
-            for stat in directory.stats:
-                for value_name in total:
-                    value = getattr(stat, value_name)
-                    total[value_name][stat.threshold_days_ago] += value
-        for directory in self:
-            for stat in directory.stats:
-                stat.fractions = {
-                    value_name: math.safe_div(
-                        getattr(stat, value_name),
-                        total[value_name][stat.threshold_days_ago]
-                    )
-                    for value_name in total
-                }
-        self._on_scan()
-
-
 class Model:
     _config: Config
-    _directories: Optional[Directories] = None
-    _directory_views: DirectoryViews = ()
+    _directories: Directories
+    directory_views: DirectoryViews
+
+    _scan_event_stop: Event
+    _scan_thread: Thread
 
     def __init__(self):
-        # Use the config setter to immediatelly trigger config saving.
-        self.config = load_config()
+        self._config = load_config()
+        self._directories = Directories(
+            self._config.configured_dirs.keys(),
+        )
+        self.directory_views = DirectoryViews(
+            self._config.value_name,
+            self._config.threshold_days_ago
+        )
+        self._init()
+
+    def _init(self):
+        self._directories.load(self._config.configured_dirs.keys())
+        self._directories.save()
+        self.directory_views.load(self._config.configured_dirs)
+        self.directory_views.update_all(self._directories)
+        self._scan_start()
 
     @property
     def config(self) -> Config:
@@ -271,28 +246,66 @@ class Model:
     def config(self, config: Config):
         self._config = config
         save_config(config)
-        self.scan_stop()
-        self._directories = Directories(
-            self._config.configured_dirs,
-            self._update_directory_views,
-            self._config.threshold_days_ago,
-            test=self._config.test
-        )
+        self._directories.clear()
+        self._init()
 
-    @property
-    def directory_views(self) -> DirectoryViews:
-        return self._directory_views
+    def _scan_start(self):
+        self._scan_event_stop = Event()
 
-    def _update_directory_views(self):
-        self._directory_views = DirectoryViews(
-            DirectoryView(
-                directory,
-                self._config.value_name,
-                self._config.threshold_days_ago
-            )
-            for directory in self._directories
-        )
+        def orchestrator():
+            with ThreadPoolExecutor() as executor:
+                futures = [
+                    executor.submit(self._scan_directory, directory.path)
+                    for directory in self._directories
+                ]
+                wait(futures)
+
+        self._scan_thread = Thread(target=orchestrator)
+        self._scan_thread.start()
 
     def scan_stop(self):
-        if self._directories:
-            self._directories.scan_stop()
+        self._scan_event_stop.set()
+        self._scan_thread.join()
+        logger.info('Scan stopped')
+
+    @func.measure_time
+    def _scan_directory(self, path: str):
+        session = scoped_session(session_factory)
+        directory = session.query(Directory).filter(
+            Directory.path == path
+        ).one()
+        logger.info('Calculating size of "%s"', directory.path)
+        threshold_seconds_ago = self._config.threshold_days_ago * 24 * 3600
+        threshold_seconds = time.time() - threshold_seconds_ago
+        dir_size = filesystem.calc_dir_size(
+            directory.path,
+            threshold_seconds=threshold_seconds,
+            event_stop=self._scan_event_stop
+        )
+        directory.stats.clear()
+        directory.stats.append(
+            Stat(
+                size_bytes=dir_size.size_bytes_all,
+                num_files=dir_size.num_files_all,
+                threshold_days_ago=0
+            )
+        )
+        if self._config.threshold_days_ago != 0:
+            directory.stats.append(
+                Stat(
+                    size_bytes=dir_size.size_bytes_new,
+                    num_files=dir_size.num_files_new,
+                    threshold_days_ago=self._config.threshold_days_ago
+                )
+            )
+        if self._config.test:
+            func.random_wait(self._scan_event_stop)
+        logger.info(
+            'Calculated size of "%s": %s',
+            directory.path,
+            directory.stats
+        )
+        logger.info('DB: Updating %s', directory)
+        session.commit()
+        self.directory_views.update_one(directory)
+        session.close()
