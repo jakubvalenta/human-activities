@@ -145,13 +145,17 @@ def on_dir_change(event: wx.Event, callback: Callable):
     callback(event.GetString())
 
 
-def create_icon_from_image(image: Image) -> wx.Icon:
+def image_to_bitmap(image: Image.Image) -> wx.Bitmap:
     with io.BytesIO() as f:
         image.save(f, format='PNG')
         f.seek(0)
         wx_image = wx.Image(f)
-        icon = wx.Icon(wx_image.ConvertToBitmap())
-    return icon
+        bitmap = wx_image.ConvertToBitmap()
+    return bitmap
+
+
+def image_to_icon(image: Image.Image) -> wx.Icon:
+    return wx.Icon(image_to_bitmap(image))
 
 
 def call_tick(func: Callable):

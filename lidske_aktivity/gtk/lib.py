@@ -144,7 +144,7 @@ def on_file_set(button: Gtk.FileChooserButton, callback: Callable):
     callback(button.get_filename())
 
 
-def image_to_pixbuf(image: Image) -> GdkPixbuf.Pixbuf:
+def image_to_pixbuf(image: Image.Image) -> GdkPixbuf.Pixbuf:
     loader = GdkPixbuf.PixbufLoader.new_with_type('png')
     image.save(loader, format='PNG')
     pixbuf = loader.get_pixbuf()

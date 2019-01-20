@@ -10,7 +10,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk  # noqa:E402  # isort:skip
 
 
-def show_about(image: Image,
+def show_about(image: Image.Image,
                title: str,
                version: str,
                copyright: str,

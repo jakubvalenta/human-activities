@@ -3,10 +3,13 @@ from typing import TYPE_CHECKING, Callable, Optional
 
 import wx
 import wx.adv
+from PIL import Image
 
 from lidske_aktivity.icon import draw_pie_chart_png
 from lidske_aktivity.model import DirectoryViews
-from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
+from lidske_aktivity.wx.lib import (
+    image_to_bitmap, image_to_icon, new_id_ref_compat,
+)
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
@@ -16,6 +19,7 @@ def create_menu_item(parent: wx.Window,
                      menu: wx.Menu,
                      text: str,
                      tooltip: str = '',
+                     icon_image: Optional[Image.Image] = None,
                      id: int = wx.ID_ANY,
                      callback: Optional[Callable] = None):
     """Create menu item
@@ -24,6 +28,9 @@ def create_menu_item(parent: wx.Window,
     supported by WxWidgets.
     """
     menu_item = wx.MenuItem(menu, id, text, helpString=tooltip)
+    if icon_image:
+        bitmap = image_to_bitmap(icon_image)
+        menu_item.SetBitmap(bitmap)
     menu.Append(menu_item)
     if callback:
         parent.Bind(
@@ -58,12 +65,18 @@ class StatusIcon(wx.adv.TaskBarIcon):
         # TODO: Limit the maximum number of items shown.
         menu = wx.Menu()
         if directory_views:
-            for directory_view in directory_views.values():
+            for i, directory_view in enumerate(directory_views.values()):
+                icon_image = draw_pie_chart_png(
+                    16,
+                    directory_views.fractions,
+                    directory_views.get_colors_with_one_highlighted(i)
+                )
                 create_menu_item(
                     self,
                     menu,
                     directory_view.text,
-                    directory_view.tooltip
+                    tooltip=directory_view.tooltip,
+                    icon_image=icon_image
                 )
         else:
             create_menu_item(self, menu, 'No directories configured')
@@ -108,7 +121,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
 
     def update(self, directory_views: DirectoryViews):
         image = draw_pie_chart_png(self.icon_size, directory_views.fractions)
-        icon = create_icon_from_image(image)
+        icon = image_to_icon(image)
         self.SetIcon(icon, directory_views.tooltip)
         self._init_menu(directory_views)
 

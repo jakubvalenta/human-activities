@@ -112,7 +112,7 @@ def _pie_chart_shader(x: int,
 def _draw_image(w: int,
                 h: int,
                 shader: Callable,
-                background_color: Color = COLOR_TRANSPARENT) -> Image:
+                background_color: Color = COLOR_TRANSPARENT) -> Image.Image:
     image = Image.new('RGBA', (w, h), background_color)
     pixels = image.load()
     for x in range(w):
@@ -148,7 +148,7 @@ def _create_slices(fractions: List[float],
 
 def draw_pie_chart_png(size: int,
                        fractions: List[float],
-                       colors: Optional[List[Color]] = None) -> Image:
+                       colors: Optional[List[Color]] = None) -> Image.Image:
     slices = list(_create_slices(fractions, colors))
     return _draw_image(
         w=size,
