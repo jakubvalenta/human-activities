@@ -249,4 +249,5 @@ class NamedDirsForm(Gtk.Grid):
         return {
             named_dir.path: named_dir.name
             for named_dir in self._named_dirs_list
+            if named_dir.path and named_dir.name
         }

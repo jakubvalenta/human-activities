@@ -72,7 +72,11 @@ class Config:
             'root_path': self.root_path,
             'test': self.test,
             'mode': self.mode,
-            'named_dirs': self.named_dirs,
+            'named_dirs': {
+                path: name
+                for path, name in self.named_dirs.items()
+                if path and name
+            },
             'show_setup': self.show_setup,
         }
         return json.dumps(d, indent=2)
@@ -116,6 +120,7 @@ def _load_config_named_dirs(config_json: Any, config: Config):
     config.named_dirs = {
         str(path): str(name)
         for path, name in config_json['named_dirs'].items()
+        if path and name
     }
 
 
