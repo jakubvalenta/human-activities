@@ -4,10 +4,18 @@ import wx
 import wx.adv
 
 from lidske_aktivity.icon import draw_pie_chart
+from lidske_aktivity.model import DirectoryView
 from lidske_aktivity.wx.lib import create_icon_from_image, new_id_ref_compat
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
+
+
+def add_menu_item(menu: wx.Menu, text: str, tooltip: str = ''):
+    menu_item = wx.MenuItem(menu, wx.ID_ANY, text, helpString=tooltip)
+    menu.Append(menu_item)
+    menu_item.Enable(False)
+    return menu_item
 
 
 class StatusIcon(wx.adv.TaskBarIcon):
@@ -44,27 +52,23 @@ class StatusIcon(wx.adv.TaskBarIcon):
         )
         self._init_menu([])
 
-    def _init_menu(self, texts: List[str]):
+    def _init_menu(self, directory_views: List[DirectoryView]):
         # TODO: Limit the maximum number of items shown.
         menu = wx.Menu()
-        if texts:
-            for text in texts:
-                menu_item = wx.MenuItem(menu, wx.ID_ANY, text)
-                menu.Append(menu_item)
-                menu_item.Enable(False)
+        if directory_views:
+            for directory_view in directory_views:
+                add_menu_item(
+                    menu,
+                    directory_view.text,
+                    directory_view.tooltip
+                )
         else:
-            menu_item = wx.MenuItem(
-                menu,
-                wx.ID_ANY,
-                'No directories configured'
-            )
-            menu.Append(menu_item)
-            menu_item.Enable(False)
+            add_menu_item(menu, 'No directories configured')
             menu.AppendSeparator()
             menu.Append(self.id_setup, '&Setup')
         self._menu = menu
 
-    def show_menu(self):
+    def _show_menu(self):
         self.PopupMenu(self._menu)
 
     def CreatePopupMenu(self) -> wx.Menu:
@@ -75,12 +79,14 @@ class StatusIcon(wx.adv.TaskBarIcon):
         context_menu.Append(wx.ID_EXIT, '&Quit')
         return context_menu
 
-    def update(self, percents: List[float], texts: List[str]):
+    def update(self, directory_views: List[DirectoryView]):
+        percents = (dv.fraction for dv in directory_views)
+        texts = (dv.text for dv in directory_views)
         image = draw_pie_chart(self.icon_size, percents)
         icon = create_icon_from_image(image)
         tooltip = '\n'.join(texts)
         self.SetIcon(icon, tooltip)
-        self._init_menu(texts)
+        self._init_menu(directory_views)
 
     @property
     def icon_size(self) -> int:

@@ -7,6 +7,7 @@ import gi
 
 from lidske_aktivity import __application_id__, __application_name__
 from lidske_aktivity.icon import calc_icon_hash, draw_pie_chart_svg
+from lidske_aktivity.model import DirectoryView
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 def create_menu_item(label: str,
                      callback: Callable = None,
+                     tooltip: Optional[str] = None,
                      icon: Optional[str] = None) -> Gtk.MenuItem:
     if icon:
         menu_item = Gtk.ImageMenuItem()
@@ -29,6 +31,8 @@ def create_menu_item(label: str,
     else:
         menu_item = Gtk.MenuItem()
     menu_item.set_label(label)
+    if tooltip:
+        menu_item.set_tooltip_text(tooltip)
     if callback:
         menu_item.connect('activate', callback)
     else:
@@ -80,11 +84,16 @@ class StatusIcon():
         self._indicator = create_indicator()
         self._init_menu([])
 
-    def _create_menu_items(self, texts: List[str]) -> Iterator[Gtk.MenuItem]:
+    def _create_menu_items(
+            self,
+            directory_views: List[DirectoryView]) -> Iterator[Gtk.MenuItem]:
         # TODO: Limit the maximum number of items shown.
-        if texts:
-            for text in texts:
-                yield create_menu_item(text)
+        if directory_views:
+            for directory_view in directory_views:
+                yield create_menu_item(
+                    directory_view.text,
+                    tooltip=directory_view.tooltip
+                )
         else:
             yield create_menu_item('No directories configured')
         yield Gtk.SeparatorMenuItem()
@@ -107,14 +116,16 @@ class StatusIcon():
             icon='application-exit'
         )
 
-    def _init_menu(self, texts: List[str]):
+    def _init_menu(self, directory_views: List[DirectoryView]):
         menu = Gtk.Menu()
-        for menu_item in self._create_menu_items(texts):
+        for menu_item in self._create_menu_items(directory_views):
             menu.append(menu_item)
         menu.show_all()
         self._indicator.set_menu(menu)
 
-    def update(self, percents: List[float], texts: List[str]):
+    def update(self, directory_views: List[DirectoryView]):
+        percents = (dv.fraction for dv in directory_views)
+        texts = (dv.text for dv in directory_views)
         svg = draw_pie_chart_svg(percents)
         icon_hash = calc_icon_hash(percents)
         icon_temp_dir = write_temp_file(
@@ -130,7 +141,7 @@ class StatusIcon():
             tooltip=tooltip
         )
         self._icon_temp_dir = icon_temp_dir
-        self._init_menu(texts)
+        self._init_menu(directory_views)
 
     def destroy(self):
         self._indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)

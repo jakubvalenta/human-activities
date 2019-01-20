@@ -89,15 +89,11 @@ class Application:
         if self.model.directory_views == self.last_directory_views:
             return
         self.last_directory_views = self.model.directory_views
-        fractions, texts = zip(*(
-            (directory_view.fraction, directory_view.text)
-            for directory_view in self.model.directory_views
-        ))
         logger.info(
             'Updating icon with slices %s',
-            [f'{fraction:.2f}' for fraction in fractions]
+            [f'{dv.fraction:.2f}' for dv in self.model.directory_views]
         )
-        self.status_icon.update(fractions, texts)  # TODO: tooltips
+        self.status_icon.update(self.model.directory_views)
 
     def quit(self):
         logger.info('Menu quit')

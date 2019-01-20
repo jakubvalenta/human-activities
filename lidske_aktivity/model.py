@@ -11,7 +11,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 from lidske_aktivity.config import (
-    VALUE_NAMES, Config, TNamedDirs, load_config, save_config,
+    VALUE_NAME_NUM_FILES, VALUE_NAME_SIZE_BYTES, VALUE_NAMES, Config,
+    TNamedDirs, load_config, save_config,
 )
 from lidske_aktivity.utils import filesystem, func, math
 
@@ -125,13 +126,16 @@ class DirectoryView:
         return f'{self.directory.label}: {self.fraction:.0%}'
 
     def _get_tooltip(self) -> str:
-        value_text = VALUE_NAMES[self._value_name]
+        value_text = {
+            VALUE_NAME_SIZE_BYTES: 'of the size ',
+            VALUE_NAME_NUM_FILES: '',
+        }[self._value_name]
         if self._threshold_days_ago == 0:
-            set_text = 'all configured directories'
+            set_text = 'all files in configured directories'
         else:
             set_text = (f'the files modified in the past '
                         f'{self._threshold_days_ago} days')
-        s = f'{self.fraction:.2%} of the {value_text} of {set_text}'
+        s = f'{self.fraction:.2%} {value_text}of {set_text}'
         return textwrap.fill(s)
 
     def _get_fraction(self) -> float:
