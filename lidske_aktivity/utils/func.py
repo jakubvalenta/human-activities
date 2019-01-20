@@ -12,13 +12,8 @@ def measure_time(f):
     def wrapper(*args, **kwargs):
         time_start = time.time()
         ret = f(*args, **kwargs)
-        time_duration = time.time() - time_start
-        logger.info(
-            'Called %s in %f s, ret: %s',
-            f.__name__,
-            time_duration,
-            ret
-        )
+        duration = time.time() - time_start
+        logger.info('Called %s in %f s', f.__name__, duration)
         return ret
     return wrapper
 

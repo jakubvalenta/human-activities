@@ -50,7 +50,7 @@ class Stat(Base):  # type: ignore
     id = Column(Integer, primary_key=True)
     size_bytes = Column(Integer)
     num_files = Column(Integer)
-    threshold_days_ago = Column(Integer)
+    threshold_days_ago = Column(Integer, nullable=False)
     directory_id = Column(Integer, ForeignKey('directories.id'))
     directory = relationship('Directory', back_populates='stats')
 
@@ -58,7 +58,8 @@ class Stat(Base):  # type: ignore
 
     def __repr__(self) -> str:
         return (f'Stat(size_bytes={self.size_bytes}, '
-                f'num_files={self.num_files})')
+                f'num_files={self.num_files}, '
+                f'threshold_days_ago={self.threshold_days_ago})')
 
 
 TScanCallback = Callable[['Directory'], None]
@@ -93,14 +94,17 @@ class Directory(Base):  # type: ignore
             Stat(
                 size_bytes=dir_size.size_bytes_all,
                 num_files=dir_size.num_files_all,
-                threshold_days_ago=threshold_days_ago
-            ),
-            Stat(
-                size_bytes=dir_size.size_bytes_new,
-                num_files=dir_size.num_files_new,
-                threshold_days_ago=None
+                threshold_days_ago=0
             )
         ]
+        if threshold_days_ago != 0:
+            self.stats.append(
+                Stat(
+                    size_bytes=dir_size.size_bytes_new,
+                    num_files=dir_size.num_files_new,
+                    threshold_days_ago=threshold_days_ago
+                )
+            )
         if test:
             func.random_wait(event_stop)
         self.pending = False
@@ -118,7 +122,7 @@ Base.metadata.create_all(engine)
 class DirectoryView:
     directory: Directory
     _value_name: str
-    _threshold_days_ago: Optional[int]
+    _threshold_days_ago: int
 
     fraction: float
     text: str
@@ -127,7 +131,7 @@ class DirectoryView:
     def __init__(self,
                  directory: Directory,
                  value_name: str,
-                 threshold_days_ago: Optional[int]):
+                 threshold_days_ago: int):
         self.directory = directory
         self._value_name = value_name
         self._threshold_days_ago = threshold_days_ago
@@ -146,7 +150,7 @@ class DirectoryView:
             'size_bytes': 'size',
             'num_files': 'number',
         }[self._value_name]
-        if self._threshold_days_ago is None:
+        if self._threshold_days_ago == 0:
             set_text = 'all configured directories'
         else:
             set_text = (f'the files modified in the past '
@@ -161,8 +165,9 @@ class DirectoryView:
         return 0
 
     def __repr__(self) -> str:
-        return (f'DirectoryView(directory={self.directory}, '
-                f'fraction={self.fraction})')
+        return (f'DirectoryView(directory={self.directory.path}, '
+                f'fraction={self.fraction}, value_name={self._value_name}, '
+                f'threshold_days_ago={self._threshold_days_ago})')
 
 
 class Directories(list):

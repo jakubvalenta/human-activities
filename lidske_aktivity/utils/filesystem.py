@@ -65,7 +65,7 @@ def calc_dir_size(path: str,
                     threshold_seconds,
                     event_stop
                 )
-                if sub_dir_size.size_bytes_all is not None:
+                if sub_dir_size.size_bytes_all:
                     size_bytes_all += sub_dir_size.size_bytes_all
                 if sub_dir_size.size_bytes_new:
                     size_bytes_new += sub_dir_size.size_bytes_new
@@ -74,8 +74,8 @@ def calc_dir_size(path: str,
                 if sub_dir_size.num_files_new:
                     num_files_new += sub_dir_size.num_files_new
     return DirSize(
-        size_bytes_all,
-        size_bytes_new,
-        num_files_all,
-        num_files_new
+        size_bytes_all=size_bytes_all,
+        size_bytes_new=size_bytes_new,
+        num_files_all=num_files_all,
+        num_files_new=num_files_new
     )
