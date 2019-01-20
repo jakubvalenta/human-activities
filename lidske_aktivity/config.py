@@ -37,7 +37,7 @@ def get_config_dir():
     return get_dir('Preferences', 'XDG_CONFIG_HOME', '.config')
 
 
-CACHE_PATH = Path(get_cache_dir()) / 'cache.csv'
+CACHE_PATH = Path(get_cache_dir()) / 'cache.db'
 CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
 MODE_ROOT_PATH = 'path'

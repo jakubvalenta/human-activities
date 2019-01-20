@@ -8,7 +8,7 @@ from typing import Callable, Dict, List, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 
 from lidske_aktivity.config import (
     VALUE_NAME_NUM_FILES, VALUE_NAME_SIZE_BYTES, VALUE_NAMES, Config,
@@ -20,9 +20,8 @@ from lidske_aktivity.utils import filesystem, func, math
 logger = logging.getLogger(__name__)
 
 Base = declarative_base()
-engine = create_engine('sqlite:///:memory:')  # TODO: echo=True
-Session = sessionmaker(bind=engine)
-session = Session()
+engine = create_engine(f'sqlite:///{CACHE_PATH}')
+session_factory = sessionmaker(bind=engine)
 
 
 class Stat(Base):  # type: ignore
