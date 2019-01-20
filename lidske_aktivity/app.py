@@ -33,31 +33,15 @@ class Application:
     def on_init(self, ui_app: Any):
         self.ui_app = ui_app
         logger.info('On init')
-        self.menu = self.ui_app.spawn_frame(
-            self.ui.menu.Menu,
-            self
-        )
-        self.menu.init(self.model.active_mode, self.model.directory_views)
         self.status_icon = self.ui.status_icon.StatusIcon(self)
         if self.model.config.show_setup:
             self.model.config.show_setup = False
             self.show_setup()
         self.tick_start()
 
-    def set_active_mode(self, active_mode: str):
-        if self.model.active_mode == active_mode:
-            return
-        self.model.active_mode = active_mode
-        self.menu.update_radio_buttons(active_mode)
-        self.on_tick()
-
     def set_config(self, config: Config):
         self.model.config = config
-        self.reset_menu()
-        self.on_tick()
-
-    def show_menu(self, mouse_x: int, mouse_y: int):
-        self.menu.popup_at(mouse_x, mouse_y)
+        self._update_status_icon()
 
     def show_setup(self):
         self.ui_app.spawn_frame(
@@ -98,16 +82,13 @@ class Application:
     def tick(self):
         while not self.tick_event_stop.is_set():
             logger.info('Tick')
-            self.ui.lib.call_tick(self.on_tick)
+            self.ui.lib.call_tick(self._update_status_icon)
             time.sleep(1)
 
-    def on_tick(self):
-        if self.model.directory_views != self.last_directory_views:
-            self.last_directory_views = self.model.directory_views
-            self._update_icon()
-        self._update_menu()  # Keep GTK pulsing.
-
-    def _update_icon(self):
+    def _update_status_icon(self):
+        if self.model.directory_views == self.last_directory_views:
+            return
+        self.last_directory_views = self.model.directory_views
         fractions, texts = zip(*(
             (directory_view.fraction, directory_view.text)
             for directory_view in self.model.directory_views
@@ -118,31 +99,10 @@ class Application:
         )
         self.status_icon.update(fractions, texts)
 
-    def _update_menu(self):
-        logger.info('Update menu')
-        pending = False
-        if self.model.directory_views:
-            for directory_view in self.model.directory_views:
-                if directory_view.directory.pending:
-                    pending = True
-                    self.menu.pulse_progress_bar(directory_view.directory.path)
-                else:
-                    self.menu.update_progress_bar(
-                        directory_view.directory.path,
-                        directory_view.fraction,
-                        directory_view.tooltip
-                    )
-        if not pending:
-            self.menu.hide_spinner()
-
-    def reset_menu(self):
-        self.menu.reset(self.model.active_mode, self.model.directory_views)
-
     def quit(self):
         logger.info('Menu quit')
         self.ui_app.quit()
         self.status_icon.destroy()
-        self.menu.destroy()
 
     def on_quit(self):
         logger.info('App on_quit')

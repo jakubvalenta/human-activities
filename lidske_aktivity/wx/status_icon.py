@@ -13,13 +13,14 @@ if TYPE_CHECKING:
 class StatusIcon(wx.adv.TaskBarIcon):
     app: 'Application'
     id_setup = new_id_ref_compat()
+    _menu: wx.Menu
 
     def __init__(self, app: 'Application'):
         super().__init__(wx.adv.TBI_DOCK)
         self.app = app
         self.Bind(
             wx.adv.EVT_TASKBAR_LEFT_DOWN,
-            lambda event: self.app.show_menu(*wx.GetMousePosition())
+            lambda event: self._show_menu()
         )
         self.Bind(
             wx.EVT_MENU,
@@ -41,6 +42,30 @@ class StatusIcon(wx.adv.TaskBarIcon):
             lambda event: self.app.quit(),
             id=wx.ID_EXIT
         )
+        self._init_menu([])
+
+    def _init_menu(self, texts: List[str]):
+        # TODO: Limit the maximum number of items shown.
+        menu = wx.Menu()
+        if texts:
+            for text in texts:
+                menu_item = wx.MenuItem(menu, wx.ID_ANY, text)
+                menu.Append(menu_item)
+                menu_item.Enable(False)
+        else:
+            menu_item = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                'No directories configured'
+            )
+            menu.Append(menu_item)
+            menu_item.Enable(False)
+            menu.AppendSeparator()
+            menu.Append(self.id_setup, '&Setup')
+        self._menu = menu
+
+    def show_menu(self):
+        self.PopupMenu(self._menu)
 
     def CreatePopupMenu(self) -> wx.Menu:
         context_menu = wx.Menu()
@@ -55,6 +80,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
         icon = create_icon_from_image(image)
         tooltip = '\n'.join(texts)
         self.SetIcon(icon, tooltip)
+        self._init_menu(texts)
 
     @property
     def icon_size(self) -> int:

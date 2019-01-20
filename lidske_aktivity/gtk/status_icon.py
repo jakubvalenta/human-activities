@@ -1,7 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterable, List, Optional
+from typing import TYPE_CHECKING, Callable, Iterable, Iterator, List, Optional
 
 import gi
 
@@ -70,8 +70,6 @@ def set_indicator_icon(indicator: AppIndicator3.Indicator,
 
 class StatusIcon():
     app: 'Application'
-    _menu: Gtk.Menu
-    _dynamic_menu_items: List[Gtk.MenuItem]
     _indicator: AppIndicator3.Indicator
 
     # The directory is deleted as soon as this variable is garbage-collected.
@@ -82,47 +80,39 @@ class StatusIcon():
         self._indicator = create_indicator()
         self._init_menu([])
 
+    def _create_menu_items(self, texts: List[str]) -> Iterator[Gtk.MenuItem]:
+        # TODO: Limit the maximum number of items shown.
+        if texts:
+            for text in texts:
+                yield create_menu_item(text)
+        else:
+            yield create_menu_item('No directories configured')
+        yield Gtk.SeparatorMenuItem()
+        yield create_menu_item(
+            'Setup',
+            lambda event: self.app.show_setup()
+        )
+        yield create_menu_item(
+            'Advanced configuration',
+            lambda event: self.app.show_settings()
+        )
+        yield create_menu_item(
+            'About',
+            lambda event: self.app.show_about(),
+            icon='help-about'
+        )
+        yield create_menu_item(
+            'Quit',
+            lambda event: self.app.quit(),
+            icon='application-exit'
+        )
+
     def _init_menu(self, texts: List[str]):
         menu = Gtk.Menu()
-        secondary_target = create_menu_item(
-            'Show',
-            lambda event: self.app.show_menu(0, 0),
-            icon='lidske-aktivity'
-        )
-        menu_items = [
-            secondary_target,
-            Gtk.SeparatorMenuItem(),
-        ]
-        if texts:
-            # TODO: Limit the maximum number of items shown.
-            for text in texts:
-                menu_items.append(create_menu_item(text))
-            menu_items.append(Gtk.SeparatorMenuItem())
-        menu_items += [
-            create_menu_item(
-                'Setup',
-                lambda event: self.app.show_setup()
-            ),
-            create_menu_item(
-                'Advanced configuration',
-                lambda event: self.app.show_settings()
-            ),
-            create_menu_item(
-                'About',
-                lambda event: self.app.show_about(),
-                icon='help-about'
-            ),
-            create_menu_item(
-                'Quit',
-                lambda event: self.app.quit(),
-                icon='application-exit'
-            ),
-        ]
-        for menu_item in menu_items:
+        for menu_item in self._create_menu_items(texts):
             menu.append(menu_item)
         menu.show_all()
         self._indicator.set_menu(menu)
-        self._indicator.set_secondary_activate_target(secondary_target)
 
     def update(self, percents: List[float], texts: List[str]):
         svg = draw_pie_chart_svg(percents)
