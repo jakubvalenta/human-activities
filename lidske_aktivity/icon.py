@@ -162,6 +162,7 @@ def draw_pie_chart_svg(fractions: List[float],
     slices = _create_slices(fractions, colors)
     yield '''<?xml version="1.0" encoding="UTF-8" ?>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-1 -1 2 2">\n'''
+    yield '<g transform="rotate(-90)">\n'
     for slice in slices:
         color = slice.color
         if slice.start == 0 and slice.end == 2*math.pi:
@@ -174,6 +175,7 @@ def draw_pie_chart_svg(fractions: List[float],
         yield (f'<path d="M {start_x:.5f} {start_y:.5f} '
                f'A 1 1 0 {large_arc_flag} 1 {end_x:.5f} {end_y:.5f} L 0 0" '
                f'fill="rgb({color.r}, {color.g}, {color.b})" />\n')
+    yield '</g>\n'
     yield '</svg>\n'
 
 
