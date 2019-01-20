@@ -4,7 +4,7 @@ from typing import Callable, Iterator, Optional, TypeVar
 import gi
 
 from lidske_aktivity import __application_id__, __title__
-from lidske_aktivity.icon import MAX_COLORS, TColor, color_from_index
+from lidske_aktivity.icon import MAX_COLORS, Color, color_from_index
 
 gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
@@ -16,9 +16,8 @@ logger = logging.getLogger(__name__)
 T = TypeVar('T')
 
 
-def gen_bg_color_rule(selector: str, color: TColor) -> str:
-    r, g, b, _ = color
-    return f'{selector} {{ background: rgb({r}, {g}, {b}) }}'
+def gen_bg_color_rule(selector: str, color: Color) -> str:
+    return f'{selector} {{ background: rgb({color.r}, {color.g}, {color.b}) }}'
 
 
 def gen_color_rules() -> Iterator[str]:

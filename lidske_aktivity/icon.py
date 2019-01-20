@@ -3,15 +3,24 @@ import random
 import sys
 from functools import lru_cache, partial
 from hashlib import sha1
-from typing import Callable, Iterator, List, Tuple
+from typing import Callable, Iterator, List, NamedTuple, Optional
 
 from PIL import Image
 
 MAX_COLORS = 64
 
-TColor = Tuple[int, int, int, int]
-TSliceFrac = float
-TSliceRad = Tuple[float, float, TColor]
+
+class Color(NamedTuple):
+    r: int
+    g: int
+    b: int
+    a: int
+
+
+class Slice(NamedTuple):
+    start: float
+    end: float
+    color: Color
 
 
 def _frac_to_rad(frac: float) -> float:
@@ -42,7 +51,7 @@ def _hue_to_rgb(p: float, q: float, t: float) -> float:
     return p
 
 
-def _hsl_to_rgb(h: float, s: float, l: float) -> TColor:
+def _hsl_to_rgb(h: float, s: float, l: float) -> Color:
     """https://stackoverflow.com/a/9493060"""
     if s == 0:
         r = g = b = l  # achromatic
@@ -67,8 +76,8 @@ def hue_from_index(i: int, steps: int = 6) -> float:
 def color_from_index(i: int,
                      s: float = 0.8,
                      l: float = 0.5,
-                     default_color: TColor = (147, 161, 161, 255),
-                     **kwargs) -> TColor:
+                     default_color: Color = (147, 161, 161, 255),
+                     **kwargs) -> Color:
     if i == -1:
         return default_color
     return _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
@@ -78,8 +87,8 @@ def _pie_chart_shader(x: int,
                       y: int,
                       w: int,
                       h: int,
-                      slices_rad: List[TSliceRad],
-                      background_color: TColor = (0, 0, 0, 0)) -> TColor:
+                      slices: List[Slice],
+                      background_color: Color = (0, 0, 0, 0)) -> Color:
     center = w / 2, h / 2
     radius = min(center)
     coord = x - center[0], y - center[1]
@@ -88,16 +97,16 @@ def _pie_chart_shader(x: int,
     if angle < 0:
         angle = 2*math.pi + angle
     if distance <= radius:
-        for slice_start, slice_end, color in slices_rad:
-            if slice_start <= angle < slice_end:
-                return color
+        for slice in slices:
+            if slice.start <= angle < slice.end:
+                return slice.color
     return background_color
 
 
 def _draw_image(w: int,
                 h: int,
                 shader: Callable,
-                background_color: TColor = (0, 0, 0, 0)) -> Image:
+                background_color: Color = (0, 0, 0, 0)) -> Image:
     image = Image.new('RGBA', (w, h), background_color)
     pixels = image.load()
     for x in range(w):
@@ -106,52 +115,63 @@ def _draw_image(w: int,
     return image
 
 
-def _slices_frac_to_rad(
-        slices_frac: List[TSliceFrac],
-        default_color: TColor = (255, 255, 255, 255)) -> Iterator[TSliceRad]:
-    if not slices_frac or sum(slices_frac) == 0:
-        yield (0, _frac_to_rad(1), default_color)
+def _create_slices(
+        fractions: List[float],
+        colors: Optional[List[Color]] = None,
+        default_color: Color = (255, 255, 255, 255)) -> Iterator[Slice]:
+    if not fractions or sum(fractions) == 0:
+        yield Slice(
+            start=0,
+            end=_frac_to_rad(1),
+            color=default_color
+        )
         return
     cumulative_frac = 0.0
-    for i, frac in enumerate(slices_frac):
+    if colors is None:
+        colors = [color_from_index(i) for i in range(len(fractions))]
+    for frac, color in zip(fractions, colors):
         frac = round(frac, 2)
         if frac == 0:
             continue
-        yield (
-            _frac_to_rad(cumulative_frac),
-            _frac_to_rad(cumulative_frac + frac),
-            color_from_index(i)
+        yield Slice(
+            start=_frac_to_rad(cumulative_frac),
+            end=_frac_to_rad(cumulative_frac + frac),
+            color=color
         )
         cumulative_frac += frac
 
 
-def draw_pie_chart_png(size: int, slices_frac: List[TSliceFrac]) -> Image:
-    slices_rad = list(_slices_frac_to_rad(slices_frac))
+def draw_pie_chart_png(size: int, fractions: List[float],
+                       colors: Optional[List[Color]] = None) -> Image:
+    slices = list(_create_slices(fractions, colors))
     return _draw_image(
         w=size,
         h=size,
-        shader=partial(_pie_chart_shader, slices_rad=slices_rad)
+        shader=partial(_pie_chart_shader, slices=slices)
     )
 
 
-def draw_pie_chart_svg(slices_frac: List[TSliceFrac]) -> Iterator[str]:
-    slices_rad = _slices_frac_to_rad(slices_frac)
+def draw_pie_chart_svg(fractions: List[float],
+                       colors: Optional[List[Color]] = None) -> Iterator[str]:
+    slices = _create_slices(fractions, colors)
     yield '''<?xml version="1.0" encoding="UTF-8" ?>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-1 -1 2 2">\n'''
-    for slice_start, slice_end, (r, g, b, a) in slices_rad:
-        if slice_start == 0 and slice_end == 2*math.pi:
-            yield f'<circle cx="0" cy="0" r="1" fill="rgb({r}, {g}, {b})" />\n'
+    for slice in slices:
+        color = slice.color
+        if slice.start == 0 and slice.end == 2*math.pi:
+            yield (f'<circle cx="0" cy="0" r="1" '
+                   f'fill="rgb({color.r}, {color.g}, {color.b})" />\n')
             continue
-        start_x, start_y = math.cos(slice_start), math.sin(slice_start)
-        end_x, end_y = math.cos(slice_end), math.sin(slice_end)
-        large_arc_flag = int(slice_end - slice_start > math.pi)
+        start_x, start_y = math.cos(slice.start), math.sin(slice.start)
+        end_x, end_y = math.cos(slice.end), math.sin(slice.end)
+        large_arc_flag = int(slice.end - slice.start > math.pi)
         yield (f'<path d="M {start_x:.5f} {start_y:.5f} '
                f'A 1 1 0 {large_arc_flag} 1 {end_x:.5f} {end_y:.5f} L 0 0" '
-               f'fill="rgb({r}, {g}, {b})" />\n')
+               f'fill="rgb({color.r}, {color.g}, {color.b})" />\n')
     yield '</svg>\n'
 
 
-def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[TSliceFrac]:
+def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[float]:
     total = 0.0
     while total <= 1:
         frac = 1 / random.randint(n_min, n_max)
@@ -159,11 +179,11 @@ def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[TSliceFrac]:
         yield frac
 
 
-def calc_icon_hash(slices_frac: List[TSliceFrac]) -> str:
-    return '_'.join(f'{frac*100:.0f}' for frac in slices_frac)
+def calc_icon_hash(fractions: List[float]) -> str:
+    return '_'.join(f'{frac*100:.0f}' for frac in fractions)
 
 
 def print_default_svg_icon():
-    slices_frac = [0.35, 0.25, 0.20, 0.15, 0.05]
-    svg = draw_pie_chart_svg(slices_frac)
+    fractions = [0.35, 0.25, 0.20, 0.15, 0.05]
+    svg = draw_pie_chart_svg(fractions)
     sys.stdout.writelines(svg)
