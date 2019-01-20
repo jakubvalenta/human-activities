@@ -21,29 +21,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-class SizeMode(NamedTuple):
-    name: str
-    label: str
-    tooltip: str
-
-
-SIZE_MODE_SIZE = 'size'
-SIZE_MODE_SIZE_NEW = 'size_new'
-SIZE_MODES = (
-    SizeMode(
-        name=SIZE_MODE_SIZE,
-        label='by size',
-        tooltip='Compares data size of the directories.'
-    ),
-    SizeMode(
-        name=SIZE_MODE_SIZE_NEW,
-        label='by activity',
-        tooltip=('Shows how many percent of the files in each directory '
-                 'was modified in the past 30 days.')
-    ),
-)
-
-
 class Stat(Base):  # type: ignore
     __tablename__ = 'stats'
 
@@ -256,11 +233,11 @@ class Directories(list):
 
 class Model:
     _config: Config
-    _active_mode: str = SIZE_MODE_SIZE
-    _directories: Directories
+    _directories: Optional[Directories] = None
     _directory_views: Sequence[DirectoryView] = ()
 
     def __init__(self):
+        # Use the config setter to immediatelly trigger config saving.
         self.config = load_config()
 
     @property
@@ -278,14 +255,6 @@ class Model:
             self._config.threshold_days_ago,
             test=self._config.test
         )
-
-    @property
-    def active_mode(self):
-        return self._active_mode
-
-    @active_mode.setter
-    def active_mode(self, mode: str):
-        self._active_mode = mode
 
     @property
     def directory_views(self) -> Sequence[DirectoryView]:
