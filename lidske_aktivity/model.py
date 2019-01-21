@@ -1,10 +1,12 @@
 import logging
+import os
 import textwrap
 import time
 from threading import Event
 from typing import Callable, Iterable, List, NamedTuple, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
+from sqlalchemy.exc import DatabaseError, OperationalError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
@@ -19,8 +21,6 @@ from lidske_aktivity.utils.math import safe_div
 logger = logging.getLogger(__name__)
 
 Base = declarative_base()
-engine = create_engine(f'sqlite:///{CACHE_PATH}')
-session_factory = sessionmaker(bind=engine)
 
 
 class Stat(Base):  # type: ignore
@@ -60,7 +60,18 @@ class Directory(Base):  # type: ignore
         return f'Directory(path={self.path}, stats={self.stats})'
 
 
-Base.metadata.create_all(engine)
+def create_database_engine():
+    engine = create_engine(f'sqlite:///{CACHE_PATH}')
+    Base.metadata.create_all(engine)
+    return engine
+
+
+try:
+    engine = create_database_engine()
+except (DatabaseError, OperationalError):
+    os.remove(CACHE_PATH)
+    engine = create_database_engine()
+session_factory = sessionmaker(bind=engine)
 
 
 class Directories(list):
