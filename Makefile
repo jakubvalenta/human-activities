@@ -1,5 +1,5 @@
 _name=lidske-aktivity
-_version=0.1.3
+_version=0.2.0
 _pkgrel=1
 _arch_linux_dist_parent=dist/arch_linux
 _arch_linux_src_filename=${_name}-${_version}.tar.xz
@@ -108,8 +108,8 @@ data/lidske-aktivity.ico: data/lidske-aktivity.png
 generate-data: data/lidske-aktivity.png
 
 clean:  ## Clean distribution package
-	-rm -rf build
-	-rm -rf dist
+	-rm -rf build/*
+	-rm -rf dist/*
 
 clean-cache:  ## Clean cache
 	pipenv run python3 -m lidske_aktivity --verbose --clean
