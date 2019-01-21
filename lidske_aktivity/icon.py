@@ -188,6 +188,8 @@ def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[float]:
 
 
 def calc_icon_hash(fractions: List[float]) -> str:
+    if not fractions or sum(fractions) == 0:
+        return '0'
     return '_'.join(f'{frac*100:.0f}' for frac in fractions)
 
 
