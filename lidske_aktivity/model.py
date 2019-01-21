@@ -2,7 +2,7 @@ import logging
 import textwrap
 import time
 from threading import Event
-from typing import Callable, Iterable, List, NamedTuple
+from typing import Callable, Iterable, List, NamedTuple, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -50,11 +50,11 @@ class Directory(Base):  # type: ignore
         cascade='all, delete, delete-orphan'
     )
 
-    def find_value(self, unit: str, threshold_days_ago: int) -> int:
+    def find_value(self, unit: str, threshold_days_ago: int) -> Optional[int]:
         for stat in self.stats:
             if stat.threshold_days_ago == threshold_days_ago:
                 return getattr(stat, unit)
-        return 0
+        return None
 
     def __repr__(self) -> str:
         return f'Directory(path={self.path}, stats={self.stats})'
@@ -132,15 +132,15 @@ class DirectoryViews(dict):
 
     def load(self, *directories: Directory, **view_args):
         for directory in directories:
-            value = directory.find_value(self._unit, self._threshold_days_ago)
             if directory.path not in self:
                 logger.error(
                     'Directory view for path %s doesn\'t exist',
                     directory.path
                 )
                 continue
+            value = directory.find_value(self._unit, self._threshold_days_ago)
             self[directory.path] = self[directory.path]._replace(
-                value=value,
+                value=value or 0,
                 **view_args
             )
         self._recalculate()
