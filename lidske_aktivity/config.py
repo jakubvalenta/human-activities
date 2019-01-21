@@ -89,8 +89,7 @@ class Config:
         }
         return json.dumps(d, indent=2)
 
-    @property
-    def configured_dirs(self) -> TNamedDirs:
+    def list_effective_named_dirs(self) -> TNamedDirs:
         if self.mode == MODE_NAMED_DIRS:
             return self.named_dirs
         if self.mode == MODE_ROOT_PATH:
