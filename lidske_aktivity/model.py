@@ -120,7 +120,7 @@ class Directories(list):
 
 class DirectoryView(NamedTuple):
     label: str
-    value: float = 0
+    value: Optional[float] = None
     fraction: float = 0
     text: str = ''
     tooltip: str = ''
@@ -151,19 +151,27 @@ class DirectoryViews(dict):
                 continue
             value = directory.find_value(self._unit, self._threshold_days_ago)
             self[directory.path] = self[directory.path]._replace(
-                value=value or 0,
+                value=value,
                 **view_args
             )
         self._recalculate()
 
     def _recalculate(self):
-        total = sum(directory_view.value for directory_view in self.values())
+        total = sum(
+            directory_view.value or 0
+            for directory_view in self.values()
+        )
         for path, directory_view in self.items():
-            fraction = safe_div(directory_view.value, total)
-            if directory_view.pending:
-                text = f'{directory_view.label}: ...'
+            if directory_view.value is None:
+                fraction = 0
             else:
-                text = f'{directory_view.label}: {fraction:.0%}'
+                fraction = safe_div(directory_view.value, total)
+            text = self._format_text(
+                directory_view.label,
+                directory_view.value,
+                fraction,
+                directory_view.pending
+            )
             tooltip = self._format_tooltip(
                 fraction,
                 self._unit,
@@ -175,6 +183,20 @@ class DirectoryViews(dict):
                 tooltip=tooltip
             )
         logger.info('Recalculated fractions: %s', self.fractions)
+
+    @staticmethod
+    def _format_text(label: str,
+                     value: Optional[float],
+                     fraction: float,
+                     pending: bool):
+        s = f'{label}: '
+        if value is not None:
+            s += f'{fraction:.0%}'
+        if pending:
+            s += '...'
+        elif value is None:
+            s += 'n/a'
+        return s
 
     @staticmethod
     def _format_tooltip(fraction: float,
