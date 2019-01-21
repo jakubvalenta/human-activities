@@ -136,9 +136,8 @@ class StatusIcon():
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
         menu = Gtk.Menu()
-        if directory_views:
-            for menu_item in self._create_menu_items(directory_views):
-                menu.append(menu_item)
+        for menu_item in self._create_menu_items(directory_views):
+            menu.append(menu_item)
         menu.show_all()
         self._indicator.set_menu(menu)
 
