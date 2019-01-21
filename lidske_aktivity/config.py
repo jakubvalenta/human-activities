@@ -53,11 +53,11 @@ DEFAULT_NAMED_DIRS: TNamedDirs = {
     os.path.expanduser('~/Fun'): 'Zábava',
     os.path.expanduser('~/Downloads'): 'Stažené soubory',
 }
-VALUE_NAME_SIZE_BYTES = 'size_bytes'
-VALUE_NAME_NUM_FILES = 'num_files'
-VALUE_NAMES = {
-    VALUE_NAME_SIZE_BYTES: 'Size in bytes',
-    VALUE_NAME_NUM_FILES: 'Number of files',
+UNIT_SIZE_BYTES = 'size_bytes'
+UNIT_NUM_FILES = 'num_files'
+UNITS = {
+    UNIT_SIZE_BYTES: 'Size in bytes',
+    UNIT_NUM_FILES: 'Number of files',
 }
 
 
@@ -67,7 +67,7 @@ class Config:
     mode: str = MODE_NAMED_DIRS
     named_dirs: TNamedDirs
     show_setup: bool = True
-    value_name: str = VALUE_NAME_SIZE_BYTES
+    unit: str = UNIT_SIZE_BYTES
     threshold_days_ago: int = 30
 
     def __init__(self):
@@ -84,7 +84,7 @@ class Config:
                 if path and name
             },
             'show_setup': self.show_setup,
-            'value_name': self.value_name,
+            'unit': self.unit,
             'threshold_days_ago': self.threshold_days_ago,
         }
         return json.dumps(d, indent=2)
@@ -135,9 +135,9 @@ def _load_config_show_setup(config_json: Any, config: Config):
     config.show_setup = bool(config_json['show_setup'])
 
 
-def _load_config_value_name(config_json: Any, config: Config):
-    if config_json['value_name'] in VALUE_NAMES:
-        config.value_name = config_json['value_name']
+def _load_config_unit(config_json: Any, config: Config):
+    if config_json['unit'] in UNITS:
+        config.unit = config_json['unit']
 
 
 def _load_config_threshold_days_ago(config_json: Any, config: Config):
@@ -155,7 +155,7 @@ def load_config() -> Config:
                 _load_config_mode,
                 _load_config_named_dirs,
                 _load_config_show_setup,
-                _load_config_value_name,
+                _load_config_unit,
                 _load_config_threshold_days_ago,
             ]:
                 try:

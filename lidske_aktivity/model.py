@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
 
 from lidske_aktivity.config import (
-    CACHE_PATH, VALUE_NAME_NUM_FILES, VALUE_NAME_SIZE_BYTES, TNamedDirs,
+    CACHE_PATH, UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs,
 )
 from lidske_aktivity.icon import COLOR_GRAY, Color, color_from_index
 from lidske_aktivity.utils import filesystem, func
@@ -50,10 +50,10 @@ class Directory(Base):  # type: ignore
         cascade='all, delete, delete-orphan'
     )
 
-    def find_value(self, value_name: str, threshold_days_ago: int) -> int:
+    def find_value(self, unit: str, threshold_days_ago: int) -> int:
         for stat in self.stats:
             if stat.threshold_days_ago == threshold_days_ago:
-                return getattr(stat, value_name)
+                return getattr(stat, unit)
         return 0
 
     def __repr__(self) -> str:
@@ -117,14 +117,14 @@ class DirectoryView(NamedTuple):
 
 
 class DirectoryViews(dict):
-    _value_name: str
+    _unit: str
     _threshold_days_ago: int
 
     def config(self,
-               value_name: str,
+               unit: str,
                threshold_days_ago: int,
                named_dirs: TNamedDirs):
-        self._value_name = value_name
+        self._unit = unit
         self._threshold_days_ago = threshold_days_ago
         self.clear()
         for path, label in named_dirs.items():
@@ -132,10 +132,7 @@ class DirectoryViews(dict):
 
     def load(self, *directories: Directory, **view_args):
         for directory in directories:
-            value = directory.find_value(
-                self._value_name,
-                self._threshold_days_ago
-            )
+            value = directory.find_value(self._unit, self._threshold_days_ago)
             if directory.path not in self:
                 logger.error(
                     'Directory view for path %s doesn\'t exist',
@@ -158,7 +155,7 @@ class DirectoryViews(dict):
                 text = f'{directory_view.label}: {fraction:.0%}'
             tooltip = self._format_tooltip(
                 fraction,
-                self._value_name,
+                self._unit,
                 self._threshold_days_ago
             )
             self[path] = directory_view._replace(
@@ -170,18 +167,18 @@ class DirectoryViews(dict):
 
     @staticmethod
     def _format_tooltip(fraction: float,
-                        value_name: str,
+                        unit: str,
                         threshold_days_ago: int) -> str:
-        value_text = {
-            VALUE_NAME_SIZE_BYTES: 'of the size ',
-            VALUE_NAME_NUM_FILES: '',
-        }[value_name]
+        unit_text = {
+            UNIT_SIZE_BYTES: 'of the size ',
+            UNIT_NUM_FILES: '',
+        }[unit]
         if threshold_days_ago == 0:
             set_text = 'all files in configured directories'
         else:
             set_text = (f'the files modified in the past '
                         f'{threshold_days_ago} days')
-        s = f'{fraction:.2%} {value_text}of {set_text}'
+        s = f'{fraction:.2%} {unit_text}of {set_text}'
         return textwrap.fill(s)
 
     @property
@@ -208,7 +205,7 @@ class DirectoryViews(dict):
 
 @func.measure_time
 def scan_directory(path: str,
-                   value_name: str,
+                   unit: str,
                    threshold_days_ago: int,
                    event_stop: Event,
                    callback: Callable[[Directory], None],

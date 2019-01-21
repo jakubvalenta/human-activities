@@ -3,7 +3,7 @@ from typing import Callable, Dict
 import wx
 
 from lidske_aktivity.config import (
-    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, VALUE_NAMES, Config,
+    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, UNITS, Config,
 )
 from lidske_aktivity.wx.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, TNamedDirs, create_label,
@@ -18,7 +18,7 @@ class Settings(wx.Dialog):
     _panel: wx.Panel
     _sizer: wx.Sizer
     _border_sizer: wx.Sizer
-    _value_name_radios: Dict[str, wx.RadioButton]
+    _unit_radios: Dict[str, wx.RadioButton]
     _threshold_days_ago_control: Dict[str, wx.RadioButton]
     _mode_radios: Dict[str, wx.RadioButton]
     _root_path_form: RootPathForm
@@ -62,7 +62,7 @@ class Settings(wx.Dialog):
         )
 
     def _create_widgets(self):
-        self._create_value_name_radios()
+        self._create_unit_radios()
         self._threshold_days_ago_control = create_spin_control(
             self,
             value=self._config.threshold_days_ago,
@@ -81,18 +81,21 @@ class Settings(wx.Dialog):
         self._create_mode_radios()
 
     def _add_widgets(self):
-        label = create_label(self._panel, 'Value')
+        label = create_label(self._panel, 'Compare')
         self._sizer.Add(label, flag=wx.ALL, border=5)
-        for radio in self._value_name_radios.values():
+        for radio in self._unit_radios.values():
             self._sizer.Add(radio, flag=wx.ALL, border=5)
-        label = create_label(self._panel, 'Threshold')
+        label = create_label(
+            self._panel,
+            'Include only files newer than (days), 0 = all files'
+        ),
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(
             self._threshold_days_ago_control,
             flag=wx.ALL,
             border=5
         )
-        label = create_label(self._panel, 'Scan mode')
+        label = create_label(self._panel, 'Directories')
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(
             self._mode_radios[MODE_ROOT_PATH],
@@ -108,20 +111,20 @@ class Settings(wx.Dialog):
         self._sizer.Add(self._named_dirs_form.panel, flag=wx.EXPAND)
         self._toggle_controls()
 
-    def _create_value_name_radios(self):
+    def _create_unit_radios(self):
         radio_configs = [
             RadioConfig(value, label)
-            for value, label in VALUE_NAMES.items()
+            for value, label in UNITS.items()
         ]
-        self._value_name_radios = create_radio_group(
+        self._unit_radios = create_radio_group(
             self._panel,
             radio_configs,
-            active_value=self._config.value_name,
-            callback=self._on_value_name_radio_toggled
+            active_value=self._config.unit,
+            callback=self._on_unit_radio_toggled
         )
 
-    def _on_value_name_radio_toggled(self, value_name: str):
-        self._config.value_name = value_name
+    def _on_unit_radio_toggled(self, unit: str):
+        self._config.unit = unit
 
     def _on_threshold_days_ago_changed(self, threshold_days_ago: int):
         self._config.threshold_days_ago = threshold_days_ago

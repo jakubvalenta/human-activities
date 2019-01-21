@@ -3,7 +3,7 @@ from typing import Callable, Dict
 import gi
 
 from lidske_aktivity.config import (
-    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, VALUE_NAMES, Config, TNamedDirs,
+    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, UNITS, Config, TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, box_add, create_label,
@@ -20,7 +20,7 @@ class Settings(Gtk.Dialog):
 
     _config: Config
     _box: Gtk.Box
-    _value_name_radios: Dict[str, Gtk.RadioButton]
+    _unit_radios: Dict[str, Gtk.RadioButton]
     _threshold_days_ago_entry: Dict[str, Gtk.Entry]
     _mode_radios: Dict[str, Gtk.RadioButton]
     _root_path_form: RootPathForm
@@ -57,7 +57,7 @@ class Settings(Gtk.Dialog):
         self._box.set_spacing(10)
 
     def _create_widgets(self):
-        self._create_value_name_radios()
+        self._create_unit_radios()
         self._threshold_days_ago_entry = create_spin_button(
             value=self._config.threshold_days_ago,
             callback=self._on_threshold_days_ago_changed
@@ -78,11 +78,12 @@ class Settings(Gtk.Dialog):
 
     def _add_widgets(self):
         widgets = [
-            create_label('Value')
-        ] + list(self._value_name_radios.values()) + [
-            create_label('Threshold'),
+            create_label('Compare')
+        ] + list(self._unit_radios.values()) + [
+            create_label('Include only files newer than (days), '
+                         '0 = all files'),
             self._threshold_days_ago_entry,
-            create_label('Scan mode'),
+            create_label('Directories'),
             self._mode_radios[MODE_ROOT_PATH],
             self._root_path_form,
             self._mode_radios[MODE_NAMED_DIRS],
@@ -91,19 +92,19 @@ class Settings(Gtk.Dialog):
         for widget in widgets:
             box_add(self._box, widget, expand=False)
 
-    def _create_value_name_radios(self):
+    def _create_unit_radios(self):
         radio_configs = [
             RadioConfig(value, label)
-            for value, label in VALUE_NAMES.items()
+            for value, label in UNITS.items()
         ]
-        self._value_name_radios = create_radio_group(
+        self._unit_radios = create_radio_group(
             radio_configs,
-            active_value=self._config.value_name,
-            callback=self._on_value_name_radio_toggled
+            active_value=self._config.unit,
+            callback=self._on_unit_radio_toggled
         )
 
-    def _on_value_name_radio_toggled(self, value_name: str):
-        self._config.value_name = value_name
+    def _on_unit_radio_toggled(self, unit: str):
+        self._config.unit = unit
 
     def _on_threshold_days_ago_changed(self, threshold_days_ago: int):
         self._config.threshold_days_ago = threshold_days_ago

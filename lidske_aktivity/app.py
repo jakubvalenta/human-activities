@@ -51,7 +51,7 @@ class Application:
         self._directories.load(paths)
         self._directories.save()
         self._directory_views.config(
-            self._config.value_name,
+            self._config.unit,
             self._config.threshold_days_ago,
             named_dirs
         )
@@ -76,7 +76,7 @@ class Application:
                     executor.submit(
                         scan_directory,
                         path=directory.path,
-                        value_name=self._config.value_name,
+                        unit=self._config.unit,
                         threshold_days_ago=self._config.threshold_days_ago,
                         event_stop=self._scan_event_stop,
                         callback=partial(
