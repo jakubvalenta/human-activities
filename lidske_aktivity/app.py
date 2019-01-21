@@ -38,6 +38,7 @@ class Application:
 
     def __init__(self, ui: Any):
         self._config = load_config()
+        save_config(self._config)
         self._directories = Directories()
         self._directory_views = DirectoryViews()
         self._load_directories()
