@@ -96,7 +96,8 @@ class StatusIcon():
 
     def _create_menu_items(
             self,
-            directory_views: DirectoryViews) -> Iterator[Gtk.MenuItem]:
+            directory_views: Optional[DirectoryViews]
+    ) -> Iterator[Gtk.MenuItem]:
         # TODO: Limit the maximum number of items shown.
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
