@@ -64,7 +64,7 @@ class Settings(wx.Dialog):
     def _create_widgets(self):
         self._create_unit_radios()
         self._threshold_days_ago_control = create_spin_control(
-            self,
+            self._panel,
             value=self._config.threshold_days_ago,
             callback=self._on_threshold_days_ago_changed
         )
