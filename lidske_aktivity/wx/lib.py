@@ -118,10 +118,20 @@ def create_spin_control(parent: wx.Window,
     )
     spin_control.Bind(
         wx.EVT_TEXT,
-        partial(on_text_control_changed, callback=callback),
+        partial(
+            on_spin_control_changed,
+            spin_control=spin_control,
+            callback=callback
+        ),
         spin_control
     )
     return spin_control
+
+
+def on_spin_control_changed(event: wx.KeyEvent,
+                            spin_control: wx.SpinCtrl,
+                            callback: Callable):
+    callback(spin_control.GetValue())
 
 
 class DirBrowserButtonWithoutLabel(wx.lib.filebrowsebutton.DirBrowseButton):
