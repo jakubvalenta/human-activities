@@ -1,3 +1,4 @@
+import logging
 import math
 import random
 import sys
@@ -6,6 +7,8 @@ from hashlib import sha1
 from typing import Callable, Iterator, List, NamedTuple, Optional, Tuple
 
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 MAX_COLORS = 64
 
@@ -149,6 +152,7 @@ def _create_slices(fractions: List[float],
 def draw_pie_chart_png(size: int,
                        fractions: List[float],
                        colors: Optional[List[Color]] = None) -> Image.Image:
+    logger.info('Drawing PNG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = list(_create_slices(fractions, colors))
     return _draw_image(
         w=size,
@@ -159,6 +163,7 @@ def draw_pie_chart_png(size: int,
 
 def draw_pie_chart_svg(fractions: List[float],
                        colors: Optional[List[Color]] = None) -> Iterator[str]:
+    logger.info('Drawing SVG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = _create_slices(fractions, colors)
     yield '''<?xml version="1.0" encoding="UTF-8" ?>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-1 -1 2 2">\n'''

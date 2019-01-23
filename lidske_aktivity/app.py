@@ -121,10 +121,6 @@ class Application:
         if directory_views_list == self._last_directory_views_list:
             return
         self._last_directory_views_list = directory_views_list
-        logger.info(
-            'Updating icon with slices %s',
-            [f'{fract:.2f}' for fract in self._directory_views.fractions]
-        )
         self._status_icon.update(self._directory_views)
 
     def set_config(self, config: Config):
