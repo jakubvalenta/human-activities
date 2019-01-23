@@ -76,6 +76,7 @@ class Settings(wx.Dialog):
         self._named_dirs_form = NamedDirsForm(
             self._config.named_dirs,
             self._on_named_dirs_change,
+            on_redraw=self._fit,
             parent=self._panel
         )
         self._create_mode_radios()

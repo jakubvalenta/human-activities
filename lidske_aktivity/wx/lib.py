@@ -1,7 +1,7 @@
 import io
 import logging
 from functools import partial
-from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 import wx
 import wx.lib.filebrowsebutton
@@ -20,7 +20,7 @@ def new_id_ref_compat():
         return wx.NewId()
 
 
-def create_sizer(parent: wx.Window,
+def create_sizer(parent: Union[wx.Sizer, wx.Panel],
                  orientation: int = wx.VERTICAL,
                  *args,
                  **kwargs) -> wx.BoxSizer:
@@ -36,12 +36,11 @@ def create_label(parent: wx.Window, text: str) -> wx.StaticText:
     return wx.StaticText(parent, label=text)
 
 
-def create_button(parent: wx.Window,
-                  panel: wx.Panel,
+def create_button(parent: wx.Panel,
                   label: str,
                   callback: Callable) -> wx.Button:
-    button = wx.Button(panel, wx.ID_ANY, label)
-    parent.Bind(
+    button = wx.Button(parent, wx.ID_ANY, label)
+    button.Bind(
         wx.EVT_BUTTON,
         partial(on_button_clicked, callback=callback),
         id=button.GetId()
@@ -90,11 +89,11 @@ def on_radio_toggled(event: wx.MouseEvent,
     callback(value)
 
 
-def create_text_control(parent: wx.Window,
+def create_text_control(parent: wx.Panel,
                         value: str,
                         callback: Callable) -> wx.TextCtrl:
     text_control = wx.TextCtrl(parent, value=value)
-    parent.Bind(
+    text_control.Bind(
         wx.EVT_TEXT,
         partial(on_text_control_changed, callback=callback),
         text_control
@@ -117,7 +116,7 @@ def create_spin_control(parent: wx.Window,
         min=min_val,
         max=max_val
     )
-    parent.Bind(
+    spin_control.Bind(
         wx.EVT_TEXT,
         partial(on_text_control_changed, callback=callback),
         spin_control
@@ -221,6 +220,7 @@ class NamedDirsForm(Form):
     def __init__(self,
                  named_dirs: TNamedDirs,
                  on_change: Callable[[TNamedDirs], None],
+                 on_redraw: Callable[[], None],
                  parent: wx.Panel,
                  *args,
                  **kwargs):
@@ -229,6 +229,7 @@ class NamedDirsForm(Form):
             for path, name in named_dirs.items()
         ]
         self._on_change = on_change
+        self._on_redraw = on_redraw
         self._parent = parent
         super().__init__(self._parent, *args, **kwargs)
         self._init_controls()
@@ -261,7 +262,6 @@ class NamedDirsForm(Form):
             )
             remove_button = create_button(
                 self.panel,
-                self.panel,
                 'Remove',
                 callback=partial(self._on_remove_clicked, i)
             )
@@ -277,18 +277,16 @@ class NamedDirsForm(Form):
             self._vbox.Add(hbox, flag=flag, border=5)
         add_button = create_button(
             self.panel,
-            self.panel,
             'Add',
             callback=self._on_add_clicked
         )
         self._vbox.Add(add_button, flag=wx.TOP, border=10)
 
-    def _clear(self):
-        try:
-            self.panel.PopEventHandler(deleteHandler=True)
-        except wx.wxAssertionError:
-            pass
-        self._vbox.Destroy()
+    def _recreate(self):
+        self.panel.DestroyChildren()
+        self._init_controls()
+        self._vbox.Layout()
+        self._on_redraw()
 
     def _on_name_changed(self, i: int, name: str):
         named_dir = self._named_dirs_list[i]
@@ -303,15 +301,13 @@ class NamedDirsForm(Form):
     def _on_remove_clicked(self, i: int):
         del self._named_dirs_list[i]
         self._on_change(self._named_dirs)
-        self._clear()
-        self._init_controls()
+        wx.CallAfter(self._recreate)
 
     def _on_add_clicked(self):
         new_named_dir = NamedDir()
         self._named_dirs_list.append(new_named_dir)
         self._on_change(self._named_dirs)
-        self._clear()
-        self._init_controls()
+        wx.CallAfter(self._recreate)
 
     @property
     def _named_dirs(self) -> TNamedDirs:

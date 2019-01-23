@@ -158,7 +158,6 @@ def call_tick(func: Callable):
 
 class RootPathForm(Gtk.Box):
     _root_path: str
-    _parent: Gtk.Window
 
     def __init__(self,
                  root_path: str,
@@ -166,7 +165,6 @@ class RootPathForm(Gtk.Box):
                  parent: Gtk.Window):
         self._root_path = root_path
         self._on_change = on_change
-        self._parent = parent
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self._init_entry()
 
@@ -199,7 +197,6 @@ class NamedDirsForm(Gtk.Grid):
             for path, name in named_dirs.items()
         ]
         self._on_change = on_change
-        self._parent = parent
         super().__init__()
         self.set_column_spacing(10)
         self.set_row_spacing(10)
