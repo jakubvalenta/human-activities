@@ -6,7 +6,7 @@ from threading import Event
 from typing import Callable, Iterable, List, NamedTuple, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
-from sqlalchemy.exc import DatabaseError, OperationalError
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
@@ -67,8 +67,9 @@ def create_database_engine():
 
 
 try:
+    os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
     engine = create_database_engine()
-except (DatabaseError, OperationalError):
+except DatabaseError:
     os.remove(CACHE_PATH)
     engine = create_database_engine()
 session_factory = sessionmaker(bind=engine)
