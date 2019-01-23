@@ -88,7 +88,7 @@ class Settings(wx.Dialog):
         label = create_label(
             self._panel,
             'Include only files newer than (days), 0 = all files'
-        ),
+        )
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(
             self._threshold_days_ago_control,
