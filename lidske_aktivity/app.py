@@ -66,7 +66,6 @@ class Application:
         if self._config.show_setup:
             self._config.show_setup = False
             self.show_setup()
-        self.show_settings()
         self._tick_start()
 
     def _scan_start(self):

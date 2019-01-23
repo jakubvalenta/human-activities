@@ -46,7 +46,7 @@ def main():
         logging.basicConfig(
             stream=sys.stdout,
             level=logging.INFO,
-            format='%(message)s')
+            format='[%(threadName)s] %(message)s')
     if args.clean:
         clean_cache()
     else:
