@@ -25,7 +25,7 @@ $ make setup
 #. Install Python dependencies:
 
     ```
-    pip install Pillow wxpython
+    pip install Pillow sqlalchemy wxpython
     ```
 
 ## Usage
