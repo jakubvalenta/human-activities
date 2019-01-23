@@ -230,8 +230,8 @@ class NamedDirsForm(Form):
     def __init__(self,
                  named_dirs: TNamedDirs,
                  on_change: Callable[[TNamedDirs], None],
-                 on_redraw: Callable[[], None],
                  parent: wx.Panel,
+                 on_redraw: Optional[Callable[[], None]] = None,
                  *args,
                  **kwargs):
         self._named_dirs_list = [
@@ -296,7 +296,9 @@ class NamedDirsForm(Form):
         self.panel.DestroyChildren()
         self._init_controls()
         self._vbox.Layout()
-        self._on_redraw()
+        self.panel.Layout()
+        if self._on_redraw:
+            self._on_redraw()
 
     def _on_name_changed(self, i: int, name: str):
         named_dir = self._named_dirs_list[i]

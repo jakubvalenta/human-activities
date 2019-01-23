@@ -159,7 +159,6 @@ class Settings(wx.Dialog):
     def _fit(self):
         self._border_sizer.Fit(self._panel)
         self._border_sizer.Fit(self)
-        self.Layout()
 
     def _show(self):
         self.Centre()
