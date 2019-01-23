@@ -2,6 +2,7 @@ import logging
 import os
 import textwrap
 import time
+import traceback
 from threading import Event
 from typing import Callable, Iterable, List, NamedTuple, Optional
 
@@ -244,42 +245,43 @@ def scan_directory(path: str,
                    event_stop: Event,
                    callback: Callable[[Directory], None],
                    test: bool = False):
-    session = scoped_session(session_factory)
-    directory = session.query(Directory).filter(
-        Directory.path == path
-    ).one()
-    logger.info('Calculating size of "%s"', directory.path)
-    threshold_seconds_ago = threshold_days_ago * 24 * 3600
-    threshold_seconds = time.time() - threshold_seconds_ago
-    dir_size = filesystem.calc_dir_size(
-        directory.path,
-        threshold_seconds=threshold_seconds,
-        event_stop=event_stop
-    )
-    directory.stats.clear()
-    directory.stats.append(
-        Stat(
-            size_bytes=dir_size.size_bytes_all,
-            num_files=dir_size.num_files_all,
-            threshold_days_ago=0
+    logger.info('Scanning "%s"', path)
+    try:
+        session = scoped_session(session_factory)
+        directory = session.query(Directory).filter(
+            Directory.path == path
+        ).one()
+        threshold_seconds_ago = threshold_days_ago * 24 * 3600
+        threshold_seconds = time.time() - threshold_seconds_ago
+        dir_size = filesystem.calc_dir_size(
+            directory.path,
+            threshold_seconds=threshold_seconds,
+            event_stop=event_stop
         )
-    )
-    if threshold_days_ago != 0:
+        directory.stats.clear()
         directory.stats.append(
             Stat(
-                size_bytes=dir_size.size_bytes_new,
-                num_files=dir_size.num_files_new,
-                threshold_days_ago=threshold_days_ago
+                size_bytes=dir_size.size_bytes_all,
+                num_files=dir_size.num_files_all,
+                threshold_days_ago=0
             )
         )
-    if test:
-        func.random_wait(event_stop)
-    logger.info(
-        'Calculated size of "%s": %s',
-        directory.path,
-        directory.stats
-    )
-    logger.info('DB: Updating %s', directory)
-    session.commit()
-    callback(directory)
-    session.close()
+        if threshold_days_ago != 0:
+            directory.stats.append(
+                Stat(
+                    size_bytes=dir_size.size_bytes_new,
+                    num_files=dir_size.num_files_new,
+                    threshold_days_ago=threshold_days_ago
+                )
+            )
+        if test:
+            func.random_wait(event_stop)
+        logger.info('Scanned "%s": %s', directory.path, directory.stats)
+        logger.info('DB: Updating %s', directory)
+        session.commit()
+        callback(directory)
+    except Exception as e:
+        logger.error('Exception while scanning "%s"', path)
+        logger.info(traceback.format_exc())
+    finally:
+        session.close()
