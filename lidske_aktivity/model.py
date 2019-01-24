@@ -280,7 +280,7 @@ def scan_directory(path: str,
         logger.info('DB: Updating %s', directory)
         session.commit()
         callback(directory)
-    except Exception as e:
+    except Exception:
         logger.error('Exception while scanning "%s"', path)
         logger.info(traceback.format_exc())
     finally:
