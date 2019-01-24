@@ -15,7 +15,9 @@ from sqlalchemy.orm.session import Session
 from lidske_aktivity.config import (
     CACHE_PATH, UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs,
 )
-from lidske_aktivity.icon import COLOR_GRAY, Color, color_from_index
+from lidske_aktivity.icon import (
+    COLOR_BLACK, COLOR_GRAY, Color, color_from_index,
+)
 from lidske_aktivity.utils import filesystem, func
 from lidske_aktivity.utils.math import safe_div
 
@@ -232,9 +234,15 @@ class DirectoryViews(dict):
     def tooltip(self) -> str:
         return '\n'.join(self.texts)
 
-    def get_colors_with_one_highlighted(self, i: int) -> List[Color]:
+    def get_colors_with_one_highlighted(
+            self,
+            i: int,
+            grayscale: bool = False) -> List[Color]:
         colors = [COLOR_GRAY for i in range(len(self))]
-        colors[i] = color_from_index(i)
+        if grayscale:  # TODO: Remove when finally decided for one option.
+            colors[i] = COLOR_BLACK
+        else:
+            colors[i] = color_from_index(i)
         return colors
 
 

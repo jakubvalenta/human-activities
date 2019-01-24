@@ -69,7 +69,10 @@ class StatusIcon(wx.adv.TaskBarIcon):
                 icon_image = draw_pie_chart_png(
                     16,
                     directory_views.fractions,
-                    directory_views.get_colors_with_one_highlighted(i)
+                    directory_views.get_colors_with_one_highlighted(
+                        i,
+                        grayscale=True
+                    )
                 )
                 create_menu_item(
                     self,

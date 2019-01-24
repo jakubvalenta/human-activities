@@ -29,6 +29,7 @@ class Slice(NamedTuple):
 COLOR_TRANSPARENT = Color(0, 0, 0, 0)
 COLOR_WHITE = Color(255, 255, 255)
 COLOR_GRAY = Color(147, 161, 161)
+COLOR_BLACK = Color(0, 0, 0)
 
 
 def _frac_to_rad(frac: float) -> float:
