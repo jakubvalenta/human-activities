@@ -11,16 +11,28 @@ $ make setup
 
 ### Windows
 
-#. Install pre-requisites:
+#. Install [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
-    - [Visual C++ Redistributable for Visual Studio
-       2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
-    - [Git](https://www.git-scm.com/).
-    - [Python3](https://www.python.org/).
+#. Install [Git](https://www.git-scm.com/).
 
-#. Open Git bash.
+#. Install [Python3](https://www.python.org/).
 
-#. Clone this repo.
+    Check _Add python to environment variables_.
+
+#. Open Git Bash.
+
+#. Configure Git:
+
+    ```
+    git config --global user.name "Jakub Valenta"
+    git config --global user.email "jakub@jakubvalenta.cz"
+    ```
+
+#. Clone this repo:
+
+    ```
+    git clone gogs@lab.saloun.cz:jakub/art-lidske-aktivity-gtk.git
+    ```
 
 #. Install Python dependencies:
 
