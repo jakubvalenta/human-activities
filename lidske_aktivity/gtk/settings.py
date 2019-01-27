@@ -7,8 +7,10 @@ from lidske_aktivity.config import (
 )
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm, RadioConfig, RootPathForm, box_add, create_label,
-    create_radio_group, create_spin_button,
+    create_radio_group, create_spin_button, image_to_pixbuf,
 )
+from lidske_aktivity.gtk.status_icon import create_menu_item
+from lidske_aktivity.icon import draw_pie_chart_png
 
 gi.require_version('Gtk', '3.0')
 
@@ -55,6 +57,28 @@ class Settings(Gtk.Dialog):
         self._box.set_homogeneous(False)
         self._box.set_border_width(10)
         self._box.set_spacing(10)
+
+        menu_bar = Gtk.MenuBar()
+        menu_item_1 = Gtk.MenuItem.new_with_label('File')
+        submenu = Gtk.Menu()
+
+        _, icon_size, _ = Gtk.IconSize.lookup(Gtk.IconSize.MENU)
+        icon_image = draw_pie_chart_png(
+            icon_size,
+            [0.5, 0.3, 0.2]
+        )
+        icon_pixbuf = image_to_pixbuf(icon_image)
+        menu_item = create_menu_item(
+            'Foo',
+            callback=lambda: None,
+            tooltip='Bar...',
+            icon_pixbuf=icon_pixbuf
+        )
+        submenu.append(menu_item)
+
+        menu_item_1.set_submenu(submenu)
+        menu_bar.append(menu_item_1)
+        box_add(self._box, menu_bar)
 
     def _create_widgets(self):
         self._create_unit_radios()
