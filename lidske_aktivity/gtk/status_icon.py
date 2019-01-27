@@ -39,8 +39,9 @@ def create_menu_item(
         hbox = create_box(Gtk.Orientation.HORIZONTAL, spacing=6)
         image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
         hbox.add(image)
-        label = create_label(label)
-        hbox.add(label)
+        label_widget = Gtk.Label(None)
+        label_widget.set_markup(f'<span color="red">{label}</span>')
+        hbox.add(label_widget)
         menu_item = Gtk.MenuItem()
         menu_item.add(hbox)
     else:
