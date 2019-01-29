@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache test lint lint-arch-linux lint-data check bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data check bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -113,6 +113,9 @@ clean:  ## Clean distribution package
 
 clean-cache:  ## Clean cache
 	pipenv run python3 -m lidske_aktivity --verbose --clean
+
+scan:  ## Scan directories
+	pipenv run python3 -m lidske_aktivity --verbose --scan
 
 test:  ## Run unit tests
 	tox -e py37

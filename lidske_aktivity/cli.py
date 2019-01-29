@@ -35,6 +35,12 @@ def main():
         help='Clean cache and exit'
     )
     parser.add_argument(
+        '-s',
+        '--scan',
+        action='store_true',
+        help='Scan all directories, write the results to cache, and exit'
+    )
+    parser.add_argument(
         '-w',
         '--wx',
         action='store_true',
@@ -49,9 +55,13 @@ def main():
             format='[%(threadName)s] %(message)s')
     if args.clean:
         clean_cache()
+        return
+    app = Application()
+    if args.scan:
+        app.scan()
+        return
+    if not args.wx and is_appindicator_available():
+        import lidske_aktivity.gtk as ui
     else:
-        if not args.wx and is_appindicator_available():
-            import lidske_aktivity.gtk as ui
-        else:
-            import lidske_aktivity.wx as ui
-        Application(ui)
+        import lidske_aktivity.wx as ui
+    app.run_ui(ui)
