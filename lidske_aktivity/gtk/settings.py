@@ -10,7 +10,7 @@ from lidske_aktivity.gtk.lib import (
     create_radio_group, create_spin_button, image_to_pixbuf,
 )
 from lidske_aktivity.gtk.status_icon import create_menu_item
-from lidske_aktivity.icon import draw_pie_chart_png
+from lidske_aktivity.icon import draw_pie_chart_png, color_from_index
 
 gi.require_version('Gtk', '3.0')
 
@@ -72,7 +72,7 @@ class Settings(Gtk.Dialog):
             'Foo',
             callback=lambda: None,
             tooltip='Bar...',
-            icon_pixbuf=icon_pixbuf
+            color=color_from_index(1)
         )
         submenu.append(menu_item)
 

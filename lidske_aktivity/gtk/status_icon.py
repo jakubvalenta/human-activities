@@ -8,7 +8,7 @@ import gi
 from lidske_aktivity import __application_id__, __application_name__
 from lidske_aktivity.gtk.lib import image_to_pixbuf
 from lidske_aktivity.icon import (
-    calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
+    calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg, Color
 )
 from lidske_aktivity.model import DirectoryViews
 
@@ -29,24 +29,27 @@ def create_menu_item(
         callback: Optional[Callable] = None,
         tooltip: Optional[str] = None,
         icon_name: Optional[str] = None,
-        icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None) -> Gtk.MenuItem:
+        icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None,
+        color: Optional[Color] = None) -> Gtk.MenuItem:
     if icon_name:
         menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
         menu_item.set_image(image)
-        menu_item.set_label(label)
     elif icon_pixbuf:
-        menu_item = Gtk.MenuItem.new_with_label(label)
-        label_widget = menu_item.get_child()
-        menu_item.remove(label_widget)
-        hbox = Gtk.Box(Gtk.Orientation.HORIZONTAL, 6)
-        menu_item.add(hbox)
+        menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
-        hbox.add(image)
+        menu_item.set_image(image)
+    elif color:
+        menu_item = Gtk.MenuItem()
+        label_widget = Gtk.Label(None)
+        point = f'<span color="{color.hex}">\N{BLACK CIRCLE}</span>'
+        label_widget.set_markup(f'{label} {point}')
+        hbox = Gtk.Box(Gtk.Orientation.HORIZONTAL)
         hbox.add(label_widget)
+        menu_item.add(hbox)
     else:
         menu_item = Gtk.MenuItem()
-        menu_item.set_label(label)
+    menu_item.set_label(label)
     if tooltip:
         menu_item.set_tooltip_text(tooltip)
     if callback:

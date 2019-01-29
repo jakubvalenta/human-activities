@@ -24,6 +24,7 @@ def gen_color_rules() -> Iterator[str]:
     for i in range(MAX_COLORS):
         yield gen_bg_color_rule(f'.bg-{i} progress', color_from_index(i))
     yield gen_bg_color_rule('progress.pulse', color_from_index(-1))
+    yield 'menuitem label { color: red }'
     yield 'progress { border-color: transparent }'
 
 

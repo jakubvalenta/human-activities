@@ -19,6 +19,14 @@ class Color(NamedTuple):
     b: int
     a: int = 255
 
+    @property
+    def css(self):
+        return f'rgba({self.r}, {self.g}, {self.b}, {self.a})'
+
+    @property
+    def hex(self):
+        return f'#{self.r:X}{self.g:X}{self.b:X}{self.a:X}'
+
 
 class Slice(NamedTuple):
     start: float
