@@ -210,8 +210,8 @@ class DirectoryViews(dict):
                 changed = True
         logger.info(
             'Recalculated: changed = %s, fractions = %s',
-            self.fractions,
-            changed
+            changed,
+            self.fractions
         )
         return changed
 
