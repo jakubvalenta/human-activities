@@ -69,7 +69,6 @@ class Application:
         self._load_directories()
         self._scan_start()
         self._scan_thread.join()
-        logger.info('Scan finished')
 
     def _on_init(self, ui_app: Any):
         self._ui_app = ui_app
@@ -98,6 +97,7 @@ class Application:
                     for directory in self._directories
                 ]
                 wait(futures)
+                logger.info('Scan finished')
 
         self._scan_thread = Thread(target=orchestrator)
         self._scan_thread.start()

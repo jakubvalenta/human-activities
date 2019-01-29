@@ -42,7 +42,7 @@ def main():
     )
     parser.add_argument(
         '-w',
-        '--wx',
+        '--wxwidgets',
         action='store_true',
         help=('Force the use of the WxWidget backend; by default, GTK is '
               'always used when AppIndicator is available')
@@ -60,7 +60,7 @@ def main():
     if args.scan:
         app.scan()
         return
-    if not args.wx and is_appindicator_available():
+    if not args.wxwidgets and is_appindicator_available():
         import lidske_aktivity.gtk as ui
     else:
         import lidske_aktivity.wx as ui

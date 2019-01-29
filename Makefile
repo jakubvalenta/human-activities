@@ -36,7 +36,7 @@ run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m lidske_aktivity --verbose
 
 run-wx:  ## Start the app with the WxWidgets backend and extended logging
-	pipenv run python3 -m lidske_aktivity --verbose --wx
+	pipenv run python3 -m lidske_aktivity --verbose --wxwidgets
 
 dist-pyinstaller-build:
 	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
