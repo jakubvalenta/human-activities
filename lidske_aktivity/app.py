@@ -3,15 +3,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import partial
 from threading import Event, Thread
-from typing import Any, Callable, List, Optional
+from typing import Any, List, Optional
 
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
-from lidske_aktivity.config import Config, load_config, save_config
+from lidske_aktivity.config import Config, TNamedDirs, load_config, save_config
 from lidske_aktivity.icon import draw_pie_chart_png, gen_random_slices
 from lidske_aktivity.model import (
-    Directories, Directory, DirectoryView, DirectoryViews, scan_directory,
+    Directories, DirectoryView, DirectoryViews, scan_directory,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ class AppError(Exception):
 
 class Application:
     _config: Config
+    _named_dirs: TNamedDirs
     _directories: Directories
     _directory_views: DirectoryViews
 
@@ -39,33 +40,34 @@ class Application:
     def __init__(self):
         self._config = load_config()
         save_config(self._config)
+        self._named_dirs = self._config.list_effective_named_dirs()
         self._directories = Directories()
         self._directory_views = DirectoryViews()
 
-    def _load_directories(self, with_views: bool = True):
-        named_dirs = self._config.list_effective_named_dirs()
-        paths = named_dirs.keys()
+    def _load_directories(self):
+        paths = self._named_dirs.keys()
         self._directories.clear()
         self._directories.load(paths)
         self._directories.save()
-        if with_views:
-            self._directory_views.config(
-                self._config.unit,
-                self._config.threshold_days_ago,
-                named_dirs
-            )
-            self._directory_views.load(*self._directories)
-            self._scan_start(callback=self._directory_views.load)
-        else:
-            self._scan_start(callback=lambda *args, **kwargs: None)
+
+    def _load_directory_views(self):
+        self._directory_views.config(
+            self._config.unit,
+            self._config.threshold_days_ago,
+            self._named_dirs
+        )
+        self._directory_views.load(*self._directories)
 
     def run_ui(self, ui: Any):
         self._load_directories()
+        self._load_directory_views()
+        self._scan_start()
         self._ui = ui
         self._ui.app.Application(self._on_init, self._on_quit).run()
 
     def scan(self):
-        self._load_directories(with_views=False)
+        self._load_directories()
+        self._scan_start()
         self._scan_thread.join()
         logger.info('Scan finished')
 
@@ -78,7 +80,7 @@ class Application:
             self.show_setup()
         self._tick_start()
 
-    def _scan_start(self, callback: Callable[[Directory], None]):
+    def _scan_start(self):
         self._scan_event_stop = Event()
 
         def orchestrator():
@@ -90,7 +92,7 @@ class Application:
                         unit=self._config.unit,
                         threshold_days_ago=self._config.threshold_days_ago,
                         event_stop=self._scan_event_stop,
-                        callback=partial(callback, pending=False),
+                        callback=partial(self._on_scan, pending=False),
                         test=self._config.test
                     )
                     for directory in self._directories
@@ -99,6 +101,10 @@ class Application:
 
         self._scan_thread = Thread(target=orchestrator)
         self._scan_thread.start()
+
+    def _on_scan(self, *args, **kwargs):
+        if self._directory_views:
+            self._directory_views.load(*args, **kwargs)
 
     def _scan_stop(self):
         self._scan_event_stop.set()
@@ -133,7 +139,11 @@ class Application:
     def set_config(self, config: Config):
         self._config = config
         save_config(config)
+        self._scan_stop()
+        self._named_dirs = self._config.list_effective_named_dirs()
         self._load_directories()
+        self._load_directory_views()
+        self._scan_start()
         self._update_status_icon()
 
     def show_setup(self):
