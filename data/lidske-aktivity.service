@@ -1,0 +1,8 @@
+[Unit]
+Description=Lidské aktivity
+
+[Service]
+ExecStart=/usr/bin/lidske-aktivity --scan
+
+[Install]
+WantedBy=multi-user.target
