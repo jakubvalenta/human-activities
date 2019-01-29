@@ -2,7 +2,7 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import partial
-from threading import Event, Thread
+from threading import Event, Thread, Timer
 from typing import Any, List, Optional
 
 from lidske_aktivity import (
@@ -22,6 +22,7 @@ class AppError(Exception):
 
 
 class Application:
+    _interval: int
     _config: Config
     _named_dirs: TNamedDirs
     _directories: Directories
@@ -33,11 +34,12 @@ class Application:
     _last_directory_views_list: Optional[List[DirectoryView]] = None
 
     _scan_event_stop: Event
-    _scan_thread: Thread
+    _scan_timer: Timer
     _tick_event_stop: Optional[Event] = None
     _tick_thread: Optional[Thread] = None
 
-    def __init__(self):
+    def __init__(self, interval: int):
+        self._interval = interval
         self._config = load_config()
         save_config(self._config)
         self._named_dirs = self._config.list_effective_named_dirs()
@@ -68,7 +70,7 @@ class Application:
     def scan(self):
         self._load_directories()
         self._scan_start()
-        self._scan_thread.join()
+        self._scan_timer.cancel()
 
     def _on_init(self, ui_app: Any):
         self._ui_app = ui_app
@@ -83,6 +85,7 @@ class Application:
         self._scan_event_stop = Event()
 
         def orchestrator():
+            logger.info(f'Starting scan')
             with ThreadPoolExecutor() as executor:
                 futures = [
                     executor.submit(
@@ -99,8 +102,13 @@ class Application:
                 wait(futures)
                 logger.info('Scan finished')
 
-        self._scan_thread = Thread(target=orchestrator)
-        self._scan_thread.start()
+                if not self._scan_event_stop.is_set() and self._interval:
+                    logger.info(f'Setting scan timer to {self._interval}s')
+                    self._scan_timer = Timer(self._interval, orchestrator)
+                    self._scan_timer.start()
+
+        self._scan_timer = Timer(0, orchestrator)
+        self._scan_timer.start()
 
     def _on_scan(self, *args, **kwargs):
         if self._directory_views:
@@ -108,7 +116,7 @@ class Application:
 
     def _scan_stop(self):
         self._scan_event_stop.set()
-        self._scan_thread.join()
+        self._scan_timer.cancel()
         logger.info('Scan stopped')
 
     def _tick_start(self):

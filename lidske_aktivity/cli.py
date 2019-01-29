@@ -41,6 +41,14 @@ def main():
         help='Scan all directories, write the results to cache, and exit'
     )
     parser.add_argument(
+        '-i',
+        '--interval',
+        type=int,
+        default=0,
+        help=('Number of seconds between periodic directory scans; '
+              '0 (default) means no periodic scanning')
+    )
+    parser.add_argument(
         '-w',
         '--wxwidgets',
         action='store_true',
@@ -56,7 +64,7 @@ def main():
     if args.clean:
         clean_cache()
         return
-    app = Application()
+    app = Application(args.interval)
     if args.scan:
         app.scan()
         return
