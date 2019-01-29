@@ -124,11 +124,43 @@ class Directories(list):
 
 class DirectoryView(NamedTuple):
     label: str
+    unit: str
+    threshold_days_ago: int
     value: Optional[float] = None
-    fraction: float = 0
-    text: str = ''
-    tooltip: str = ''
+    fraction: Optional[float] = None
     pending: bool = True
+
+    @property
+    def text(self):
+        s = f'{self.label}: '
+        if self.value is not None:
+            s += f'{self.fraction:.0%}'
+        if self.pending:
+            s += '...'
+        elif self.value is None:
+            s += 'n/a'
+        return s
+
+    @property
+    def tooltip(self) -> str:
+        unit_text = {
+            UNIT_SIZE_BYTES: 'of the size ',
+            UNIT_NUM_FILES: '',
+        }[self.unit]
+        if self.threshold_days_ago == 0:
+            set_text = 'all files in configured directories'
+        else:
+            set_text = (f'the files modified in the past '
+                        f'{self.threshold_days_ago} days')
+        s = f'{self.fraction:.2%} {unit_text}of {set_text}'
+        return textwrap.fill(s)
+
+    def __eq__(self, other) -> bool:
+        return (
+            self.unit == other.unit and
+            self.threshold_days_ago == other.threshold_days_ago and
+            self.fraction == other.fraction
+        )
 
 
 class DirectoryViews(dict):
@@ -143,9 +175,13 @@ class DirectoryViews(dict):
         self._threshold_days_ago = threshold_days_ago
         self.clear()
         for path, label in named_dirs.items():
-            self[path] = DirectoryView(label)
+            self[path] = DirectoryView(
+                label=label,
+                unit=unit,
+                threshold_days_ago=threshold_days_ago
+            )
 
-    def load(self, *directories: Directory, **view_args):
+    def load(self, *directories: Directory, **view_args) -> bool:
         for directory in directories:
             if directory.path not in self:
                 logger.error(
@@ -154,69 +190,30 @@ class DirectoryViews(dict):
                 )
                 continue
             value = directory.find_value(self._unit, self._threshold_days_ago)
-            self[directory.path] = self[directory.path]._replace(
-                value=value,
-                **view_args
-            )
-        self._recalculate()
+            self[directory.path] = self[directory.path]._replace(value=value)
+        return self._recalculate(**view_args)
 
-    def _recalculate(self):
+    def _recalculate(self, **view_args) -> bool:
+        changed = False
         total = sum(
             directory_view.value or 0.0
             for directory_view in self.values()
         )
         for path, directory_view in self.items():
-            if directory_view.value is None:
-                fraction = 0
-            else:
-                fraction = safe_div(directory_view.value, total)
-            text = self._format_text(
-                directory_view.label,
-                directory_view.value,
-                fraction,
-                directory_view.pending
-            )
-            tooltip = self._format_tooltip(
-                fraction,
-                self._unit,
-                self._threshold_days_ago
-            )
-            self[path] = directory_view._replace(
+            fraction = round(safe_div(directory_view.value, total), 2)
+            new_directory_view = directory_view._replace(
                 fraction=fraction,
-                text=text,
-                tooltip=tooltip
+                **view_args
             )
-        logger.info('Recalculated fractions: %s', self.fractions)
-
-    @staticmethod
-    def _format_text(label: str,
-                     value: Optional[float],
-                     fraction: float,
-                     pending: bool):
-        s = f'{label}: '
-        if value is not None:
-            s += f'{fraction:.0%}'
-        if pending:
-            s += '...'
-        elif value is None:
-            s += 'n/a'
-        return s
-
-    @staticmethod
-    def _format_tooltip(fraction: float,
-                        unit: str,
-                        threshold_days_ago: int) -> str:
-        unit_text = {
-            UNIT_SIZE_BYTES: 'of the size ',
-            UNIT_NUM_FILES: '',
-        }[unit]
-        if threshold_days_ago == 0:
-            set_text = 'all files in configured directories'
-        else:
-            set_text = (f'the files modified in the past '
-                        f'{threshold_days_ago} days')
-        s = f'{fraction:.2%} {unit_text}of {set_text}'
-        return textwrap.fill(s)
+            if directory_view != new_directory_view:
+                self[path] = new_directory_view
+                changed = True
+        logger.info(
+            'Recalculated: changed = %s, fractions = %s',
+            self.fractions,
+            changed
+        )
+        return changed
 
     @property
     def paths(self) -> List[str]:
