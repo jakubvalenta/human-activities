@@ -166,26 +166,32 @@ def draw_pie_chart_png(size: int,
 
 @lru_cache(ICON_CACHE_SIZE)
 def draw_pie_chart_svg(fractions: Tuple[float, ...],
-                       colors: Tuple[Color, ...] = ()) -> Iterator[str]:
+                       colors: Tuple[Color, ...] = ()) -> str:
     logger.info('Drawing SVG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = _create_slices(fractions, colors)
-    yield '''<?xml version="1.0" encoding="UTF-8" ?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-1 -1 2 2">\n'''
-    yield '<g transform="rotate(-90)">\n'
+    lines = []
+    lines.append('<?xml version="1.0" encoding="UTF-8" ?>')
+    lines.append('<svg xmlns="http://www.w3.org/2000/svg" '
+                 'version="1.1" viewBox="-1 -1 2 2">')
+    lines.append('<g transform="rotate(-90)">')
     for slice in slices:
         color = slice.color
         if slice.start == 0 and slice.end == 2*math.pi:
-            yield (f'<circle cx="0" cy="0" r="1" '
-                   f'fill="rgb({color.r}, {color.g}, {color.b})" />\n')
+            lines.append(f'<circle cx="0" cy="0" r="1" '
+                         f'fill="rgb({color.r}, {color.g}, {color.b})" />')
             continue
         start_x, start_y = math.cos(slice.start), math.sin(slice.start)
         end_x, end_y = math.cos(slice.end), math.sin(slice.end)
         large_arc_flag = int(slice.end - slice.start > math.pi)
-        yield (f'<path d="M {start_x:.5f} {start_y:.5f} '
-               f'A 1 1 0 {large_arc_flag} 1 {end_x:.5f} {end_y:.5f} L 0 0" '
-               f'fill="rgb({color.r}, {color.g}, {color.b})" />\n')
-    yield '</g>\n'
-    yield '</svg>\n'
+        lines.append(
+            f'<path d="M {start_x:.5f} {start_y:.5f} '
+            f'A 1 1 0 {large_arc_flag} 1 {end_x:.5f} {end_y:.5f} L 0 0" '
+            f'fill="rgb({color.r}, {color.g}, {color.b})" />'
+        )
+    lines.append('</g>')
+    lines.append('</svg>')
+    lines.append('')
+    return '\n'.join(lines)
 
 
 def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[float]:
@@ -206,4 +212,4 @@ def calc_icon_hash(fractions: Tuple[float, ...]) -> str:
 def print_default_svg_icon():
     fractions = (0.35, 0.25, 0.20, 0.15, 0.05)
     svg = draw_pie_chart_svg(fractions)
-    sys.stdout.writelines(svg)
+    sys.stdout.write(svg)

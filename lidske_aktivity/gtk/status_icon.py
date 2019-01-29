@@ -1,7 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterable, Iterator, Optional
+from typing import TYPE_CHECKING, Callable, Iterator, Optional
 
 import gi
 
@@ -64,12 +64,11 @@ def create_indicator() -> AppIndicator3.Indicator:
     return indicator
 
 
-def write_temp_file(lines: Iterable[str],
+def write_temp_file(svg: str,
                     filename: str,
                     **kwargs) -> tempfile.TemporaryDirectory:
     temp_dir = tempfile.TemporaryDirectory(**kwargs)
-    with (Path(temp_dir.name) / filename).open('w') as f:
-        f.writelines(lines)
+    (Path(temp_dir.name) / filename).write_text(svg)
     return temp_dir
 
 
