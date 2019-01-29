@@ -1,18 +1,16 @@
 import logging
-import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import partial
+from queue import Queue
 from threading import Event, Thread, Timer
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
 from lidske_aktivity.config import Config, TNamedDirs, load_config, save_config
 from lidske_aktivity.icon import draw_pie_chart_png, gen_random_slices
-from lidske_aktivity.model import (
-    Directories, DirectoryView, DirectoryViews, scan_directory,
-)
+from lidske_aktivity.model import Directories, DirectoryViews, scan_directory
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +29,12 @@ class Application:
     _ui: Any
     _ui_app: Any
     _status_icon: Any
-    _last_directory_views_list: Optional[List[DirectoryView]] = None
 
     _scan_event_stop: Event
     _scan_timer: Timer
-    _tick_event_stop: Optional[Event] = None
-    _tick_thread: Optional[Thread] = None
+    _redraw_event_stop: Optional[Event] = None
+    _redraw_queue: Optional[Queue] = None
+    _redraw_thread: Optional[Thread] = None
 
     def __init__(self, interval: int):
         self._interval = interval
@@ -63,7 +61,6 @@ class Application:
     def run_ui(self, ui: Any):
         self._load_directories()
         self._load_directory_views()
-        self._scan_start()
         self._ui = ui
         self._ui.app.Application(self._on_init, self._on_quit).run()
 
@@ -79,13 +76,15 @@ class Application:
         if self._config.show_setup:
             self._config.show_setup = False
             self.show_setup()
-        self._tick_start()
+        self._redraw_start()
+        self._redraw_trigger()
+        self._scan_start()
 
     def _scan_start(self):
         self._scan_event_stop = Event()
 
         def orchestrator():
-            logger.info(f'Starting scan')
+            logger.info(f'Starting scan ochestrator')
             with ThreadPoolExecutor() as executor:
                 futures = [
                     executor.submit(
@@ -100,10 +99,10 @@ class Application:
                     for directory in self._directories
                 ]
                 wait(futures)
-                logger.info('Scan finished')
+                logger.info('All scan threads finished')
 
                 if not self._scan_event_stop.is_set() and self._interval:
-                    logger.info(f'Setting scan timer to {self._interval}s')
+                    logger.info(f'Setting new scan timer to {self._interval}s')
                     self._scan_timer = Timer(self._interval, orchestrator)
                     self._scan_timer.start()
 
@@ -112,37 +111,45 @@ class Application:
 
     def _on_scan(self, *args, **kwargs):
         if self._directory_views:
-            self._directory_views.load(*args, **kwargs)
+            changed = self._directory_views.load(*args, **kwargs)
+            if changed:
+                self._redraw_trigger()
 
     def _scan_stop(self):
         self._scan_event_stop.set()
         self._scan_timer.cancel()
-        logger.info('Scan stopped')
+        logger.info('Scan orchestrator stopped')
 
-    def _tick_start(self):
-        self._tick_event_stop = Event()
-        self._tick_thread = Thread(target=self._tick)
-        self._tick_thread.start()
+    def _redraw_start(self):
+        logger.info('Starting redrawing thread')
+        self._redraw_event_stop = Event()
+        self._redraw_queue = Queue()
+        self._redraw_thread = Thread(target=self._redraw)
+        self._redraw_thread.start()
 
-    def _tick_stop(self):
-        if self._tick_event_stop is not None:
-            self._tick_event_stop.set()
-        if self._tick_thread is not None:
-            self._tick_thread.join()
-        logger.info('Tick stopped')
+    def _redraw_trigger(self):
+        if self._redraw_queue:
+            self._redraw_queue.put(None)
 
-    def _tick(self):
-        while not self._tick_event_stop.is_set():
-            logger.debug('Tick')
-            self._ui.lib.call_tick(self._update_status_icon)
-            time.sleep(1)
+    def _redraw(self):
+        while not self._redraw_event_stop.is_set():
+            logger.info('Waiting for an item in the redrawing queue')
+            self._redraw_queue.get()
+            logger.info('Redrawing')
+            self._ui.lib.call_tick(
+                partial(
+                    self._status_icon.update,
+                    self._directory_views
+                )
+            )
 
-    def _update_status_icon(self):
-        directory_views_list = list(self._directory_views.values())
-        if directory_views_list == self._last_directory_views_list:
-            return
-        self._last_directory_views_list = directory_views_list
-        self._status_icon.update(self._directory_views)
+    def _redraw_stop(self):
+        if self._redraw_event_stop is not None:
+            self._redraw_event_stop.set()
+        self._redraw_trigger()
+        if self._redraw_thread is not None:
+            self._redraw_thread.join()
+        logger.info('Redrawing thread stopped')
 
     def set_config(self, config: Config):
         self._config = config
@@ -152,7 +159,7 @@ class Application:
         self._load_directories()
         self._load_directory_views()
         self._scan_start()
-        self._update_status_icon()
+        self._redraw_trigger()
 
     def show_setup(self):
         self._ui_app.spawn_frame(
@@ -170,7 +177,7 @@ class Application:
 
     def show_about(self):
         self._ui.about.show_about(
-            image=draw_pie_chart_png(148, list(gen_random_slices())),
+            image=draw_pie_chart_png(148, tuple(gen_random_slices())),
             title=__title__,
             version=__version__,
             copyright=__copyright__,
@@ -185,5 +192,5 @@ class Application:
 
     def _on_quit(self):
         logger.info('App on_quit')
-        self._tick_stop()
+        self._redraw_stop()
         self._scan_stop()
