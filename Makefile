@@ -100,10 +100,10 @@ data/lidske-aktivity.svg:
 	pipenv run python3 -c 'from lidske_aktivity import icon; icon.print_default_svg_icon()' > data/lidske-aktivity.svg
 
 data/lidske-aktivity.png: data/lidske-aktivity.svg
-	data/bin/create_png.sh
+	sh data/bin/create_png.sh
 
 data/lidske-aktivity.ico: data/lidske-aktivity.png
-	data/bin/create_ico.sh
+	sh data/bin/create_ico.sh
 
 generate-data: data/lidske-aktivity.png
 
