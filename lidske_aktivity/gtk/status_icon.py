@@ -6,9 +6,8 @@ from typing import TYPE_CHECKING, Callable, Iterable, Iterator, Optional
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
-from lidske_aktivity.gtk.lib import image_to_pixbuf
 from lidske_aktivity.icon import (
-    calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
+    Color, calc_icon_hash, color_from_index, draw_pie_chart_svg,
 )
 from lidske_aktivity.model import DirectoryViews
 
@@ -29,7 +28,8 @@ def create_menu_item(
         callback: Optional[Callable] = None,
         tooltip: Optional[str] = None,
         icon_name: Optional[str] = None,
-        icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None) -> Gtk.MenuItem:
+        icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None,
+        color: Optional[Color] = None) -> Gtk.MenuItem:
     if icon_name:
         menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
@@ -38,6 +38,14 @@ def create_menu_item(
         menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
         menu_item.set_image(image)
+    elif color:
+        menu_item = Gtk.MenuItem()
+        label_widget = Gtk.Label(None)
+        point = f'<span color="{color.hex}">\N{BLACK CIRCLE}</span>'
+        label_widget.set_markup(f'{label} {point}')
+        hbox = Gtk.Box(Gtk.Orientation.HORIZONTAL)
+        hbox.add(label_widget)
+        menu_item.add(hbox)
     else:
         menu_item = Gtk.MenuItem()
     menu_item.set_label(label)
@@ -101,17 +109,10 @@ class StatusIcon():
         # TODO: Limit the maximum number of items shown.
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
-                _, icon_size, _ = Gtk.IconSize.lookup(Gtk.IconSize.MENU)
-                icon_image = draw_pie_chart_png(
-                    icon_size,
-                    directory_views.fractions,
-                    directory_views.get_colors_with_one_highlighted(i)
-                )
-                icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(
                     directory_view.text,
                     tooltip=directory_view.tooltip,
-                    icon_pixbuf=icon_pixbuf
+                    color=color_from_index(i)
                 )
         else:
             yield create_menu_item('No directories configured')
