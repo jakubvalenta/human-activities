@@ -91,7 +91,7 @@ class StatusIcon():
     _indicator: AppIndicator3.Indicator
 
     # The directory is deleted as soon as this variable is garbage-collected.
-    icon_temp_dir: tempfile.TemporaryDirectory
+    _icon_temp_dir: tempfile.TemporaryDirectory
 
     def __init__(self, app: 'Application'):
         self.app = app

@@ -4,7 +4,7 @@ import textwrap
 import time
 import traceback
 from threading import Event
-from typing import Callable, Iterable, List, NamedTuple, Optional
+from typing import Callable, Iterable, List, NamedTuple, Optional, Tuple
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.exc import DatabaseError
@@ -162,7 +162,7 @@ class DirectoryViews(dict):
 
     def _recalculate(self):
         total = sum(
-            directory_view.value or 0
+            directory_view.value or 0.0
             for directory_view in self.values()
         )
         for path, directory_view in self.items():
@@ -223,8 +223,8 @@ class DirectoryViews(dict):
         return list(self.keys())
 
     @property
-    def fractions(self) -> List[float]:
-        return [dv.fraction for dv in self.values()]
+    def fractions(self) -> Tuple[float, ...]:
+        return tuple(dv.fraction for dv in self.values())
 
     @property
     def texts(self) -> List[str]:
@@ -237,13 +237,13 @@ class DirectoryViews(dict):
     def get_colors_with_one_highlighted(
             self,
             i: int,
-            grayscale: bool = False) -> List[Color]:
+            grayscale: bool = False) -> Tuple[Color, ...]:
         colors = [COLOR_GRAY for i in range(len(self))]
         if grayscale:  # TODO: Remove when finally decided for one option.
             colors[i] = COLOR_BLACK
         else:
             colors[i] = color_from_index(i)
-        return colors
+        return tuple(colors)
 
 
 @func.measure_time

@@ -4,13 +4,14 @@ import random
 import sys
 from functools import lru_cache, partial
 from hashlib import sha1
-from typing import Callable, Iterator, List, NamedTuple, Optional, Tuple
+from typing import Callable, Iterator, List, NamedTuple, Tuple
 
 from PIL import Image
 
 logger = logging.getLogger(__name__)
 
 MAX_COLORS = 64
+ICON_CACHE_SIZE = 128
 
 
 class Color(NamedTuple):
@@ -125,8 +126,8 @@ def _draw_image(w: int,
     return image
 
 
-def _create_slices(fractions: List[float],
-                   colors: Optional[List[Color]] = None,
+def _create_slices(fractions: Tuple[float, ...],
+                   colors: Tuple[Color, ...] = (),
                    default_color: Color = COLOR_WHITE) -> Iterator[Slice]:
     if not fractions or sum(fractions) == 0:
         yield Slice(
@@ -136,8 +137,8 @@ def _create_slices(fractions: List[float],
         )
         return
     cumulative_frac = 0.0
-    if colors is None:
-        colors = [color_from_index(i) for i in range(len(fractions))]
+    if not colors:
+        colors = tuple(color_from_index(i) for i in range(len(fractions)))
     for frac, color in zip(fractions, colors):
         frac = round(frac, 2)
         if frac == 0:
@@ -150,9 +151,10 @@ def _create_slices(fractions: List[float],
         cumulative_frac += frac
 
 
+@lru_cache(ICON_CACHE_SIZE)
 def draw_pie_chart_png(size: int,
-                       fractions: List[float],
-                       colors: Optional[List[Color]] = None) -> Image.Image:
+                       fractions: Tuple[float, ...],
+                       colors: Tuple[Color, ...] = ()) -> Image.Image:
     logger.info('Drawing PNG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = list(_create_slices(fractions, colors))
     return _draw_image(
@@ -162,8 +164,9 @@ def draw_pie_chart_png(size: int,
     )
 
 
-def draw_pie_chart_svg(fractions: List[float],
-                       colors: Optional[List[Color]] = None) -> Iterator[str]:
+@lru_cache(ICON_CACHE_SIZE)
+def draw_pie_chart_svg(fractions: Tuple[float, ...],
+                       colors: Tuple[Color, ...] = ()) -> Iterator[str]:
     logger.info('Drawing SVG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = _create_slices(fractions, colors)
     yield '''<?xml version="1.0" encoding="UTF-8" ?>
@@ -193,13 +196,14 @@ def gen_random_slices(n_min: int = 3, n_max: int = 8) -> Iterator[float]:
         yield frac
 
 
-def calc_icon_hash(fractions: List[float]) -> str:
+@lru_cache(ICON_CACHE_SIZE)
+def calc_icon_hash(fractions: Tuple[float, ...]) -> str:
     if not fractions or sum(fractions) == 0:
         return '0'
     return '_'.join(f'{frac*100:.0f}' for frac in fractions)
 
 
 def print_default_svg_icon():
-    fractions = [0.35, 0.25, 0.20, 0.15, 0.05]
+    fractions = (0.35, 0.25, 0.20, 0.15, 0.05)
     svg = draw_pie_chart_svg(fractions)
     sys.stdout.writelines(svg)
