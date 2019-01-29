@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable, Iterable, Iterator, Optional
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
-from lidske_aktivity.gtk.lib import image_to_pixbuf
+from lidske_aktivity.gtk.lib import create_box, image_to_pixbuf
 from lidske_aktivity.icon import (
     calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
 )
@@ -30,17 +30,21 @@ def create_menu_item(
         tooltip: Optional[str] = None,
         icon_name: Optional[str] = None,
         icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None) -> Gtk.MenuItem:
+    menu_item = Gtk.MenuItem()
     if icon_name:
-        menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
-        menu_item.set_image(image)
     elif icon_pixbuf:
-        menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
-        menu_item.set_image(image)
     else:
-        menu_item = Gtk.MenuItem()
-    menu_item.set_label(label)
+        image = None
+    if image:
+        hbox = create_box(Gtk.Orientation.HORIZONTAL, spacing=6)
+        hbox.add(image)
+        label_widget = Gtk.Label(label)
+        hbox.add(label_widget)
+        menu_item.add(hbox)
+    else:
+        menu_item.set_label(label)
     if tooltip:
         menu_item.set_tooltip_text(tooltip)
     if callback:
