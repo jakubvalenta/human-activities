@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable, Iterable, Iterator, Optional
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__
-from lidske_aktivity.gtk.lib import create_box, create_label, image_to_pixbuf
+from lidske_aktivity.gtk.lib import image_to_pixbuf
 from lidske_aktivity.icon import (
     calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
 )
@@ -34,18 +34,13 @@ def create_menu_item(
         menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
         menu_item.set_image(image)
-        menu_item.set_label(label)
     elif icon_pixbuf:
-        hbox = create_box(Gtk.Orientation.HORIZONTAL, spacing=6)
+        menu_item = Gtk.ImageMenuItem()
         image = Gtk.Image.new_from_pixbuf(icon_pixbuf)
-        hbox.add(image)
-        label = create_label(label)
-        hbox.add(label)
-        menu_item = Gtk.MenuItem()
-        menu_item.add(hbox)
+        menu_item.set_image(image)
     else:
         menu_item = Gtk.MenuItem()
-        menu_item.set_label(label)
+    menu_item.set_label(label)
     if tooltip:
         menu_item.set_tooltip_text(tooltip)
     if callback:
@@ -113,15 +108,11 @@ class StatusIcon():
                     directory_views.get_colors_with_one_highlighted(i)
                 )
                 icon_pixbuf = image_to_pixbuf(icon_image)
-                menu_item = create_menu_item(
+                yield create_menu_item(
                     directory_view.text,
                     tooltip=directory_view.tooltip,
                     icon_pixbuf=icon_pixbuf
                 )
-                menu_item.get_style_context().add_class(
-                    f'lidske-aktivity-color-{i}'
-                )
-                yield menu_item
         else:
             yield create_menu_item('No directories configured')
         yield Gtk.SeparatorMenuItem()
