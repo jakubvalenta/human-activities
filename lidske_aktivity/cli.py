@@ -4,7 +4,7 @@ import sys
 
 from lidske_aktivity import __title__
 from lidske_aktivity.app import Application
-from lidske_aktivity.config import clean_cache
+from lidske_aktivity.model import clean_cache
 
 logger = logging.getLogger(__name__)
 

@@ -1,44 +1,14 @@
 import json
 import logging
 import os.path
-import platform
-from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
-from lidske_aktivity import __application_id__, __application_name__
+from lidske_aktivity import CONFIG_PATH
 from lidske_aktivity.utils import filesystem
 
 logger = logging.getLogger(__name__)
 
 TNamedDirs = Dict[str, str]
-
-
-def get_dir(mac_dir: str,
-            xdg_var: str,
-            fallback_dir: str) -> Union[Path, PurePosixPath, PureWindowsPath]:
-    if platform.win32_ver()[0]:
-        win_app_dir = os.environ.get('APPDATA')
-        if win_app_dir:
-            return PureWindowsPath(win_app_dir) / __application_name__
-    elif platform.mac_ver()[0]:
-        return Path.home() / mac_dir / __application_id__
-    else:
-        xdg_cache_dir = os.environ.get(xdg_var)
-        if xdg_cache_dir:
-            return PurePosixPath(xdg_cache_dir) / __application_name__
-    return Path.home() / fallback_dir / __application_name__
-
-
-def get_cache_dir():
-    return get_dir('Caches', 'XDG_CACHE_HOME', '.cache')
-
-
-def get_config_dir():
-    return get_dir('Preferences', 'XDG_CONFIG_HOME', '.config')
-
-
-CACHE_PATH = Path(get_cache_dir()) / 'cache.db'
-CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
 MODE_ROOT_PATH = 'path'
 MODE_NAMED_DIRS = 'named'
@@ -205,11 +175,3 @@ def save_config(config: Config):
     logger.info('Writing config %s', config_json)
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     CONFIG_PATH.write_text(config_json)
-
-
-def clean_cache():
-    if CACHE_PATH.is_file():
-        CACHE_PATH.unlink()
-        logger.info('Removed cache file %s', CACHE_PATH)
-    else:
-        logger.info('Nothing to do, cache file %s doesn\'t exist', CACHE_PATH)

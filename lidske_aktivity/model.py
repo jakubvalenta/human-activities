@@ -12,9 +12,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
 
-from lidske_aktivity.config import (
-    CACHE_PATH, UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs,
-)
+from lidske_aktivity import CACHE_PATH
+from lidske_aktivity.config import UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs
 from lidske_aktivity.icon import (
     COLOR_BLACK, COLOR_GRAY, Color, color_from_index,
 )
@@ -290,3 +289,11 @@ def scan_directory(path: str,
         logger.info(traceback.format_exc())
     finally:
         session.close()
+
+
+def clean_cache():
+    if CACHE_PATH.is_file():
+        CACHE_PATH.unlink()
+        logger.info('Removed cache file %s', CACHE_PATH)
+    else:
+        logger.info('Nothing to do, cache file %s doesn\'t exist', CACHE_PATH)
