@@ -44,9 +44,9 @@ def main():
         '-i',
         '--interval',
         type=int,
-        default=30,
+        default=21600,
         help=('Number of seconds between periodic directory scans '
-              '(default 30s). If set to 0, periodic scanning will be '
+              '(default 21600 = 6h). If set to 0, periodic scanning will be '
               'disabled.')
     )
     parser.add_argument(
