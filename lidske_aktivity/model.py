@@ -83,29 +83,24 @@ class Directories(list):
     def __init__(self):
         self._session = scoped_session(session_factory)
 
-    def load(self, paths: Iterable[str]):
-        """Load Directory objects for passed paths from the databse.
-
-        Create new objects for those that were not found in the database.
-        """
-        paths = list(paths)
+    def load_from_db(self, paths: Iterable[str]):
         query = (
             self._session.query(Directory)
             .filter(Directory.path.in_(paths))
             .order_by(Directory.path)
         )
-        directories_dict = {
-            directory.path: directory
-            for directory in query
-        }
+        for directory in query:
+            logger.info('DB: Loaded %s', directory)
+            self.append(directory)
+
+    def create_missing(self, paths: Iterable[str]):
+        existing_paths = [directory.path for directory in self]
         for path in paths:
-            if path in directories_dict:
-                directory = directories_dict[path]
-                logger.info('DB: Loaded %s', directory)
-            else:
-                directory = Directory(path=path)
-                logger.info('DB: Inserting %s', directory)
-                self._session.add(directory)
+            if path in existing_paths:
+                continue
+            directory = Directory(path=path)
+            logger.info('DB: Inserting %s', directory)
+            self._session.add(directory)
             self.append(directory)
 
     def clear(self):

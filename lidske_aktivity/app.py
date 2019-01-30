@@ -43,9 +43,10 @@ class Application:
         self._directory_views = DirectoryViews()
 
     def _load_directories(self):
-        paths = self._config.effective_named_dirs.keys()
+        paths = list(self._config.effective_named_dirs.keys())
         self._directories.clear()
-        self._directories.load(paths)
+        self._directories.load_from_db(paths)
+        self._directories.create_missing(paths)
         self._directories.save()
 
     def _load_directory_views(self):
@@ -62,10 +63,6 @@ class Application:
         self._ui = ui
         self._ui.app.Application(self._on_init, self._on_quit).run()
 
-    def scan(self):
-        self._load_directories()
-        self._scan_start()
-
     def _on_init(self, ui_app: Any):
         self._ui_app = ui_app
         logger.info('On init')
@@ -75,6 +72,10 @@ class Application:
             self.show_setup()
         self._redraw_start()
         self._redraw_trigger()
+        self._scan_start()
+
+    def scan(self):
+        self._load_directories()
         self._scan_start()
 
     def _scan_start(self):
@@ -125,7 +126,7 @@ class Application:
         self._redraw_thread.start()
 
     def _redraw_trigger(self):
-        if self._redraw_queue:
+        if self._redraw_queue is not None:
             self._redraw_queue.put(None)
 
     def _redraw(self):
