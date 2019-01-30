@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 
 def safe_div(a: Optional[Union[int, float]],
@@ -6,10 +6,3 @@ def safe_div(a: Optional[Union[int, float]],
     if a and b:
         return a / b
     return 0.0
-
-
-def try_int(val: Any) -> Optional[int]:
-    try:
-        return int(val)
-    except (TypeError, ValueError):
-        return None
