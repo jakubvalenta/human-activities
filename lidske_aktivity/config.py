@@ -19,9 +19,7 @@ MODES = {
 DEFAULT_NAMED_DIRS: TNamedDirs = {
     os.path.expanduser('~/Paid work'): 'Honorovaná práce',
     os.path.expanduser('~/Unpaid work'): 'Nehonorovaná práce',
-    os.path.expanduser('~/Free time'): 'Volný čas',
-    os.path.expanduser('~/Fun'): 'Zábava',
-    os.path.expanduser('~/Downloads'): 'Stažené soubory',
+    os.path.expanduser('~/Others'): 'Ostatní',
 }
 UNIT_SIZE_BYTES = 'size_bytes'
 UNIT_NUM_FILES = 'num_files'
