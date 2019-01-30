@@ -21,7 +21,7 @@ ifeq (,$(DESTDIR))
 	@exit 1
 endif
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
-	install -D data/*.service data/*.timer "${DESTDIR}/lib/systemd/system/"
+	install -D -m644 -t "${DESTDIR}/usr/lib/systemd/system/" data/*.service data/*.timer
 
 setup:  ## Create Pipenv virtual environment and install dependencies.
 	pipenv --three --site-packages
