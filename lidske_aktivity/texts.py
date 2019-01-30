@@ -4,14 +4,14 @@ FILE_CHOOSER_BUTTON = _('Please choose a directory')
 BUTTON_ADD = _('Add')
 BUTTON_REMOVE = _('Remove')
 
-SETTINGS_TITLE = _('Lidské aktivity advanced configuration')
+SETTINGS_TITLE = _('Lidské Aktivity advanced configuration')
 SETTINGS_UNIT = _('Compare')
 SETTINGS_THRESHOLD_DAYS_OLD = _(
     'Include only files newer than (days), 0 = all files'
 )
 SETTINGS_MODE = _('Directories')
 
-SETUP_TITLE = _('Lidské aktivity setup')
+SETUP_TITLE = _('Lidské Aktivity setup')
 SETUP_HEADING = _('Please adjust your OS settings like this:')
 SETUP_LIST = _('''first do this
 than that

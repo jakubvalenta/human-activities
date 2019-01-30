@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
-Name=Lidské aktivity
-Comment=Description of Lidské aktivity
+Name=Lidské Aktivity
+Comment=Description of Lidské Aktivity
 Exec=/usr/bin/lidske-aktivity --interval=0
 Icon=lidske-aktivity
 StartupNotify=true

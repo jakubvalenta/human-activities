@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lidske-aktivity 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-30 21:58+0100\n"
+"POT-Creation-Date: 2019-01-31 00:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Remove"
 msgstr ""
 
 #: lidske_aktivity/texts.py:7
-msgid "Lidské aktivity advanced configuration"
+msgid "Lidské Aktivity advanced configuration"
 msgstr ""
 
 #: lidske_aktivity/texts.py:8
@@ -46,7 +46,7 @@ msgid "Directories"
 msgstr ""
 
 #: lidske_aktivity/texts.py:14
-msgid "Lidské aktivity setup"
+msgid "Lidské Aktivity setup"
 msgstr ""
 
 #: lidske_aktivity/texts.py:15
@@ -118,19 +118,19 @@ msgstr ""
 msgid "{fraction:.2%} {unit_text}of {set_text}"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:88 lidske_aktivity/wx/status_icon.py:99
+#: lidske_aktivity/wx/status_icon.py:89 lidske_aktivity/wx/status_icon.py:100
 msgid "&Setup"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:106
+#: lidske_aktivity/wx/status_icon.py:107
 msgid "Advanced &configuration"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:113
+#: lidske_aktivity/wx/status_icon.py:114
 msgid "&About"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:120
+#: lidske_aktivity/wx/status_icon.py:121
 msgid "&Quit"
 msgstr ""
 

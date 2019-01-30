@@ -1,5 +1,5 @@
 [Unit]
-Description=Run Lidské aktivity every 6 hours
+Description=Run Lidské Aktivity every 6 hours
 
 [Timer]
 OnUnitActiveSec=6h

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lidske-aktivity 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-30 21:52+0100\n"
-"PO-Revision-Date: 2019-01-30 21:58+0100\n"
+"POT-Creation-Date: 2019-01-31 00:48+0100\n"
+"PO-Revision-Date: 2019-01-31 00:49+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -30,7 +30,7 @@ msgid "Remove"
 msgstr "Odstranit"
 
 #: lidske_aktivity/texts.py:7
-msgid "Lidské aktivity advanced configuration"
+msgid "Lidské Aktivity advanced configuration"
 msgstr "Pokročilé nastavení Lidských Aktivit"
 
 #: lidske_aktivity/texts.py:8
@@ -47,7 +47,7 @@ msgid "Directories"
 msgstr "Adresáře"
 
 #: lidske_aktivity/texts.py:14
-msgid "Lidské aktivity setup"
+msgid "Lidské Aktivity setup"
 msgstr "Základní nastavení Lidských Aktivit"
 
 #: lidske_aktivity/texts.py:15
@@ -122,19 +122,19 @@ msgstr "souborů změněných v posledních {days} dnech"
 msgid "{fraction:.2%} {unit_text}of {set_text}"
 msgstr "{fraction:.2%} {unit_text}{set_text}"
 
-#: lidske_aktivity/wx/status_icon.py:88 lidske_aktivity/wx/status_icon.py:99
+#: lidske_aktivity/wx/status_icon.py:89 lidske_aktivity/wx/status_icon.py:100
 msgid "&Setup"
 msgstr "Nastavení"
 
-#: lidske_aktivity/wx/status_icon.py:106
+#: lidske_aktivity/wx/status_icon.py:107
 msgid "Advanced &configuration"
 msgstr "Pokročilé nastavení"
 
-#: lidske_aktivity/wx/status_icon.py:113
+#: lidske_aktivity/wx/status_icon.py:114
 msgid "&About"
 msgstr "O &aplikaci"
 
-#: lidske_aktivity/wx/status_icon.py:120
+#: lidske_aktivity/wx/status_icon.py:121
 msgid "&Quit"
 msgstr "Ukončit"
 

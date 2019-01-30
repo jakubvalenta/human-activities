@@ -1,4 +1,4 @@
-# Lidské aktivity
+# Lidské Aktivity
 
 ## Installation
 

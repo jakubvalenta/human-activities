@@ -1,5 +1,5 @@
 [Unit]
-Description=Lidské aktivity
+Description=Lidské Aktivity
 
 [Service]
 ExecStart=/usr/bin/lidske-aktivity --scan
