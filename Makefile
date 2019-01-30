@@ -21,9 +21,6 @@ ifeq (,$(DESTDIR))
 	@exit 1
 endif
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
-	install -D -m644 -t "${DESTDIR}/usr/lib/systemd/system/" data/*.service data/*.timer
-	install -d -m755 "${DESTDIR}/usr/lib/systemd/system/timers.target.wants"
-	ln -s ../lidske-aktivity.timer "${DESTDIR}/usr/lib/systemd/system/timers.target.wants/lidske-aktivity.timer"
 
 setup:  ## Create Pipenv virtual environment and install dependencies.
 	pipenv --three --site-packages
@@ -129,6 +126,8 @@ lint-arch-linux:
 
 lint-data:
 	desktop-file-validate data/lidske-aktivity.desktop
+	systemd-analyze verify data/lidske-aktivity.service
+	systemd-analyze verify data/lidske-aktivity.timer
 
 check:  ## Test installed app
 	python3 -m pytest lidske_aktivity/tests

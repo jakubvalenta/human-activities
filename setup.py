@@ -27,7 +27,6 @@ setup(
     packages=find_packages(),
     data_files=[
         ('share/applications', [f'data/{__application_name__}.desktop']),
-        ('etc/xdg/autostart', [f'data/{__application_name__}.desktop']),
         ('share/icons/hicolor/scalable/apps',
          [f'data/{__application_name__}.svg']),
         ('share/pixmaps', [f'data/{__application_name__}.png']),
