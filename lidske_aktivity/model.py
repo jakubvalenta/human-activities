@@ -191,10 +191,7 @@ class DirectoryViews(dict):
                 continue
             value = directory.find_value(self._unit, self._threshold_days_ago)
             self[directory.path] = self[directory.path]._replace(value=value)
-        total = sum(
-            directory_view.value or 0.0
-            for directory_view in self.values()
-        )
+        total = sum(dv.value or 0.0 for dv in self.values())
         for path, directory_view in self.items():
             fraction = round(safe_div(directory_view.value, total), 2)
             new_directory_view = directory_view._replace(
@@ -213,7 +210,7 @@ class DirectoryViews(dict):
 
     @property
     def fractions(self) -> Tuple[float, ...]:
-        return tuple(dv.fraction for dv in self.values())
+        return tuple(dv.fraction or 0.0 for dv in self.values())
 
     @property
     def tooltip(self) -> str:
