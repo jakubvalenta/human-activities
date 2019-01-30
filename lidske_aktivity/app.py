@@ -100,11 +100,8 @@ class Application:
         else:
             logger.info('No further scanning scheduled')
 
-    def _on_scan(self,
-                 directory_views: DirectoryViews,
-                 *directories,
-                 **extra_props):
-        directory_views.load(*directories, pending=False)
+    def _on_scan(self, directory_views: DirectoryViews, directory):
+        directory_views.load(directory, pending=False)
         self._redraw_trigger(directory_views.copy())
 
     def _scan_stop(self):
