@@ -116,6 +116,14 @@ Then start the app and run GTK Inspector with `CTRL+SHIFT+i`.
 make setup-dev
 ```
 
+### Translation
+
+Edit the `lang/*.po` files and then run:
+
+```
+make gettext
+```
+
 ### Testing
 
 ```

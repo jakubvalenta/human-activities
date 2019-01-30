@@ -3,7 +3,7 @@ import logging
 import os.path
 from typing import Any, Dict, Optional
 
-from lidske_aktivity import CONFIG_PATH
+from lidske_aktivity import CONFIG_PATH, _
 from lidske_aktivity.utils import filesystem
 
 logger = logging.getLogger(__name__)
@@ -13,19 +13,22 @@ TNamedDirs = Dict[str, str]
 MODE_ROOT_PATH = 'path'
 MODE_NAMED_DIRS = 'named'
 MODES = {
-    MODE_ROOT_PATH: 'All directories in selected directory',
-    MODE_NAMED_DIRS: 'Predefined directories',
+    MODE_ROOT_PATH: _('All directories in selected directory'),
+    MODE_NAMED_DIRS: _('Predefined directories'),
 }
 DEFAULT_NAMED_DIRS: TNamedDirs = {
-    os.path.expanduser('~/Paid work'): 'Honorovaná práce',
-    os.path.expanduser('~/Unpaid work'): 'Nehonorovaná práce',
-    os.path.expanduser('~/Others'): 'Ostatní',
+    os.path.expanduser('~/' + name): name
+    for name in (
+        _('Paid work'),
+        _('Unpaid work'),
+        _('Others'),
+    )
 }
 UNIT_SIZE_BYTES = 'size_bytes'
 UNIT_NUM_FILES = 'num_files'
 UNITS = {
-    UNIT_SIZE_BYTES: 'Size in bytes',
-    UNIT_NUM_FILES: 'Number of files',
+    UNIT_SIZE_BYTES: _('Size in bytes'),
+    UNIT_NUM_FILES: _('Number of files'),
 }
 
 

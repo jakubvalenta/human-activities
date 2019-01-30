@@ -1,0 +1,46 @@
+# English translations for lidske-aktivity package.
+# Copyright (C) 2019 THE lidske-aktivity'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the lidske-aktivity package.
+#  <jakub@jakubvalenta.cz>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lidske-aktivity 0.3.0\n"
+"Report-Msgid-Bugs-To:\n"
+"POT-Creation-Date: 2019-01-30 20:57+0100\n"
+"PO-Revision-Date: 2019-01-30 21:11+0100\n"
+"Last-Translator:  <jakub@jakubvalenta.cz>\n"
+"Language-Team: Czech\n"
+"Language: cs_CZ\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lidske_aktivity/config.py:16
+msgid "All directories in selected directory"
+msgstr "Všechny adresáře ve zvoleném adresáři"
+
+#: lidske_aktivity/config.py:17
+msgid "Predefined directories"
+msgstr "Vybrané adresáře"
+
+#: lidske_aktivity/config.py:22
+msgid "Paid work"
+msgstr "Honorovaná práce"
+
+#: lidske_aktivity/config.py:23
+msgid "Unpaid work"
+msgstr "Nehonorovaná práce"
+
+#: lidske_aktivity/config.py:24
+msgid "Others"
+msgstr "Ostatní"
+
+#: lidske_aktivity/config.py:30
+msgid "Size in bytes"
+msgstr "Velikost v bytech"
+
+#: lidske_aktivity/config.py:31
+msgid "Number of files"
+msgstr "Počet souborů"

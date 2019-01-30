@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data check bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data check gettext bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -43,7 +43,7 @@ dist-pyinstaller-build:
 
 dist-pyinstaller: | dist-pyinstaller-build  ## Build a PyInstaller-based package (with Docker)
 	docker run --rm --volume "$$(pwd):/app" -e PYTHONHASHSEED=1 lidske_aktivity_pyinstaller \
-		pipenv run pyinstaller linux_pyinstaller/lidske-aktivity.spec
+		pipenv run pyinstaller "linux_pyinstaller/${_name}.spec"
 
 ${_arch_linux_dist_parent}/${_arch_linux_src_filename}:
 	mkdir -p "${_arch_linux_dist_parent}"
@@ -91,19 +91,19 @@ install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install buil
 	sudo dpkg -i "${_debian_dist_parent}/${_debian_pkg_filename}"
 	sudo apt-get install -f --yes
 
-data/lidske-aktivity.svg:
-	pipenv run python3 -c 'from lidske_aktivity import icon; icon.print_default_svg_icon()' > data/lidske-aktivity.svg
+data/${_name}.svg:
+	pipenv run python3 -c 'from lidske_aktivity import icon; icon.print_default_svg_icon()' > "data/${_name}.svg"
 
-data/lidske-aktivity.png: data/lidske-aktivity.svg
+data/${_name}.png: data/${_name}.svg
 	sh data/bin/create_png.sh
 
-data/lidske-aktivity.ico: data/lidske-aktivity.png
+data/${_name}.ico: data/${_name}.png
 	sh data/bin/create_ico.sh
 
-data/lidske-aktivity.icns: data/lidske-aktivity.svg
+data/${_name}.icns: data/${_name}.svg
 	sh data/bin/create_icns.sh
 
-generate-data: data/lidske-aktivity.png
+generate-data: data/${_name}.png
 
 clean:  ## Clean distribution package
 	-rm -rf build/*
@@ -125,12 +125,31 @@ lint-arch-linux:
 	namcap install/arch_linux/PKGBUILD
 
 lint-data:
-	desktop-file-validate data/lidske-aktivity.desktop
-	systemd-analyze verify data/lidske-aktivity.service
-	systemd-analyze verify data/lidske-aktivity.timer
+	desktop-file-validate "data/${_name}.desktop"
+	systemd-analyze verify "data/${_name}.service"
+	systemd-analyze verify "data/${_name}.timer"
 
 check:  ## Test installed app
 	python3 -m pytest lidske_aktivity/tests
+
+lang/${_name}.pot: $(wildcard lidske_aktivity/*.py)
+	xgettext --language=Python --keyword=_ --output=$@ --from-code=UTF-8 \
+		--package-name="${_name}" --package-version="${_version}" $^
+
+lang/%.po: lang/${_name}.pot
+	if [ -f $@ ]; then \
+		msgmerge --update $@ $<; \
+	else \
+		msginit --output=$@ --input=$< --locale=en_US; \
+	fi
+
+locale/%/LC_MESSAGES/${_name}.mo: lang/%.po
+	mkdir -p "$$(dirname "$@")"
+	msgfmt $< -o $@
+
+gettext: | lang/${_name}.pot
+	-rm locale/*/LC_MESSAGES/${_name}.mo
+	$(MAKE) locale/en_US/LC_MESSAGES/${_name}.mo locale/cs_CZ/LC_MESSAGES/${_name}.mo
 
 bump-version:  ## Increase application version (automatically change code)
 ifeq (,$(version))
@@ -153,3 +172,5 @@ backup:  ## Backup built packages (currently Debian-only)
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
+
+

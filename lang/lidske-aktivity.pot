@@ -1,0 +1,46 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the lidske-aktivity package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: lidske-aktivity 0.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-01-30 20:57+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: lidske_aktivity/config.py:16
+msgid "All directories in selected directory"
+msgstr ""
+
+#: lidske_aktivity/config.py:17
+msgid "Predefined directories"
+msgstr ""
+
+#: lidske_aktivity/config.py:22
+msgid "Paid work"
+msgstr ""
+
+#: lidske_aktivity/config.py:23
+msgid "Unpaid work"
+msgstr ""
+
+#: lidske_aktivity/config.py:24
+msgid "Others"
+msgstr ""
+
+#: lidske_aktivity/config.py:30
+msgid "Size in bytes"
+msgstr ""
+
+#: lidske_aktivity/config.py:31
+msgid "Number of files"
+msgstr ""
