@@ -99,6 +99,9 @@ data/lidske-aktivity.png: data/lidske-aktivity.svg
 data/lidske-aktivity.ico: data/lidske-aktivity.png
 	sh data/bin/create_ico.sh
 
+data/lidske-aktivity.icns: data/lidske-aktivity.svg
+	sh data/bin/create_icns.sh
+
 generate-data: data/lidske-aktivity.png
 
 clean:  ## Clean distribution package

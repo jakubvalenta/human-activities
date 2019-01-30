@@ -40,7 +40,7 @@ exe = EXE(  # noqa: F821
 app = BUNDLE(  # noqa: F821
     exe,
     name='lidske-aktivity.app',
-    icon='data/lidske-aktivity.ico',
+    icon='data/lidske-aktivity.icns',
     bundle_identifier='cz.jakubvalenta.lidske-aktivity'
     # TODO: info_plist
 )

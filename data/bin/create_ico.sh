@@ -21,6 +21,4 @@ done
 echo "Writing lidske-aktivity.ico" >&2
 magick convert "${png_paths[@]}" -colors 256 data/lidske-aktivity.ico
 
-rm -r "$temp_dir"
-
 echo "Done" >&2
