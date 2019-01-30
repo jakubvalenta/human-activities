@@ -4,7 +4,7 @@ import textwrap
 import time
 import traceback
 from threading import Event
-from typing import Callable, Iterable, List, NamedTuple, Optional, Tuple
+from typing import Callable, Iterable, NamedTuple, Optional, Tuple
 
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.exc import DatabaseError
@@ -175,7 +175,8 @@ class DirectoryViews(dict):
                 threshold_days_ago=threshold_days_ago
             )
 
-    def load(self, *directories: Directory, **view_args) -> bool:
+    def load(self, *directories: Directory, **extra_props) -> bool:
+        changed = False
         for directory in directories:
             if directory.path not in self:
                 logger.error(
@@ -185,10 +186,6 @@ class DirectoryViews(dict):
                 continue
             value = directory.find_value(self._unit, self._threshold_days_ago)
             self[directory.path] = self[directory.path]._replace(value=value)
-        return self._recalculate(**view_args)
-
-    def _recalculate(self, **view_args) -> bool:
-        changed = False
         total = sum(
             directory_view.value or 0.0
             for directory_view in self.values()
@@ -197,7 +194,7 @@ class DirectoryViews(dict):
             fraction = round(safe_div(directory_view.value, total), 2)
             new_directory_view = directory_view._replace(
                 fraction=fraction,
-                **view_args
+                **extra_props
             )
             if directory_view != new_directory_view:
                 self[path] = new_directory_view
@@ -210,20 +207,12 @@ class DirectoryViews(dict):
         return changed
 
     @property
-    def paths(self) -> List[str]:
-        return list(self.keys())
-
-    @property
     def fractions(self) -> Tuple[float, ...]:
         return tuple(dv.fraction for dv in self.values())
 
     @property
-    def texts(self) -> List[str]:
-        return [dv.text for dv in self.values()]
-
-    @property
     def tooltip(self) -> str:
-        return '\n'.join(self.texts)
+        return '\n'.join(dv.text for dv in self.values())
 
     def get_colors_with_one_highlighted(
             self,
