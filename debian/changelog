@@ -1,3 +1,10 @@
+lidske-aktivity (0.3.0-1) unstable; urgency=medium
+
+  * Add periodic scanning feature (option --interval).
+  * Add Systemd service and timer.
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Wed, 30 Jan 2019 16:24:53 +0000
+
 lidske-aktivity (0.2.0-1) unstable; urgency=medium
 
   * Remove window.

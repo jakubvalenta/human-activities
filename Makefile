@@ -1,5 +1,5 @@
 _name=lidske-aktivity
-_version=0.2.0
+_version=0.3.0
 _pkgrel=1
 _arch_linux_dist_parent=dist/arch_linux
 _arch_linux_src_filename=${_name}-${_version}.tar.xz
@@ -21,6 +21,7 @@ ifeq (,$(DESTDIR))
 	@exit 1
 endif
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
+	install -D data/*.service data/*.timer "${DESTDIR}/lib/systemd/system/"
 
 setup:  ## Create Pipenv virtual environment and install dependencies.
 	pipenv --three --site-packages
@@ -79,6 +80,7 @@ ${_debian_dist_parent}/${_debian_src_filename}:
 
 ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_src_filename}
 	cd "${_debian_dist_parent}" && tar xvf "${_debian_src_filename}"
+	cp -f data/*.service data/*.timer "${_debian_dist_parent}/${_debian_src_dirname}/debian"
 
 ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
 	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" lidske_aktivity_debian \
