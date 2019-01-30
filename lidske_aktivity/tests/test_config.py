@@ -1,7 +1,9 @@
 from pathlib import PurePosixPath, PureWindowsPath
 from unittest import TestCase, mock
 
-from lidske_aktivity import __application_id__, __application_name__, config
+from lidske_aktivity import (
+    __application_id__, __application_name__, get_cache_dir,
+)
 
 WIN_HOME = PureWindowsPath(r'C:\Documents and Settings\foo')
 MAC_HOME = PurePosixPath('/Users/foo')
@@ -18,14 +20,14 @@ class TestConfigWin(TestCase):
     @mock.patch.dict('os.environ', {'APPDATA': str(WIN_APPDATA)})
     def test_win(self):
         self.assertEqual(
-            config.get_cache_dir(),
+            get_cache_dir(),
             WIN_APPDATA / __application_name__
         )
 
     @mock.patch.dict('os.environ', {'APPDATA': ''})
     def test_win_fallback(self):
         self.assertEqual(
-            config.get_cache_dir(),
+            get_cache_dir(),
             WIN_HOME / '.cache' / __application_name__
         )
 
@@ -37,7 +39,7 @@ class TestConfigMac(TestCase):
 
     def test_mac(self):
         self.assertEqual(
-            config.get_cache_dir(),
+            get_cache_dir(),
             MAC_HOME / 'Caches' / __application_id__
         )
 
@@ -50,13 +52,13 @@ class TestConfigLinux(TestCase):
     @mock.patch.dict('os.environ', {'XDG_CACHE_HOME': str(XDG_CACHE_HOME)})
     def test_linux(self):
         self.assertEqual(
-            config.get_cache_dir(),
+            get_cache_dir(),
             XDG_CACHE_HOME / __application_name__
         )
 
     @mock.patch.dict('os.environ', {'XDG_CACHE_HOME': ''})
     def test_linux_fallback(self):
         self.assertEqual(
-            config.get_cache_dir(),
+            get_cache_dir(),
             XDG_CACHE_HOME / __application_name__
         )
