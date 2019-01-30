@@ -7,6 +7,9 @@
 ```
 # pacman -S pipenv python-wxpython
 $ make setup
+# make install DESTDIR=/
+# systemctl enable lidske-aktivity.timer
+# systemctl start lidske-aktivity.timer
 ```
 
 ### Windows
