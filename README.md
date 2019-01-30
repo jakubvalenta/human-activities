@@ -74,18 +74,24 @@ make dist-arch-linux-build dist-arch-linux
 make dist-debian-build dist-debian
 ```
 
+### Linux with Pyinstaller
+
+```
+make dist-pyinstaller-build dist-pyinstaller
+```
+
 ### Mac
 
 ```
 pip install pyinstaller
-sh pyinstaller/pyinstaller_mac.sh
+sh mac/pyinstaller.sh
 ```
 
 ### Windows
 
 ```
 pip install pyinstaller
-pyinstaller/pyinstaller_win.cmd
+win/pyinstaller.cmd
 ```
 
 ## Debugging

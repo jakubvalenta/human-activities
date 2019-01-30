@@ -39,17 +39,11 @@ run-wx:  ## Start the app with the WxWidgets backend and extended logging
 	pipenv run python3 -m lidske_aktivity --verbose --wxwidgets
 
 dist-pyinstaller-build:
-	docker build -f docker/pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
+	docker build -f linux_pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
 
 dist-pyinstaller: | dist-pyinstaller-build  ## Build a PyInstaller-based package (with Docker)
-	docker run --rm --volume "$$(pwd):/app" -e PYTHONHASHSEED=1 \
-		lidske_aktivity_pyinstaller \
-		pipenv run pyinstaller \
-			--onefile \
-			--windowed \
-			--name=lidske-aktivity \
-			--specpath=pyinstaller \
-			lidske_aktivity/__main__.py
+	docker run --rm --volume "$$(pwd):/app" -e PYTHONHASHSEED=1 lidske_aktivity_pyinstaller \
+		pipenv run pyinstaller linux_pyinstaller/lidske-aktivity.spec
 
 ${_arch_linux_dist_parent}/${_arch_linux_src_filename}:
 	mkdir -p "${_arch_linux_dist_parent}"
@@ -71,7 +65,7 @@ install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux packag
 	sudo pacman -U "${_arch_linux_pkg_path}"
 
 dist-debian-build:
-	docker build -f docker/debian/Dockerfile -t lidske_aktivity_debian .
+	docker build -f debian/Dockerfile -t lidske_aktivity_debian .
 
 dist-debian-shell:
 	docker run -it --volume="$$(pwd)/${_debian_dist_parent}:/app" lidske_aktivity_debian \
