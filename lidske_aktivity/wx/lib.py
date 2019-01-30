@@ -7,6 +7,7 @@ import wx
 import wx.lib.filebrowsebutton
 from PIL import Image
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import TNamedDirs
 
 logger = logging.getLogger(__name__)
@@ -272,7 +273,7 @@ class NamedDirsForm(Form):
             )
             remove_button = create_button(
                 self.panel,
-                'Remove',
+                texts.BUTTON_REMOVE,
                 callback=partial(self._on_remove_clicked, i)
             )
             hbox.Add(
@@ -287,7 +288,7 @@ class NamedDirsForm(Form):
             self._vbox.Add(hbox, flag=flag, border=5)
         add_button = create_button(
             self.panel,
-            'Add',
+            texts.BUTTON_ADD,
             callback=self._on_add_clicked
         )
         self._vbox.Add(add_button, flag=wx.TOP, border=10)

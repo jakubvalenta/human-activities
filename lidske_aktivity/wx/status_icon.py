@@ -5,6 +5,7 @@ import wx
 import wx.adv
 from PIL import Image
 
+from lidske_aktivity import _, texts
 from lidske_aktivity.icon import draw_pie_chart_png
 from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.wx.lib import (
@@ -82,9 +83,9 @@ class StatusIcon(wx.adv.TaskBarIcon):
                     icon_image=icon_image
                 )
         else:
-            create_menu_item(self, menu, 'No directories configured')
+            create_menu_item(self, menu, texts.MENU_EMPTY)
             menu.AppendSeparator()
-            menu.Append(self.id_setup, '&Setup')
+            menu.Append(self.id_setup, _('&Setup'))
         self._menu = menu
 
     def _show_menu(self):
@@ -95,28 +96,28 @@ class StatusIcon(wx.adv.TaskBarIcon):
         create_menu_item(
             self,
             context_menu,
-            '&Setup',
+            _('&Setup'),
             id=self.id_setup,
             callback=self.app.show_setup
         )
         create_menu_item(
             self,
             context_menu,
-            'Advanced &configuration',
+            _('Advanced &configuration'),
             id=wx.ID_SETUP,
             callback=self.app.show_settings
         )
         create_menu_item(
             self,
             context_menu,
-            '&About',
+            _('&About'),
             id=wx.ID_ABOUT,
             callback=self.app.show_about
         )
         create_menu_item(
             self,
             context_menu,
-            '&Quit',
+            _('&Quit'),
             id=wx.ID_EXIT,
             callback=self.app.quit
         )

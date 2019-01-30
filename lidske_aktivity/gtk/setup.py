@@ -3,6 +3,7 @@ from typing import Callable, List, NamedTuple
 
 import gi
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import Config, TNamedDirs
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm, box_add, create_box, create_label,
@@ -26,22 +27,15 @@ def add_text_paragraph(box: Gtk.Box, text: str):
 
 def add_text_list(box: Gtk.Box, items: List[str]):
     for item in items:
-        label = create_label(f'\N{BULLET} {item}')
+        label = create_label(texts.LIST_BULLET.format(item=item))
         box_add(box, label, expand=False)
 
 
 def create_content_intro(parent: Gtk.Window) -> Gtk.Box:
     box = create_box(spacing=5, homogeneous=False)
-    add_text_heading(box, 'Lidské aktivity setup')
-    add_text_paragraph(box, 'Please adjust your OS settings like this:')
-    add_text_list(
-        box,
-        [
-            'first do this',
-            'than that',
-            'and finally something different',
-        ]
-    )
+    add_text_heading(box, texts.SETUP_TITLE)
+    add_text_paragraph(box, texts.SETUP_HEADING)
+    add_text_list(box, texts.SETUP_LIST.splitlines())
     return box
 
 
@@ -104,12 +98,12 @@ class Setup:
             parent,
             [
                 Page(
-                    title='Intro',
+                    title=texts.SETUP_STEP_INTRO_TITLE,
                     content_func=create_content_intro,
                     page_type=Gtk.AssistantPageType.INTRO
                 ),
                 Page(
-                    title='Setup',
+                    title=texts.SETUP_STEP_SETUP_TITLE,
                     content_func=partial(
                         NamedDirsForm,
                         self._config.named_dirs,

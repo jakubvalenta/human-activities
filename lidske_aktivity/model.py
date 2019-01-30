@@ -12,7 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
 
-from lidske_aktivity import CACHE_PATH
+from lidske_aktivity import CACHE_PATH, _
 from lidske_aktivity.config import UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs
 from lidske_aktivity.icon import (
     COLOR_BLACK, COLOR_GRAY, Color, color_from_index,
@@ -138,15 +138,20 @@ class DirectoryView(NamedTuple):
     @property
     def tooltip(self) -> str:
         unit_text = {
-            UNIT_SIZE_BYTES: 'of the size ',
+            UNIT_SIZE_BYTES: _('of the size '),
             UNIT_NUM_FILES: '',
         }[self.unit]
         if self.threshold_days_ago == 0:
-            set_text = 'all files in configured directories'
+            set_text = _('all files in configured directories')
         else:
-            set_text = (f'the files modified in the past '
-                        f'{self.threshold_days_ago} days')
-        s = f'{self.fraction:.2%} {unit_text}of {set_text}'
+            set_text = _('the files modified in the past {days} days').format(
+                days=self.threshold_days_ago
+            )
+        s = _('{fraction:.2%} {unit_text}of {set_text}').format(
+            fraction=self.fraction,
+            unit_text=unit_text,
+            set_text=set_text
+        )
         return textwrap.fill(s)
 
     def __eq__(self, other) -> bool:

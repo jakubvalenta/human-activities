@@ -10,7 +10,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data check gettext bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -132,7 +132,7 @@ lint-data:
 check:  ## Test installed app
 	python3 -m pytest lidske_aktivity/tests
 
-lang/${_name}.pot: $(wildcard lidske_aktivity/*.py)
+lang/${_name}.pot: $(wildcard lidske_aktivity/*.py lidske_aktivity/**/*.py)
 	xgettext --language=Python --keyword=_ --output=$@ --from-code=UTF-8 \
 		--package-name="${_name}" --package-version="${_version}" $^
 
@@ -147,9 +147,11 @@ locale/%/LC_MESSAGES/${_name}.mo: lang/%.po
 	mkdir -p "$$(dirname "$@")"
 	msgfmt $< -o $@
 
-gettext: | lang/${_name}.pot
+clean-lang:
+	-rm lang/${_name}.pot
 	-rm locale/*/LC_MESSAGES/${_name}.mo
-	$(MAKE) locale/en_US/LC_MESSAGES/${_name}.mo locale/cs_CZ/LC_MESSAGES/${_name}.mo
+
+gen-lang: | locale/en_US/LC_MESSAGES/${_name}.mo locale/cs_CZ/LC_MESSAGES/${_name}.mo
 
 bump-version:  ## Increase application version (automatically change code)
 ifeq (,$(version))

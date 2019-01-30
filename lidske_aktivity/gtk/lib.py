@@ -5,6 +5,7 @@ from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
 import gi
 from PIL import Image
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import TNamedDirs
 
 gi.require_version('GdkPixbuf', '2.0')
@@ -131,7 +132,7 @@ def create_file_chooser_button(
         value: Optional[str],
         callback: Callable[[str], None]) -> Gtk.FileChooserButton:
     button = Gtk.FileChooserButton.new(
-        'Please choose a directory',
+        texts.FILE_CHOOSER_BUTTON,
         Gtk.FileChooserAction.SELECT_FOLDER
     )
     if value:

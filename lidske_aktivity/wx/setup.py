@@ -4,6 +4,7 @@ from typing import Callable, List
 import wx
 import wx.adv
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import Config, TNamedDirs
 from lidske_aktivity.wx.lib import NamedDirsForm, create_label, create_sizer
 
@@ -20,28 +21,16 @@ def add_text_paragraph(parent: wx.Window, sizer: wx.Sizer, text: str):
 
 def add_text_list(parent: wx.Window, sizer: wx.Sizer, items: List[str]):
     for item in items:
-        label = create_label(parent, f'\N{BULLET} {item}')
+        label = create_label(parent, texts.LIST_BULLET.format(item=item))
         sizer.Add(label)
     sizer.AddSpacer(5)
 
 
 def add_content_intro(parent: wx.Panel):
     sizer = create_sizer(parent)
-    add_text_heading(parent, sizer, 'Lidské aktivity setup')
-    add_text_paragraph(
-        parent,
-        sizer,
-        'Please adjust your OS settings like this:'
-    )
-    add_text_list(
-        parent,
-        sizer,
-        [
-            'first do this',
-            'than that',
-            'and finally something different',
-        ]
-    )
+    add_text_heading(parent, sizer, texts.SETUP_TITLE)
+    add_text_paragraph(parent, sizer, texts.SETUP_HEADING)
+    add_text_list(parent, sizer, texts.SETUP_LIST.splitlines())
 
 
 def init_wizard(wizard: wx.adv.Wizard,
@@ -60,7 +49,7 @@ def init_wizard(wizard: wx.adv.Wizard,
 
 
 class Setup(wx.adv.Wizard):
-    title = 'Lidské aktivity setup'
+    title = texts.SETUP_TITLE
 
     _config: Config
 

@@ -121,7 +121,7 @@ make setup-dev
 Edit the `lang/*.po` files and then run:
 
 ```
-make gettext
+make clean-lang gen-lang
 ```
 
 ### Testing

@@ -2,6 +2,7 @@ from typing import Callable, Dict
 
 import gi
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import (
     MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, UNITS, Config, TNamedDirs,
 )
@@ -16,7 +17,7 @@ from gi.repository import GdkPixbuf, Gtk, GLib  # noqa:E402  # isort:skip
 
 
 class Settings(Gtk.Dialog):
-    title = 'Lidské aktivity advanced configuration'
+    title = texts.SETTINGS_TITLE
 
     _config: Config
     _box: Gtk.Box
@@ -78,12 +79,11 @@ class Settings(Gtk.Dialog):
 
     def _add_widgets(self):
         widgets = [
-            create_label('Compare')
+            create_label(texts.SETTINGS_UNIT)
         ] + list(self._unit_radios.values()) + [
-            create_label('Include only files newer than (days), '
-                         '0 = all files'),
+            create_label(texts.SETTINGS_THRESHOLD_DAYS_OLD),
             self._threshold_days_ago_entry,
-            create_label('Directories'),
+            create_label(texts.SETTINGS_MODE),
             self._mode_radios[MODE_ROOT_PATH],
             self._root_path_form,
             self._mode_radios[MODE_NAMED_DIRS],

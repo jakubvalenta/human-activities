@@ -2,6 +2,7 @@ from typing import Callable, Dict
 
 import wx
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import (
     MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, UNITS, Config,
 )
@@ -12,7 +13,7 @@ from lidske_aktivity.wx.lib import (
 
 
 class Settings(wx.Dialog):
-    title = 'Lidské aktivity advanced configuration'
+    title = texts.SETTINGS_TITLE
 
     config: Config
     _panel: wx.Panel
@@ -82,21 +83,18 @@ class Settings(wx.Dialog):
         self._create_mode_radios()
 
     def _add_widgets(self):
-        label = create_label(self._panel, 'Compare')
+        label = create_label(self._panel, texts.SETTINGS_UNIT)
         self._sizer.Add(label, flag=wx.ALL, border=5)
         for radio in self._unit_radios.values():
             self._sizer.Add(radio, flag=wx.ALL, border=5)
-        label = create_label(
-            self._panel,
-            'Include only files newer than (days), 0 = all files'
-        )
+        label = create_label(self._panel, texts.SETTINGS_THRESHOLD_DAYS_OLD)
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(
             self._threshold_days_ago_control,
             flag=wx.ALL,
             border=5
         )
-        label = create_label(self._panel, 'Directories')
+        label = create_label(self._panel, texts.SETTINGS_MODE)
         self._sizer.Add(label, flag=wx.ALL, border=5)
         self._sizer.Add(
             self._mode_radios[MODE_ROOT_PATH],

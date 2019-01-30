@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Callable, Iterator, Optional
 
 import gi
 
-from lidske_aktivity import __application_id__, __application_name__
+from lidske_aktivity import _, __application_id__, __application_name__, texts
 from lidske_aktivity.gtk.lib import create_box, image_to_pixbuf
 from lidske_aktivity.icon import (
     calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
@@ -104,7 +104,7 @@ class StatusIcon():
         # TODO: Limit the maximum number of items shown.
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
-                _, icon_size, _ = Gtk.IconSize.lookup(Gtk.IconSize.MENU)
+                icon_size = Gtk.IconSize.lookup(Gtk.IconSize.MENU)[1]
                 icon_image = draw_pie_chart_png(
                     icon_size,
                     directory_views.fractions,
@@ -117,23 +117,23 @@ class StatusIcon():
                     icon_pixbuf=icon_pixbuf
                 )
         else:
-            yield create_menu_item('No directories configured')
+            yield create_menu_item(texts.MENU_EMPTY)
         yield Gtk.SeparatorMenuItem()
         yield create_menu_item(
-            'Setup',
+            _('Setup'),
             lambda event: self.app.show_setup()
         )
         yield create_menu_item(
-            'Advanced configuration',
+            _('Advanced configuration'),
             lambda event: self.app.show_settings()
         )
         yield create_menu_item(
-            'About',
+            _('About'),
             lambda event: self.app.show_about(),
             icon_name='help-about'
         )
         yield create_menu_item(
-            'Quit',
+            _('Quit'),
             lambda event: self.app.quit(),
             icon_name='application-exit'
         )
