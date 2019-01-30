@@ -142,6 +142,8 @@ endif
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
 		lidske_aktivity_debian dch -v "${version}-${_pkgrel}" "New version"
+	@echo "Now commit the changes and run:"
+	@echo "    git tag -a v${version}"
 
 backup:  ## Backup built packages (currently Debian-only)
 	timestamp=$$(date +%s) && \
