@@ -8,7 +8,7 @@ from typing import Any, Optional
 from lidske_aktivity import (
     __authors__, __copyright__, __title__, __uri__, __version__,
 )
-from lidske_aktivity.config import Config, TNamedDirs, load_config, save_config
+from lidske_aktivity.config import Config, load_config, save_config
 from lidske_aktivity.icon import draw_pie_chart_png, gen_random_slices
 from lidske_aktivity.model import Directories, DirectoryViews, scan_directory
 
@@ -22,7 +22,6 @@ class AppError(Exception):
 class Application:
     _interval: int
     _config: Config
-    _named_dirs: TNamedDirs
     _directories: Directories
     _directory_views: DirectoryViews
 
@@ -40,12 +39,11 @@ class Application:
         self._interval = interval
         self._config = load_config()
         save_config(self._config)
-        self._named_dirs = self._config.list_effective_named_dirs()
         self._directories = Directories()
         self._directory_views = DirectoryViews()
 
     def _load_directories(self):
-        paths = self._named_dirs.keys()
+        paths = self._config.effective_named_dirs.keys()
         self._directories.clear()
         self._directories.load(paths)
         self._directories.save()
@@ -54,7 +52,7 @@ class Application:
         self._directory_views.config(
             self._config.unit,
             self._config.threshold_days_ago,
-            self._named_dirs
+            self._config.effective_named_dirs
         )
         self._directory_views.load(*self._directories)
 
@@ -67,7 +65,6 @@ class Application:
     def scan(self):
         self._load_directories()
         self._scan_start()
-        self._scan_timer.cancel()
 
     def _on_init(self, ui_app: Any):
         self._ui_app = ui_app
@@ -155,7 +152,6 @@ class Application:
         self._config = config
         save_config(config)
         self._scan_stop()
-        self._named_dirs = self._config.list_effective_named_dirs()
         self._load_directories()
         self._load_directory_views()
         self._scan_start()

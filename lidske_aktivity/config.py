@@ -62,34 +62,69 @@ UNITS = {
 
 
 class Config:
-    root_path: Optional[str] = None
-    test: bool = False
-    mode: str = MODE_NAMED_DIRS
-    named_dirs: TNamedDirs
-    show_setup: bool = True
+    _mode: str = MODE_NAMED_DIRS
+    _root_path: Optional[str] = None
+    _named_dirs: TNamedDirs
     unit: str = UNIT_SIZE_BYTES
     threshold_days_ago: int = 30
+    show_setup: bool = True
+    test: bool = False
+
+    _effective_named_dirs: Optional[TNamedDirs] = None
 
     def __init__(self):
         self.named_dirs = {}
 
     def to_json(self) -> str:
         d = {
-            'root_path': self.root_path,
-            'test': self.test,
             'mode': self.mode,
+            'root_path': self.root_path,
             'named_dirs': {
                 path: name
                 for path, name in self.named_dirs.items()
                 if path and name
             },
-            'show_setup': self.show_setup,
             'unit': self.unit,
             'threshold_days_ago': self.threshold_days_ago,
+            'show_setup': self.show_setup,
+            'test': self.test,
         }
         return json.dumps(d, indent=2)
 
-    def list_effective_named_dirs(self) -> TNamedDirs:
+    @property
+    def mode(self) -> str:
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode: str):
+        self._mode = mode
+        self._effective_named_dirs = None
+
+    @property
+    def root_path(self) -> Optional[str]:
+        return self._root_path
+
+    @root_path.setter
+    def root_path(self, root_path: Optional[str]):
+        self._root_path = root_path
+        self._effective_named_dirs = None
+
+    @property
+    def named_dirs(self) -> TNamedDirs:
+        return self._named_dirs
+
+    @named_dirs.setter
+    def named_dirs(self, named_dirs: TNamedDirs):
+        self._named_dirs = named_dirs
+        self._effective_named_dirs = None
+
+    @property
+    def effective_named_dirs(self) -> TNamedDirs:
+        if self._effective_named_dirs is None:
+            self._effective_named_dirs = self._list_effective_named_dirs()
+        return self._effective_named_dirs
+
+    def _list_effective_named_dirs(self) -> TNamedDirs:
         if self.mode == MODE_NAMED_DIRS:
             return self.named_dirs
         if self.mode == MODE_ROOT_PATH:
