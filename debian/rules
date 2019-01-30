@@ -3,7 +3,7 @@
 export PYBUILD_NAME=lidske-aktivity
 
 %:
-	dh $@ --with python3 --buildsystem=pybuild
+	dh $@ --with python3,systemd --buildsystem=pybuild
 
 override_dh_auto_test:
 	 # make test  # TODO: Uncomment when releasing package
