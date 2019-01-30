@@ -22,7 +22,6 @@ class AppError(Exception):
 class Application:
     _interval: int
     _config: Config
-    _directories: Directories
     _directory_views: DirectoryViews
 
     _ui: Any
@@ -39,27 +38,9 @@ class Application:
         self._interval = interval
         self._config = load_config()
         save_config(self._config)
-        self._directories = Directories()
         self._directory_views = DirectoryViews()
 
-    def _load_directories(self):
-        paths = list(self._config.effective_named_dirs.keys())
-        self._directories.clear()
-        self._directories.load_from_db(paths)
-        self._directories.create_missing(paths)
-        self._directories.save()
-
-    def _load_directory_views(self):
-        self._directory_views.config(
-            self._config.unit,
-            self._config.threshold_days_ago,
-            self._config.effective_named_dirs
-        )
-        self._directory_views.load(*self._directories)
-
     def run_ui(self, ui: Any):
-        self._load_directories()
-        self._load_directory_views()
         self._ui = ui
         self._ui.app.Application(self._on_init, self._on_quit).run()
 
@@ -67,56 +48,67 @@ class Application:
         self._ui_app = ui_app
         logger.info('On init')
         self._status_icon = self._ui.status_icon.StatusIcon(self)
+        self._redraw_start()
         if self._config.show_setup:
             self._config.show_setup = False
             self.show_setup()
-        self._redraw_start()
-        self._redraw_trigger()
-        self._scan_start()
+        else:
+            self.scan_start()
 
-    def scan(self):
-        self._load_directories()
-        self._scan_start()
-
-    def _scan_start(self):
+    def scan_start(self, interval: int = 0):
+        logger.info(f'Starting scan timer in %ss', interval)
         self._scan_event_stop = Event()
-
-        def orchestrator():
-            logger.info(f'Starting scan ochestrator')
-            with ThreadPoolExecutor() as executor:
-                futures = [
-                    executor.submit(
-                        scan_directory,
-                        path=directory.path,
-                        unit=self._config.unit,
-                        threshold_days_ago=self._config.threshold_days_ago,
-                        event_stop=self._scan_event_stop,
-                        callback=partial(self._on_scan, pending=False),
-                        test=self._config.test
-                    )
-                    for directory in self._directories
-                ]
-                wait(futures)
-                logger.info('All scan threads finished')
-
-                if not self._scan_event_stop.is_set() and self._interval:
-                    logger.info(f'Setting new scan timer to {self._interval}s')
-                    self._scan_timer = Timer(self._interval, orchestrator)
-                    self._scan_timer.start()
-
-        self._scan_timer = Timer(0, orchestrator)
+        self._scan_timer = Timer(interval, self._scan)
         self._scan_timer.start()
 
+    def _load_directory_views(self):
+        logger.info('Loading directory views')
+        directories = Directories()
+        named_dirs = self._config.list_effective_named_dirs()
+        paths = list(named_dirs.keys())
+        directories.clear()
+        directories.load_from_db(paths)
+        directories.create_missing(paths)
+        directories.save()
+        self._directory_views.config(
+            self._config.unit,
+            self._config.threshold_days_ago,
+            named_dirs
+        )
+        self._directory_views.load(*directories)
+
+    def _scan(self):
+        self._load_directory_views()
+        logger.info('Starting scan threads')
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(
+                    scan_directory,
+                    path=path,
+                    unit=self._config.unit,
+                    threshold_days_ago=self._config.threshold_days_ago,
+                    event_stop=self._scan_event_stop,
+                    callback=partial(self._on_scan, pending=False),
+                    test=self._config.test
+                )
+                for path in self._directory_views.keys()
+            ]
+            wait(futures)
+        logger.info('All scan threads finished')
+        if not self._scan_event_stop.is_set() and self._interval:
+            self.scan_start(self._interval)
+        else:
+            logger.info('No further scanning scheduled')
+
     def _on_scan(self, *args, **kwargs):
-        if self._directory_views:
-            changed = self._directory_views.load(*args, **kwargs)
-            if changed:
-                self._redraw_trigger()
+        changed = self._directory_views.load(*args, **kwargs)
+        if changed:
+            self._redraw_trigger()
 
     def _scan_stop(self):
         self._scan_event_stop.set()
         self._scan_timer.cancel()
-        logger.info('Scan orchestrator stopped')
+        logger.info('Scan thread stopped')
 
     def _redraw_start(self):
         logger.info('Starting redrawing thread')
@@ -153,9 +145,7 @@ class Application:
         self._config = config
         save_config(config)
         self._scan_stop()
-        self._load_directories()
-        self._load_directory_views()
-        self._scan_start()
+        self.scan_start()
         self._redraw_trigger()
 
     def show_setup(self):

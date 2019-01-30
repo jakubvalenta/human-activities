@@ -65,9 +65,13 @@ def main():
     if args.clean:
         clean_cache()
         return
-    app = Application(args.interval)
     if args.scan:
-        app.scan()
+        interval = 0
+    else:
+        interval = args.interval
+    app = Application(interval)
+    if args.scan:
+        app.scan_start()
         return
     if not args.wxwidgets and is_appindicator_available():
         import lidske_aktivity.gtk as ui
