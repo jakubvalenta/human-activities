@@ -1,7 +1,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterator, Optional
+from typing import TYPE_CHECKING, Callable, Iterator, Optional, Tuple
 
 import gi
 
@@ -88,7 +88,7 @@ def set_indicator_icon(indicator: AppIndicator3.Indicator,
 class StatusIcon():
     app: 'Application'
     _indicator: AppIndicator3.Indicator
-
+    _last_fractions: Optional[Tuple[float, ...]] = None
     # The directory is deleted as soon as this variable is garbage-collected.
     _icon_temp_dir: tempfile.TemporaryDirectory
 
@@ -99,7 +99,7 @@ class StatusIcon():
 
     def _create_menu_items(
             self,
-            directory_views: Optional[DirectoryViews]
+            directory_views: Optional[DirectoryViews] = None
     ) -> Iterator[Gtk.MenuItem]:
         # TODO: Limit the maximum number of items shown.
         if directory_views:
@@ -146,6 +146,10 @@ class StatusIcon():
         self._indicator.set_menu(menu)
 
     def update(self, directory_views: DirectoryViews):
+        self._init_menu(directory_views)
+        if self._last_fractions == directory_views.fractions:
+            return
+        self._last_fractions = directory_views.fractions
         svg = draw_pie_chart_svg(directory_views.fractions)
         icon_hash = calc_icon_hash(directory_views.fractions)
         icon_temp_dir = write_temp_file(
@@ -160,7 +164,6 @@ class StatusIcon():
             tooltip=directory_views.tooltip
         )
         self._icon_temp_dir = icon_temp_dir
-        self._init_menu(directory_views)
 
     def destroy(self):
         self._indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)

@@ -1,5 +1,5 @@
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
 import wx
 import wx.adv
@@ -52,6 +52,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
     app: 'Application'
     id_setup = new_id_ref_compat()
     _menu: wx.Menu
+    _last_fractions: Optional[Tuple[float, ...]] = None
 
     def __init__(self, app: 'Application'):
         super().__init__(wx.adv.TBI_DOCK)
@@ -124,10 +125,13 @@ class StatusIcon(wx.adv.TaskBarIcon):
         return context_menu
 
     def update(self, directory_views: DirectoryViews):
+        self._init_menu(directory_views)
+        if self._last_fractions == directory_views.fractions:
+            return
+        self._last_fractions = directory_views.fractions
         image = draw_pie_chart_png(self.icon_size, directory_views.fractions)
         icon = image_to_icon(image)
         self.SetIcon(icon, directory_views.tooltip)
-        self._init_menu(directory_views)
 
     @property
     def icon_size(self) -> int:

@@ -154,13 +154,6 @@ class DirectoryView(NamedTuple):
         )
         return textwrap.fill(s)
 
-    def __eq__(self, other) -> bool:
-        return (
-            self.unit == other.unit and
-            self.threshold_days_ago == other.threshold_days_ago and
-            self.fraction == other.fraction
-        )
-
 
 class DirectoryViews(dict):
     _unit: str
@@ -180,8 +173,7 @@ class DirectoryViews(dict):
                 threshold_days_ago=threshold_days_ago
             )
 
-    def load(self, *directories: Directory, **extra_props) -> bool:
-        changed = False
+    def load(self, *directories: Directory, **extra_props):
         for directory in directories:
             if directory.path not in self:
                 logger.error(
@@ -190,23 +182,16 @@ class DirectoryViews(dict):
                 )
                 continue
             value = directory.find_value(self._unit, self._threshold_days_ago)
-            self[directory.path] = self[directory.path]._replace(value=value)
+            self[directory.path] = self[directory.path]._replace(
+                value=value,
+                **extra_props
+            )
         total = sum(dv.value or 0.0 for dv in self.values())
         for path, directory_view in self.items():
             fraction = round(safe_div(directory_view.value, total), 2)
-            new_directory_view = directory_view._replace(
-                fraction=fraction,
-                **extra_props
-            )
-            if directory_view != new_directory_view:
-                self[path] = new_directory_view
-                changed = True
-        logger.info(
-            'Recalculated: changed = %s, fractions = %s',
-            changed,
-            self.fractions
-        )
-        return changed
+            if directory_view.fraction != fraction:
+                self[path] = directory_view._replace(fraction=fraction)
+        logger.info('Recalculated: fractions = %s', self.fractions)
 
     @property
     def fractions(self) -> Tuple[float, ...]:
@@ -226,6 +211,11 @@ class DirectoryViews(dict):
         else:
             colors[i] = color_from_index(i)
         return tuple(colors)
+
+    def copy(self) -> 'DirectoryViews':
+        new = DirectoryViews()
+        new.update(self)
+        return new
 
 
 @func.measure_time
