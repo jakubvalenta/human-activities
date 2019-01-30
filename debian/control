@@ -2,7 +2,7 @@ Source: lidske-aktivity
 Section: unknown
 Priority: optional
 Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper (>= 9.20160709~),
                dh-python,
                python3-all,
                python3-setuptools,
