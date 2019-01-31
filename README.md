@@ -43,6 +43,8 @@ $ make setup
     pip install Pillow sqlalchemy wxpython
     ```
 
+#. Optional: Install additional language pack via Windows Update to test translations.
+
 ## Usage
 
 ### Linux and Mac
