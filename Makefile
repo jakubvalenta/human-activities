@@ -1,4 +1,5 @@
 _name=lidske-aktivity
+_pypkgname=lidske_aktivity
 _version=0.3.0
 _pkgrel=1
 _arch_linux_dist_parent=dist/arch_linux
@@ -30,13 +31,13 @@ setup-dev:  ## Install development dependencies
 	pipenv install --dev
 
 run:  ## Start the app
-	pipenv run python3 -m lidske_aktivity
+	pipenv run python3 -m ${_pypkgname}
 
 run-debug:  ## Start the app with extended logging
-	pipenv run python3 -m lidske_aktivity --verbose
+	pipenv run python3 -m ${_pypkgname} --verbose
 
 run-wx:  ## Start the app with the WxWidgets backend and extended logging
-	pipenv run python3 -m lidske_aktivity --verbose --wxwidgets
+	pipenv run python3 -m ${_pypkgname} --verbose --wxwidgets
 
 dist-pyinstaller-build:
 	docker build -f linux_pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
@@ -92,7 +93,7 @@ install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install buil
 	sudo apt-get install -f --yes
 
 data/${_name}.svg:
-	pipenv run python3 -c 'from lidske_aktivity import icon; icon.print_default_svg_icon()' > "data/${_name}.svg"
+	pipenv run python3 -c 'from ${_pypkgname} import icon; icon.print_default_svg_icon()' > "data/${_name}.svg"
 
 data/${_name}.png: data/${_name}.svg
 	sh data/bin/create_png.sh
@@ -110,10 +111,10 @@ clean:  ## Clean distribution package
 	-rm -rf dist/*
 
 clean-cache:  ## Clean cache
-	pipenv run python3 -m lidske_aktivity --verbose --clean
+	pipenv run python3 -m ${_pypkgname} --verbose --clean
 
 scan:  ## Scan directories
-	pipenv run python3 -m lidske_aktivity --verbose --scan
+	pipenv run python3 -m ${_pypkgname} --verbose --scan
 
 test:  ## Run unit tests
 	tox -e py37
@@ -130,9 +131,9 @@ lint-data:
 	systemd-analyze verify "data/${_name}.timer"
 
 check:  ## Test installed app
-	python3 -m pytest lidske_aktivity/tests
+	python3 -m pytest ${_pypkgname}/tests
 
-lang/${_name}.pot: $(wildcard lidske_aktivity/*.py lidske_aktivity/**/*.py)
+lang/${_name}.pot: $(wildcard ${_pypkgname}/*.py ${_pypkgname}/**/*.py)
 	xgettext --language=Python --keyword=_ --output=$@ --from-code=UTF-8 \
 		--package-name="${_name}" --package-version="${_version}" $^
 
@@ -143,15 +144,15 @@ lang/%.po: lang/${_name}.pot
 		msginit --output=$@ --input=$< --locale=en_US; \
 	fi
 
-locale/%/LC_MESSAGES/${_name}.mo: lang/%.po
+${_pypkgname}/locale/%/LC_MESSAGES/${_name}.mo: lang/%.po
 	mkdir -p "$$(dirname "$@")"
 	msgfmt $< -o $@
 
 clean-lang:
 	-rm lang/${_name}.pot
-	-rm locale/*/LC_MESSAGES/${_name}.mo
+	-rm ${_pypkgname}/locale/*/LC_MESSAGES/${_name}.mo
 
-gen-lang: | locale/en_US/LC_MESSAGES/${_name}.mo locale/cs_CZ/LC_MESSAGES/${_name}.mo
+gen-lang: | ${_pypkgname}/locale/en_US/LC_MESSAGES/${_name}.mo ${_pypkgname}/locale/cs_CZ/LC_MESSAGES/${_name}.mo
 
 bump-version:  ## Increase application version (automatically change code)
 ifeq (,$(version))
@@ -159,7 +160,7 @@ ifeq (,$(version))
 	@exit 1
 endif
 	sed -E -i s/${_version}/${version}/ Makefile
-	sed -E -i s/${_version}/${version}/ lidske_aktivity/__init__.py
+	sed -E -i s/${_version}/${version}/ ${_pypkgname}/__init__.py
 	sed -E -i s/${_version}/${version}/ arch_linux/PKGBUILD
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \

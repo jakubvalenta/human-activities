@@ -25,6 +25,9 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(),
+    package_data={
+        '': ['locale/*/LC_MESSAGES/*.mo'],
+    },
     data_files=[
         ('share/applications', [f'data/{__application_name__}.desktop']),
         ('share/icons/hicolor/scalable/apps',
