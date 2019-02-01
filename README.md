@@ -73,6 +73,9 @@ python -m lidske_aktivity --verbose
 make dist-arch-linux-build dist-arch-linux
 ```
 
+Notice that the package is not built from the currently checked out revision,
+but from a git tag specified as `v` + Makefile variable `_version`.
+
 ### Debian
 
 ```
