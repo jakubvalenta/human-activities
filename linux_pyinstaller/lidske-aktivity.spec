@@ -40,5 +40,5 @@ exe = EXE(  # noqa: F821
     upx=True,
     runtime_tmpdir=None,
     console=False,
-    icon=os.path.join('..', 'data', 'lidske-aktivity.ico')
+    icon=os.path.join('data', 'lidske-aktivity.ico')
 )
