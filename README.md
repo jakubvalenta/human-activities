@@ -40,7 +40,7 @@ $ make setup
 #. Install Python dependencies:
 
     ```
-    pip install Pillow gettext_windows sqlalchemy wxpython
+    pip install Pillow sqlalchemy wxpython
     ```
 
 #. Optional: Install additional language pack via Windows Update to test translations.

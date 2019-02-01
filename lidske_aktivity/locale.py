@@ -3,9 +3,8 @@ import os
 import os.path
 import sys
 
-import gettext_windows
-
 from lidske_aktivity import __application_name__
+from lidske_aktivity.vendor import gettext_windows
 
 translation_kwargs = {}
 if getattr(sys, 'frozen', False):  # Running in a bundle
