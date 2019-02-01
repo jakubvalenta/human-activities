@@ -57,4 +57,7 @@ setup(
             f'{__application_name__}=lidske_aktivity.cli:main',
         ],
     },
+    install_requires=[
+        'gettext_windows',
+    ],
 )

@@ -3,18 +3,17 @@ import os
 import os.path
 import sys
 
+import gettext_windows
+
 from lidske_aktivity import __application_name__
 
-if sys.platform.startswith('win'):
-    import locale
-    if os.getenv('LANG') is None:
-        lang, enc = locale.getdefaultlocale()
-        os.environ['LANG'] = lang
-
 if getattr(sys, 'frozen', False):  # Running in a bundle
-    localedir = os.path.join(sys._MEIPASS, 'locale')
+    bundle_dir = sys._MEIPASS  # type: ignore
+    locale_dir = os.path.join(bundle_dir, 'locale')
 else:
-    localedir = None
+    locale_dir = ''
 
-t = gettext.translation(__application_name__, localedir, fallback=True)
+gettext_windows.setup_env()
+
+t = gettext.translation(__application_name__, locale_dir, fallback=True)
 _ = t.gettext
