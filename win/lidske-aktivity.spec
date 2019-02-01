@@ -1,12 +1,17 @@
 # -*- mode: python -*-
 
+import os.path
+
 block_cipher = None
 
 a = Analysis(  # noqa: F821
-    ['..\\lidske_aktivity\\__main__.py'],
+    [os.path.join('..', 'lidske_aktivity', '__main__.py')],
     pathex=['win'],
     binaries=[],
-    datas=[],
+    datas=[(
+        os.path.join('..', 'lidske_aktivity', 'locale'),
+        os.path.join('share', 'locale')
+    )],
     hiddenimports=['sqlalchemy.ext.baked'],
     hookspath=[],
     runtime_hooks=[],
@@ -35,5 +40,5 @@ exe = EXE(  # noqa: F821
     upx=True,
     runtime_tmpdir=None,
     console=False,
-    icon='data\\lidske-aktivity.ico'
+    icon=os.path.join('..', 'data', 'lidske-aktivity.ico')
 )
