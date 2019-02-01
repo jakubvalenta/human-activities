@@ -7,13 +7,16 @@ import gettext_windows
 
 from lidske_aktivity import __application_name__
 
+translation_kwargs = {}
 if getattr(sys, 'frozen', False):  # Running in a bundle
     bundle_dir = sys._MEIPASS  # type: ignore
-    locale_dir = os.path.join(bundle_dir, 'locale')
-else:
-    locale_dir = ''
+    translation_kwargs['localedir'] = os.path.join(bundle_dir, 'locale')
 
 gettext_windows.setup_env()
 
-t = gettext.translation(__application_name__, locale_dir, fallback=True)
+t = gettext.translation(
+    __application_name__,
+    **translation_kwargs,
+    fallback=True
+)
 _ = t.gettext
