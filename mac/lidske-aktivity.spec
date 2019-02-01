@@ -10,7 +10,7 @@ a = Analysis(  # noqa: F821
     binaries=[],
     datas=[(
         os.path.join('..', 'lidske_aktivity', 'locale'),
-        os.path.join('share', 'locale')
+        os.path.join('locale')
     )],
     hiddenimports=['sqlalchemy.ext.baked'],
     hookspath=[],
