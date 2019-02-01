@@ -30,12 +30,12 @@ exe = EXE(  # noqa: F821
     pyz,
     a.scripts,
     [],
+    exclude_binaries=True,
     name='lidske-aktivity',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    runtime_tmpdir=None,
     console=False,
     icon=os.path.join('data', 'lidske-aktivity.ico')
 )
@@ -46,6 +46,5 @@ coll = COLLECT(  # noqa: F821
     a.datas,
     strip=False,
     upx=True,
-    name='lidske-aktivity',
-    icon=os.path.join('data', 'lidske-aktivity.ico')
+    name='lidske-aktivity'
 )
