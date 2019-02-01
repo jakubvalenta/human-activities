@@ -5,8 +5,9 @@ import wx
 import wx.adv
 from PIL import Image
 
-from lidske_aktivity import _, texts
+from lidske_aktivity import texts
 from lidske_aktivity.icon import draw_pie_chart_png
+from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.wx.lib import (
     image_to_bitmap, image_to_icon, new_id_ref_compat,

@@ -1,4 +1,4 @@
-from lidske_aktivity import _
+from lidske_aktivity.locale import _
 
 FILE_CHOOSER_BUTTON = _('Please choose a directory')
 BUTTON_ADD = _('Add')

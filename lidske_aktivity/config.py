@@ -3,7 +3,8 @@ import logging
 import os.path
 from typing import Any, Dict, Optional
 
-from lidske_aktivity import CONFIG_PATH, _
+from lidske_aktivity import CONFIG_PATH
+from lidske_aktivity.locale import _
 from lidske_aktivity.utils import filesystem
 
 logger = logging.getLogger(__name__)

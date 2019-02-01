@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING, Callable, Iterator, Optional, Tuple
 
 import gi
 
-from lidske_aktivity import _, __application_id__, __application_name__, texts
+from lidske_aktivity import __application_id__, __application_name__, texts
 from lidske_aktivity.gtk.lib import create_box, image_to_pixbuf
 from lidske_aktivity.icon import (
     calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
 )
+from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
 
 gi.require_version('AppIndicator3', '0.1')
