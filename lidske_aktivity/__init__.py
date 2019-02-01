@@ -47,6 +47,5 @@ def get_config_dir():
 CACHE_PATH = Path(get_cache_dir()) / 'cache.db'
 CONFIG_PATH = Path(get_config_dir()) / 'config.json'
 
-LOCALE_PATH = Path(__file__).parent / 'locale'
-t = gettext.translation(__application_name__, str(LOCALE_PATH))
+t = gettext.translation(__application_name__)
 _ = t.gettext

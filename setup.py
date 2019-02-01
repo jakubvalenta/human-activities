@@ -1,3 +1,4 @@
+import glob
 from pathlib import Path
 
 from setuptools import find_packages, setup
@@ -6,6 +7,14 @@ from lidske_aktivity import (
     __application_name__, __author_email__, __authors__, __license__,
     __summary__, __uri__, __version__,
 )
+
+
+def list_mo_files(locale_dir):
+    return [
+        str(Path(path).relative_to(locale_dir))
+        for path in glob.glob(locale_dir + '/**/*.mo', recursive=True)
+    ]
+
 
 setup(
     name=__application_name__,
@@ -28,12 +37,20 @@ setup(
     package_data={
         '': ['locale/*/LC_MESSAGES/*.mo'],
     },
-    data_files=[
-        ('share/applications', [f'data/{__application_name__}.desktop']),
-        ('share/icons/hicolor/scalable/apps',
-         [f'data/{__application_name__}.svg']),
-        ('share/pixmaps', [f'data/{__application_name__}.png']),
-    ],
+    data_files={
+        'share/applications': [
+            f'data/{__application_name__}.desktop',
+        ],
+        'share/icons/hicolor/scalable/apps': [
+            f'data/{__application_name__}.svg',
+        ],
+        'share/pixmaps': [
+            f'data/{__application_name__}.png',
+        ],
+        f'share/locale/{__application_name__}': list_mo_files(
+            f'lidske_aktivity/locale'
+        )
+    },
     entry_points={
         'console_scripts': [
             f'{__application_name__}=lidske_aktivity.cli:main',
