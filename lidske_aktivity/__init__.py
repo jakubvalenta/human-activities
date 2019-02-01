@@ -8,7 +8,7 @@ __application_id__ = 'cz.jakubvalenta.lidske-aktivity'
 __application_name__ = 'lidske-aktivity'
 
 __title__ = 'Lidské Aktivity'
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 __summary__ = 'Lidské Aktivity'
 __uri__ = 'https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'

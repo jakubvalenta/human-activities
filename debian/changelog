@@ -1,3 +1,9 @@
+lidske-aktivity (0.4.0-1) unstable; urgency=medium
+
+  * i18n
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Fri, 01 Feb 2019 11:26:15 +0000
+
 lidske-aktivity (0.3.0-1) unstable; urgency=medium
 
   * Scan periodically.

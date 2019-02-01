@@ -1,6 +1,6 @@
 _name=lidske-aktivity
 _pypkgname=lidske_aktivity
-_version=0.3.0
+_version=0.4.0
 _pkgrel=1
 _arch_linux_dist_parent=dist/arch_linux
 _arch_linux_src_filename=${_name}-${_version}.tar.xz
@@ -174,6 +174,6 @@ backup:  ## Backup built packages (currently Debian-only)
 	cp "${_debian_dist_parent}/${_debian_pkg_filename}" "bak/$$timestamp"
 
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\0.4.0m %s\n", $$1, $$2}'
 
 
