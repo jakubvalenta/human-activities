@@ -80,6 +80,15 @@ class StatusIcon(wx.adv.TaskBarIcon):
                 create_menu_item(
                     self, menu, directory_view.text, icon_image=icon_image
                 )
+            if directory_views.threshold_days_ago:
+                menu.AppendSeparator()
+                create_menu_item(
+                    self,
+                    menu,
+                    texts.MENU_THRESHOLD_DAYS_AGO.format(
+                        days=directory_views.threshold_days_ago
+                    ),
+                )
         else:
             create_menu_item(self, menu, texts.MENU_EMPTY)
             menu.AppendSeparator()

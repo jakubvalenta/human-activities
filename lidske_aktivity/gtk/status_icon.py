@@ -97,6 +97,10 @@ def set_indicator_icon(
     )
 
 
+def markup_italic(s: str) -> str:
+    return f'<i>{s}</i>'
+
+
 class StatusIcon:
     app: 'Application'
     _indicator: AppIndicator3.Indicator
@@ -129,8 +133,10 @@ class StatusIcon:
                 yield Gtk.SeparatorMenuItem()
                 yield create_menu_item(
                     label='',
-                    markup=texts.MENU_THRESHOLD_DAYS_AGO.format(
-                        days=directory_views.threshold_days_ago
+                    markup=markup_italic(
+                        texts.MENU_THRESHOLD_DAYS_AGO.format(
+                            days=directory_views.threshold_days_ago
+                        )
                     ),
                 )
         else:
