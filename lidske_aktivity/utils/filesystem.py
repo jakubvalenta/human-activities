@@ -28,6 +28,19 @@ def list_dirs(path: str) -> List[str]:
     )
 
 
+suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+
+
+def humansize(nbytes: int) -> str:
+    """https://stackoverflow.com/a/14996816"""
+    i = 0
+    while nbytes >= 1024 and i < len(suffixes) - 1:
+        nbytes /= 1024.0
+        i += 1
+    f = f'{nbytes:.2f}'.rstrip('0').rstrip('.')
+    return f'{f} {suffixes[i]}'
+
+
 class DirSize(NamedTuple):
     size_bytes_all: Optional[int] = None
     size_bytes_new: Optional[int] = None

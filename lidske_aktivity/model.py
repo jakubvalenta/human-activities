@@ -134,9 +134,9 @@ class DirectoryView(NamedTuple):
     def text(self):
         s = f'{self.label}: '
         if self.value is not None:
-            s += f'{self.fraction:.0%}'
+            s += f'{self.fraction:.0%} ({self.value_str})'
         if self.pending:
-            s += '...'
+            s += '\N{HORIZONTAL ELLIPSIS}'
         elif self.value is None:
             s += 'n/a'
         return s
@@ -156,6 +156,10 @@ class DirectoryView(NamedTuple):
             fraction=self.fraction, unit_text=unit_text, set_text=set_text
         )
         return textwrap.fill(s)
+    def value_str(self) -> str:
+        if self.unit == UNIT_SIZE_BYTES:
+            return filesystem.humansize(self.value)
+        return _('{value} files').format(value=self.value)
 
 
 class DirectoryViews(dict):
