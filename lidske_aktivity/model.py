@@ -1,6 +1,5 @@
 import logging
 import os
-import textwrap
 import time
 import traceback
 from threading import Event
@@ -13,7 +12,7 @@ from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
 
 from lidske_aktivity import CACHE_PATH
-from lidske_aktivity.config import UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs
+from lidske_aktivity.config import UNIT_SIZE_BYTES, TNamedDirs
 from lidske_aktivity.icon import (
     COLOR_BLACK,
     COLOR_GRAY,
@@ -142,20 +141,6 @@ class DirectoryView(NamedTuple):
         return s
 
     @property
-    def tooltip(self) -> str:
-        unit_text = {UNIT_SIZE_BYTES: _('of the size '), UNIT_NUM_FILES: ''}[
-            self.unit
-        ]
-        if self.threshold_days_ago == 0:
-            set_text = _('all files in configured directories')
-        else:
-            set_text = _('the files modified in the past {days} days').format(
-                days=self.threshold_days_ago
-            )
-        s = _('{fraction:.2%} {unit_text}of {set_text}').format(
-            fraction=self.fraction, unit_text=unit_text, set_text=set_text
-        )
-        return textwrap.fill(s)
     def value_str(self) -> str:
         if self.unit == UNIT_SIZE_BYTES:
             return filesystem.humansize(self.value)
@@ -163,14 +148,14 @@ class DirectoryView(NamedTuple):
 
 
 class DirectoryViews(dict):
-    _unit: str
-    _threshold_days_ago: int
+    unit: str
+    threshold_days_ago: int = 0
 
     def config(
         self, unit: str, threshold_days_ago: int, named_dirs: TNamedDirs
     ):
-        self._unit = unit
-        self._threshold_days_ago = threshold_days_ago
+        self.unit = unit
+        self.threshold_days_ago = threshold_days_ago
         self.clear()
         for path, label in named_dirs.items():
             self[path] = DirectoryView(
@@ -184,7 +169,7 @@ class DirectoryViews(dict):
                     'Directory view for path %s doesn\'t exist', directory.path
                 )
                 continue
-            value = directory.find_value(self._unit, self._threshold_days_ago)
+            value = directory.find_value(self.unit, self.threshold_days_ago)
             self[directory.path] = self[directory.path]._replace(
                 value=value, **extra_props
             )
@@ -215,6 +200,8 @@ class DirectoryViews(dict):
 
     def copy(self) -> 'DirectoryViews':
         new = DirectoryViews()
+        new.unit = self.unit
+        new.threshold_days_ago = self.threshold_days_ago
         new.update(self)
         return new
 

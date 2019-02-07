@@ -23,3 +23,6 @@ SETUP_STEP_SETUP_TITLE = _('Setup')
 LIST_BULLET = '\N{BULLET} {item}'
 
 MENU_EMPTY = _('No directories configured')
+MENU_THRESHOLD_DAYS_AGO = _(
+    '<i>Counting only files modified in the past {days} days</i>'
+)

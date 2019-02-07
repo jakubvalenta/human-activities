@@ -78,11 +78,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
                     ),
                 )
                 create_menu_item(
-                    self,
-                    menu,
-                    directory_view.text,
-                    tooltip=directory_view.tooltip,
-                    icon_image=icon_image,
+                    self, menu, directory_view.text, icon_image=icon_image
                 )
         else:
             create_menu_item(self, menu, texts.MENU_EMPTY)

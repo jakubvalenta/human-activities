@@ -37,6 +37,7 @@ def create_menu_item(
     tooltip: Optional[str] = None,
     icon_name: Optional[str] = None,
     icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None,
+    markup: Optional[str] = None,
 ) -> Gtk.MenuItem:
     menu_item = Gtk.MenuItem()
     if icon_name:
@@ -55,6 +56,9 @@ def create_menu_item(
         menu_item.set_label(label)
     if tooltip:
         menu_item.set_tooltip_text(tooltip)
+    if markup:
+        label = menu_item.get_child()
+        label.set_markup(markup)
     if callback:
         menu_item.connect('activate', callback)
     else:
@@ -119,9 +123,14 @@ class StatusIcon:
                 )
                 icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(
-                    directory_view.text,
-                    tooltip=directory_view.tooltip,
-                    icon_pixbuf=icon_pixbuf,
+                    directory_view.text, icon_pixbuf=icon_pixbuf
+                )
+            if directory_views.threshold_days_ago:
+                yield create_menu_item(
+                    label='',
+                    markup=texts.MENU_THRESHOLD_DAYS_AGO.format(
+                        days=directory_views.threshold_days_ago
+                    ),
                 )
         else:
             yield create_menu_item(texts.MENU_EMPTY)
