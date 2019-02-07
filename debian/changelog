@@ -1,3 +1,10 @@
+lidske-aktivity (0.4.1-1) unstable; urgency=medium
+
+  * Add value (size or number of files) to menu items.
+  * Add menu item showing current days threshold.
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 07 Feb 2019 20:50:24 +0000
+
 lidske-aktivity (0.4.0-1) unstable; urgency=medium
 
   * i18n
