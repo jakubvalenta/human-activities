@@ -15,7 +15,10 @@ from sqlalchemy.orm.session import Session
 from lidske_aktivity import CACHE_PATH
 from lidske_aktivity.config import UNIT_NUM_FILES, UNIT_SIZE_BYTES, TNamedDirs
 from lidske_aktivity.icon import (
-    COLOR_BLACK, COLOR_GRAY, Color, color_from_index,
+    COLOR_BLACK,
+    COLOR_GRAY,
+    Color,
+    color_from_index,
 )
 from lidske_aktivity.locale import _
 from lidske_aktivity.utils import filesystem, func
@@ -37,9 +40,11 @@ class Stat(Base):  # type: ignore
     directory = relationship('Directory', back_populates='stats')
 
     def __repr__(self) -> str:
-        return (f'Stat(size_bytes={self.size_bytes}, '
-                f'num_files={self.num_files}, '
-                f'threshold_days_ago={self.threshold_days_ago})')
+        return (
+            f'Stat(size_bytes={self.size_bytes}, '
+            f'num_files={self.num_files}, '
+            f'threshold_days_ago={self.threshold_days_ago})'
+        )
 
 
 class Directory(Base):  # type: ignore
@@ -50,7 +55,7 @@ class Directory(Base):  # type: ignore
     stats = relationship(
         'Stat',
         back_populates='directory',
-        cascade='all, delete, delete-orphan'
+        cascade='all, delete, delete-orphan',
     )
 
     def find_value(self, unit: str, threshold_days_ago: int) -> Optional[int]:
@@ -138,10 +143,9 @@ class DirectoryView(NamedTuple):
 
     @property
     def tooltip(self) -> str:
-        unit_text = {
-            UNIT_SIZE_BYTES: _('of the size '),
-            UNIT_NUM_FILES: '',
-        }[self.unit]
+        unit_text = {UNIT_SIZE_BYTES: _('of the size '), UNIT_NUM_FILES: ''}[
+            self.unit
+        ]
         if self.threshold_days_ago == 0:
             set_text = _('all files in configured directories')
         else:
@@ -149,9 +153,7 @@ class DirectoryView(NamedTuple):
                 days=self.threshold_days_ago
             )
         s = _('{fraction:.2%} {unit_text}of {set_text}').format(
-            fraction=self.fraction,
-            unit_text=unit_text,
-            set_text=set_text
+            fraction=self.fraction, unit_text=unit_text, set_text=set_text
         )
         return textwrap.fill(s)
 
@@ -160,32 +162,27 @@ class DirectoryViews(dict):
     _unit: str
     _threshold_days_ago: int
 
-    def config(self,
-               unit: str,
-               threshold_days_ago: int,
-               named_dirs: TNamedDirs):
+    def config(
+        self, unit: str, threshold_days_ago: int, named_dirs: TNamedDirs
+    ):
         self._unit = unit
         self._threshold_days_ago = threshold_days_ago
         self.clear()
         for path, label in named_dirs.items():
             self[path] = DirectoryView(
-                label=label,
-                unit=unit,
-                threshold_days_ago=threshold_days_ago
+                label=label, unit=unit, threshold_days_ago=threshold_days_ago
             )
 
     def load(self, *directories: Directory, **extra_props):
         for directory in directories:
             if directory.path not in self:
                 logger.error(
-                    'Directory view for path %s doesn\'t exist',
-                    directory.path
+                    'Directory view for path %s doesn\'t exist', directory.path
                 )
                 continue
             value = directory.find_value(self._unit, self._threshold_days_ago)
             self[directory.path] = self[directory.path]._replace(
-                value=value,
-                **extra_props
+                value=value, **extra_props
             )
         total = sum(dv.value or 0.0 for dv in self.values())
         for path, directory_view in self.items():
@@ -203,9 +200,8 @@ class DirectoryViews(dict):
         return '\n'.join(dv.text for dv in self.values())
 
     def get_colors_with_one_highlighted(
-            self,
-            i: int,
-            grayscale: bool = False) -> Tuple[Color, ...]:
+        self, i: int, grayscale: bool = False
+    ) -> Tuple[Color, ...]:
         colors = [COLOR_GRAY for i in range(len(self))]
         if grayscale:  # TODO: Remove when finally decided for one option.
             colors[i] = COLOR_BLACK
@@ -220,31 +216,33 @@ class DirectoryViews(dict):
 
 
 @func.measure_time
-def scan_directory(path: str,
-                   unit: str,
-                   threshold_days_ago: int,
-                   event_stop: Event,
-                   callback: Callable[[Directory], None],
-                   test: bool = False):
+def scan_directory(
+    path: str,
+    unit: str,
+    threshold_days_ago: int,
+    event_stop: Event,
+    callback: Callable[[Directory], None],
+    test: bool = False,
+):
     logger.info('Scanning "%s"', path)
     try:
         session = scoped_session(session_factory)
-        directory = session.query(Directory).filter(
-            Directory.path == path
-        ).one()
+        directory = (
+            session.query(Directory).filter(Directory.path == path).one()
+        )
         threshold_seconds_ago = threshold_days_ago * 24 * 3600
         threshold_seconds = time.time() - threshold_seconds_ago
         dir_size = filesystem.calc_dir_size(
             directory.path,
             threshold_seconds=threshold_seconds,
-            event_stop=event_stop
+            event_stop=event_stop,
         )
         directory.stats.clear()
         directory.stats.append(
             Stat(
                 size_bytes=dir_size.size_bytes_all,
                 num_files=dir_size.num_files_all,
-                threshold_days_ago=0
+                threshold_days_ago=0,
             )
         )
         if threshold_days_ago != 0:
@@ -252,7 +250,7 @@ def scan_directory(path: str,
                 Stat(
                     size_bytes=dir_size.size_bytes_new,
                     num_files=dir_size.num_files_new,
-                    threshold_days_ago=threshold_days_ago
+                    threshold_days_ago=threshold_days_ago,
                 )
             )
         if test:

@@ -10,20 +10,24 @@ from lidske_aktivity.icon import draw_pie_chart_png
 from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.wx.lib import (
-    image_to_bitmap, image_to_icon, new_id_ref_compat,
+    image_to_bitmap,
+    image_to_icon,
+    new_id_ref_compat,
 )
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
 
 
-def create_menu_item(parent: wx.Window,
-                     menu: wx.Menu,
-                     text: str,
-                     tooltip: str = '',
-                     icon_image: Optional[Image.Image] = None,
-                     id: int = wx.ID_ANY,
-                     callback: Optional[Callable] = None):
+def create_menu_item(
+    parent: wx.Window,
+    menu: wx.Menu,
+    text: str,
+    tooltip: str = '',
+    icon_image: Optional[Image.Image] = None,
+    id: int = wx.ID_ANY,
+    callback: Optional[Callable] = None,
+):
     """Create menu item
 
     The tooltip is actually not visible, menu items with tooltips are not
@@ -36,9 +40,7 @@ def create_menu_item(parent: wx.Window,
     menu.Append(menu_item)
     if callback:
         parent.Bind(
-            wx.EVT_MENU,
-            partial(on_menu_item, callback=callback),
-            id=id
+            wx.EVT_MENU, partial(on_menu_item, callback=callback), id=id
         )
     else:
         menu_item.Enable(False)
@@ -59,8 +61,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
         super().__init__(wx.adv.TBI_DOCK)
         self.app = app
         self.Bind(
-            wx.adv.EVT_TASKBAR_LEFT_DOWN,
-            lambda event: self._show_menu()
+            wx.adv.EVT_TASKBAR_LEFT_DOWN, lambda event: self._show_menu()
         )
         self._init_menu()
 
@@ -73,16 +74,15 @@ class StatusIcon(wx.adv.TaskBarIcon):
                     16,
                     directory_views.fractions,
                     directory_views.get_colors_with_one_highlighted(
-                        i,
-                        grayscale=True
-                    )
+                        i, grayscale=True
+                    ),
                 )
                 create_menu_item(
                     self,
                     menu,
                     directory_view.text,
                     tooltip=directory_view.tooltip,
-                    icon_image=icon_image
+                    icon_image=icon_image,
                 )
         else:
             create_menu_item(self, menu, texts.MENU_EMPTY)
@@ -100,28 +100,28 @@ class StatusIcon(wx.adv.TaskBarIcon):
             context_menu,
             _('&Setup'),
             id=self.id_setup,
-            callback=self.app.show_setup
+            callback=self.app.show_setup,
         )
         create_menu_item(
             self,
             context_menu,
             _('Advanced &configuration'),
             id=wx.ID_SETUP,
-            callback=self.app.show_settings
+            callback=self.app.show_settings,
         )
         create_menu_item(
             self,
             context_menu,
             _('&About'),
             id=wx.ID_ABOUT,
-            callback=self.app.show_about
+            callback=self.app.show_about,
         )
         create_menu_item(
             self,
             context_menu,
             _('&Quit'),
             id=wx.ID_EXIT,
-            callback=self.app.quit
+            callback=self.app.quit,
         )
         return context_menu
 

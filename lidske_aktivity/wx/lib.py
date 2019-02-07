@@ -21,10 +21,12 @@ def new_id_ref_compat():
         return wx.NewId()
 
 
-def create_sizer(parent: Union[wx.Sizer, wx.Panel],
-                 orientation: int = wx.VERTICAL,
-                 *args,
-                 **kwargs) -> wx.BoxSizer:
+def create_sizer(
+    parent: Union[wx.Sizer, wx.Panel],
+    orientation: int = wx.VERTICAL,
+    *args,
+    **kwargs
+) -> wx.BoxSizer:
     sizer = wx.BoxSizer(orientation)
     if isinstance(parent, wx.Sizer):
         parent.Add(sizer, *args, **kwargs)
@@ -37,14 +39,14 @@ def create_label(parent: wx.Window, text: str) -> wx.StaticText:
     return wx.StaticText(parent, label=text)
 
 
-def create_button(parent: wx.Panel,
-                  label: str,
-                  callback: Callable) -> wx.Button:
+def create_button(
+    parent: wx.Panel, label: str, callback: Callable
+) -> wx.Button:
     button = wx.Button(parent, wx.ID_ANY, label)
     button.Bind(
         wx.EVT_BUTTON,
         partial(on_button_clicked, callback=callback),
-        id=button.GetId()
+        id=button.GetId(),
     )
     return button
 
@@ -59,10 +61,12 @@ class RadioConfig(NamedTuple):
     tooltip: Optional[str] = None
 
 
-def create_radio_group(parent: wx.Panel,
-                       radio_configs: Iterable[RadioConfig],
-                       active_value: str,
-                       callback: Callable) -> Dict[str, wx.RadioButton]:
+def create_radio_group(
+    parent: wx.Panel,
+    radio_configs: Iterable[RadioConfig],
+    active_value: str,
+    callback: Callable,
+) -> Dict[str, wx.RadioButton]:
     radio_buttons = {}
     for i, radio_config in enumerate(radio_configs):
         if i == 0:
@@ -73,10 +77,8 @@ def create_radio_group(parent: wx.Panel,
         radio.Bind(
             wx.EVT_RADIOBUTTON,
             partial(
-                on_radio_toggled,
-                value=radio_config.value,
-                callback=callback
-            )
+                on_radio_toggled, value=radio_config.value, callback=callback
+            ),
         )
         if radio_config.value == active_value:
             radio.SetValue(True)
@@ -84,20 +86,18 @@ def create_radio_group(parent: wx.Panel,
     return radio_buttons
 
 
-def on_radio_toggled(event: wx.MouseEvent,
-                     value: str,
-                     callback: Callable):
+def on_radio_toggled(event: wx.MouseEvent, value: str, callback: Callable):
     callback(value)
 
 
-def create_text_control(parent: wx.Panel,
-                        value: str,
-                        callback: Callable) -> wx.TextCtrl:
+def create_text_control(
+    parent: wx.Panel, value: str, callback: Callable
+) -> wx.TextCtrl:
     text_control = wx.TextCtrl(parent, value=value)
     text_control.Bind(
         wx.EVT_TEXT,
         partial(on_text_control_changed, callback=callback),
-        text_control
+        text_control,
     )
     return text_control
 
@@ -106,32 +106,31 @@ def on_text_control_changed(event: wx.KeyEvent, callback: Callable):
     callback(event.GetString())
 
 
-def create_spin_control(parent: wx.Window,
-                        value: int,
-                        callback: Callable,
-                        min_val: int = 0,
-                        max_val: int = 9999) -> wx.SpinCtrl:
+def create_spin_control(
+    parent: wx.Window,
+    value: int,
+    callback: Callable,
+    min_val: int = 0,
+    max_val: int = 9999,
+) -> wx.SpinCtrl:
     spin_control = wx.SpinCtrl(
-        parent,
-        value=str(value),
-        min=min_val,
-        max=max_val
+        parent, value=str(value), min=min_val, max=max_val
     )
     spin_control.Bind(
         wx.EVT_TEXT,
         partial(
             on_spin_control_changed,
             spin_control=spin_control,
-            callback=callback
+            callback=callback,
         ),
-        spin_control
+        spin_control,
     )
     return spin_control
 
 
-def on_spin_control_changed(event: wx.KeyEvent,
-                            spin_control: wx.SpinCtrl,
-                            callback: Callable):
+def on_spin_control_changed(
+    event: wx.KeyEvent, spin_control: wx.SpinCtrl, callback: Callable
+):
     callback(spin_control.GetValue())
 
 
@@ -140,12 +139,11 @@ class DirBrowserButtonWithoutLabel(wx.lib.filebrowsebutton.DirBrowseButton):
         return wx.Window(self)
 
 
-def create_dir_browse_button(parent: wx.Window,
-                             value: Optional[str],
-                             callback: Callable[[str], None]):
+def create_dir_browse_button(
+    parent: wx.Window, value: Optional[str], callback: Callable[[str], None]
+):
     button = DirBrowserButtonWithoutLabel(
-        parent,
-        changeCallback=partial(on_dir_change, callback=callback)
+        parent, changeCallback=partial(on_dir_change, callback=callback)
     )
     button.SetValue(value)
     return button
@@ -175,9 +173,7 @@ def call_tick(func: Callable):
 class Form:
     panel: wx.Panel
 
-    def __init__(self,
-                 parent: wx.Window,
-                 use_parent_panel: bool = False):
+    def __init__(self, parent: wx.Window, use_parent_panel: bool = False):
         if use_parent_panel:
             self.panel = parent
         else:
@@ -194,12 +190,14 @@ class RootPathForm(Form):
     _root_path: str
     _parent: wx.Panel
 
-    def __init__(self,
-                 root_path: str,
-                 on_change: Callable[[str], None],
-                 parent: wx.Panel,
-                 *args,
-                 **kwargs):
+    def __init__(
+        self,
+        root_path: str,
+        on_change: Callable[[str], None],
+        parent: wx.Panel,
+        *args,
+        **kwargs
+    ):
         self._root_path = root_path
         self._on_change = on_change
         self._parent = parent
@@ -211,7 +209,7 @@ class RootPathForm(Form):
         button = create_dir_browse_button(
             self.panel,
             value=self._root_path or '',
-            callback=self._on_dir_changed
+            callback=self._on_dir_changed,
         )
         vbox.Add(button, flag=wx.EXPAND)
 
@@ -228,16 +226,17 @@ class NamedDirsForm(Form):
     _named_dirs_list: List[NamedDir]
     _vbox: wx.BoxSizer
 
-    def __init__(self,
-                 named_dirs: TNamedDirs,
-                 on_change: Callable[[TNamedDirs], None],
-                 parent: wx.Panel,
-                 on_redraw: Optional[Callable[[], None]] = None,
-                 *args,
-                 **kwargs):
+    def __init__(
+        self,
+        named_dirs: TNamedDirs,
+        on_change: Callable[[TNamedDirs], None],
+        parent: wx.Panel,
+        on_redraw: Optional[Callable[[], None]] = None,
+        *args,
+        **kwargs
+    ):
         self._named_dirs_list = [
-            NamedDir(path, name)
-            for path, name in named_dirs.items()
+            NamedDir(path, name) for path, name in named_dirs.items()
         ]
         self._on_change = on_change
         self._on_redraw = on_redraw
@@ -252,44 +251,35 @@ class NamedDirsForm(Form):
             name_control = create_text_control(
                 self.panel,
                 value=named_dir.name or '',
-                callback=partial(self._on_name_changed, i)
+                callback=partial(self._on_name_changed, i),
             )
             hbox.Add(
                 name_control,
                 proportion=2,
                 flag=wx.EXPAND | wx.RIGHT,
-                border=10
+                border=10,
             )
             path_button = create_dir_browse_button(
                 self.panel,
                 value=named_dir.path or '',
-                callback=partial(self._on_path_changed, i)
+                callback=partial(self._on_path_changed, i),
             )
             hbox.Add(
-                path_button,
-                proportion=3,
-                flag=wx.EXPAND | wx.RIGHT,
-                border=10
+                path_button, proportion=3, flag=wx.EXPAND | wx.RIGHT, border=10
             )
             remove_button = create_button(
                 self.panel,
                 texts.BUTTON_REMOVE,
-                callback=partial(self._on_remove_clicked, i)
+                callback=partial(self._on_remove_clicked, i),
             )
-            hbox.Add(
-                remove_button,
-                proportion=1,
-                flag=wx.EXPAND
-            )
+            hbox.Add(remove_button, proportion=1, flag=wx.EXPAND)
             if i == 0:
                 flag = wx.EXPAND
             else:
                 flag = wx.EXPAND | wx.TOP
             self._vbox.Add(hbox, flag=flag, border=5)
         add_button = create_button(
-            self.panel,
-            texts.BUTTON_ADD,
-            callback=self._on_add_clicked
+            self.panel, texts.BUTTON_ADD, callback=self._on_add_clicked
         )
         self._vbox.Add(add_button, flag=wx.TOP, border=10)
 

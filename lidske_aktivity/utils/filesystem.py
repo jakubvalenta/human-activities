@@ -10,8 +10,10 @@ logger = logging.getLogger(__name__)
 
 def has_hidden_attribute(entry: os.DirEntry) -> bool:
     """See https://stackoverflow.com/a/6365265"""
-    return bool(getattr(entry.stat(), 'st_file_attributes', 0) &
-                stat.FILE_ATTRIBUTE_HIDDEN)  # type: ignore
+    return bool(
+        getattr(entry.stat(), 'st_file_attributes', 0)
+        & stat.FILE_ATTRIBUTE_HIDDEN
+    )  # type: ignore
 
 
 def is_hidden(entry: os.DirEntry) -> bool:
@@ -20,7 +22,8 @@ def is_hidden(entry: os.DirEntry) -> bool:
 
 def list_dirs(path: str) -> List[str]:
     return sorted(
-        entry.path for entry in os.scandir(path)
+        entry.path
+        for entry in os.scandir(path)
         if entry.is_dir() and not is_hidden(entry)
     )
 
@@ -32,9 +35,9 @@ class DirSize(NamedTuple):
     num_files_new: Optional[int] = None
 
 
-def calc_dir_size(path: str,
-                  threshold_seconds: float,
-                  event_stop: Event) -> DirSize:
+def calc_dir_size(
+    path: str, threshold_seconds: float, event_stop: Event
+) -> DirSize:
     try:
         entries = os.scandir(path)
     except FileNotFoundError:
@@ -61,9 +64,7 @@ def calc_dir_size(path: str,
                     num_files_new += 1
             elif entry.is_dir():
                 sub_dir_size = calc_dir_size(
-                    entry.path,
-                    threshold_seconds,
-                    event_stop
+                    entry.path, threshold_seconds, event_stop
                 )
                 if sub_dir_size.size_bytes_all:
                     size_bytes_all += sub_dir_size.size_bytes_all
@@ -77,5 +78,5 @@ def calc_dir_size(path: str,
         size_bytes_all=size_bytes_all,
         size_bytes_new=size_bytes_new,
         num_files_all=num_files_all,
-        num_files_new=num_files_new
+        num_files_new=num_files_new,
     )

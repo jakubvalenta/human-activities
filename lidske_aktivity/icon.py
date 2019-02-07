@@ -42,7 +42,7 @@ def _hash_to_fraction(s: str) -> float:
     hash_obj = sha1(s.encode())
     hash_hex_len = hash_obj.digest_size * 2
     hash_int = int(hash_obj.hexdigest(), 16)
-    max_hash_int = 16**hash_hex_len - 1
+    max_hash_int = 16 ** hash_hex_len - 1
     fraction: float = hash_int / max_hash_int
     return fraction
 
@@ -52,12 +52,12 @@ def _hue_to_rgb(p: float, q: float, t: float) -> float:
         t += 1
     if t > 1:
         t -= 1
-    if t < 1/6:
+    if t < 1 / 6:
         return p + (q - p) * 6 * t
-    if t < 1/2:
+    if t < 1 / 2:
         return q
-    if t < 2/3:
-        return p + (q - p) * (2/3 - t) * 6
+    if t < 2 / 3:
+        return p + (q - p) * (2 / 3 - t) * 6
     return p
 
 
@@ -68,9 +68,9 @@ def _hsl_to_rgb(h: float, s: float, l: float) -> Tuple[int, int, int]:
     else:
         q = l * (1 + s) if l < 0.5 else l + s - l * s
         p = 2 * l - q
-        r = _hue_to_rgb(p, q, h + 1/3)
+        r = _hue_to_rgb(p, q, h + 1 / 3)
         g = _hue_to_rgb(p, q, h)
-        b = _hue_to_rgb(p, q, h - 1/3)
+        b = _hue_to_rgb(p, q, h - 1 / 3)
     return round(r * 255), round(g * 255), round(b * 255)
 
 
@@ -83,30 +83,34 @@ def hue_from_index(i: int, steps: int = 6) -> float:
 
 
 @lru_cache(MAX_COLORS + 1)
-def color_from_index(i: int,
-                     s: float = 0.8,
-                     l: float = 0.5,
-                     default_color: Color = COLOR_GRAY,
-                     **kwargs) -> Color:
+def color_from_index(
+    i: int,
+    s: float = 0.8,
+    l: float = 0.5,
+    default_color: Color = COLOR_GRAY,
+    **kwargs,
+) -> Color:
     if i == -1:
         return default_color
     rgb = _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
     return Color(*rgb)
 
 
-def _pie_chart_shader(x: int,
-                      y: int,
-                      w: int,
-                      h: int,
-                      slices: List[Slice],
-                      background_color: Color = COLOR_TRANSPARENT) -> Color:
+def _pie_chart_shader(
+    x: int,
+    y: int,
+    w: int,
+    h: int,
+    slices: List[Slice],
+    background_color: Color = COLOR_TRANSPARENT,
+) -> Color:
     center = w / 2, h / 2
     radius = min(center)
     coord = x - center[0], y - center[1]
-    distance = math.sqrt(abs(coord[0]**2) + abs(coord[1]**2))
+    distance = math.sqrt(abs(coord[0] ** 2) + abs(coord[1] ** 2))
     angle = math.atan2(coord[1], coord[0]) + math.pi / 2
     if angle < 0:
-        angle = 2*math.pi + angle
+        angle = 2 * math.pi + angle
     if distance <= radius:
         for slice in slices:
             if slice.start <= angle < slice.end:
@@ -114,10 +118,12 @@ def _pie_chart_shader(x: int,
     return background_color
 
 
-def _draw_image(w: int,
-                h: int,
-                shader: Callable,
-                background_color: Color = COLOR_TRANSPARENT) -> Image.Image:
+def _draw_image(
+    w: int,
+    h: int,
+    shader: Callable,
+    background_color: Color = COLOR_TRANSPARENT,
+) -> Image.Image:
     image = Image.new('RGBA', (w, h), background_color)
     pixels = image.load()
     for x in range(w):
@@ -126,15 +132,13 @@ def _draw_image(w: int,
     return image
 
 
-def _create_slices(fractions: Tuple[float, ...],
-                   colors: Tuple[Color, ...] = (),
-                   default_color: Color = COLOR_WHITE) -> Iterator[Slice]:
+def _create_slices(
+    fractions: Tuple[float, ...],
+    colors: Tuple[Color, ...] = (),
+    default_color: Color = COLOR_WHITE,
+) -> Iterator[Slice]:
     if not fractions or sum(fractions) == 0:
-        yield Slice(
-            start=0,
-            end=_frac_to_rad(1),
-            color=default_color
-        )
+        yield Slice(start=0, end=_frac_to_rad(1), color=default_color)
         return
     cumulative_frac = 0.0
     if not colors:
@@ -146,39 +150,42 @@ def _create_slices(fractions: Tuple[float, ...],
         yield Slice(
             start=_frac_to_rad(cumulative_frac),
             end=_frac_to_rad(cumulative_frac + frac),
-            color=color
+            color=color,
         )
         cumulative_frac += frac
 
 
 @lru_cache(ICON_CACHE_SIZE)
-def draw_pie_chart_png(size: int,
-                       fractions: Tuple[float, ...],
-                       colors: Tuple[Color, ...] = ()) -> Image.Image:
+def draw_pie_chart_png(
+    size: int, fractions: Tuple[float, ...], colors: Tuple[Color, ...] = ()
+) -> Image.Image:
     logger.info('Drawing PNG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = list(_create_slices(fractions, colors))
     return _draw_image(
-        w=size,
-        h=size,
-        shader=partial(_pie_chart_shader, slices=slices)
+        w=size, h=size, shader=partial(_pie_chart_shader, slices=slices)
     )
 
 
 @lru_cache(ICON_CACHE_SIZE)
-def draw_pie_chart_svg(fractions: Tuple[float, ...],
-                       colors: Tuple[Color, ...] = ()) -> str:
+def draw_pie_chart_svg(
+    fractions: Tuple[float, ...], colors: Tuple[Color, ...] = ()
+) -> str:
     logger.info('Drawing SVG icon %s', [f'{fract:.2f}' for fract in fractions])
     slices = _create_slices(fractions, colors)
     lines = []
     lines.append('<?xml version="1.0" encoding="UTF-8" ?>')
-    lines.append('<svg xmlns="http://www.w3.org/2000/svg" '
-                 'version="1.1" viewBox="-1 -1 2 2">')
+    lines.append(
+        '<svg xmlns="http://www.w3.org/2000/svg" '
+        'version="1.1" viewBox="-1 -1 2 2">'
+    )
     lines.append('<g transform="rotate(-90)">')
     for slice in slices:
         color = slice.color
-        if slice.start == 0 and slice.end == 2*math.pi:
-            lines.append(f'<circle cx="0" cy="0" r="1" '
-                         f'fill="rgb({color.r}, {color.g}, {color.b})" />')
+        if slice.start == 0 and slice.end == 2 * math.pi:
+            lines.append(
+                f'<circle cx="0" cy="0" r="1" '
+                f'fill="rgb({color.r}, {color.g}, {color.b})" />'
+            )
             continue
         start_x, start_y = math.cos(slice.start), math.sin(slice.start)
         end_x, end_y = math.cos(slice.end), math.sin(slice.end)

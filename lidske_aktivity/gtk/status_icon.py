@@ -8,7 +8,9 @@ import gi
 from lidske_aktivity import __application_id__, __application_name__, texts
 from lidske_aktivity.gtk.lib import create_box, image_to_pixbuf
 from lidske_aktivity.icon import (
-    calc_icon_hash, draw_pie_chart_png, draw_pie_chart_svg,
+    calc_icon_hash,
+    draw_pie_chart_png,
+    draw_pie_chart_svg,
 )
 from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
@@ -17,7 +19,11 @@ gi.require_version('AppIndicator3', '0.1')
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import AppIndicator3, GdkPixbuf, Gtk  # noqa:E402  # isort:skip
+from gi.repository import (
+    AppIndicator3,
+    GdkPixbuf,
+    Gtk,
+)  # noqa:E402  # isort:skip
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
@@ -26,11 +32,12 @@ logger = logging.getLogger(__name__)
 
 
 def create_menu_item(
-        label: str,
-        callback: Optional[Callable] = None,
-        tooltip: Optional[str] = None,
-        icon_name: Optional[str] = None,
-        icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None) -> Gtk.MenuItem:
+    label: str,
+    callback: Optional[Callable] = None,
+    tooltip: Optional[str] = None,
+    icon_name: Optional[str] = None,
+    icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None,
+) -> Gtk.MenuItem:
     menu_item = Gtk.MenuItem()
     if icon_name:
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
@@ -59,34 +66,34 @@ def create_indicator() -> AppIndicator3.Indicator:
     indicator = AppIndicator3.Indicator.new(
         id=__application_id__,
         icon_name=__application_name__,
-        category=AppIndicator3.IndicatorCategory.APPLICATION_STATUS
+        category=AppIndicator3.IndicatorCategory.APPLICATION_STATUS,
     )
     indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
     return indicator
 
 
-def write_temp_file(svg: str,
-                    filename: str,
-                    **kwargs) -> tempfile.TemporaryDirectory:
+def write_temp_file(
+    svg: str, filename: str, **kwargs
+) -> tempfile.TemporaryDirectory:
     temp_dir = tempfile.TemporaryDirectory(**kwargs)
     (Path(temp_dir.name) / filename).write_text(svg)
     return temp_dir
 
 
-def set_indicator_icon(indicator: AppIndicator3.Indicator,
-                       icon_theme_path: str,
-                       icon_name: str,
-                       tooltip: str):
+def set_indicator_icon(
+    indicator: AppIndicator3.Indicator,
+    icon_theme_path: str,
+    icon_name: str,
+    tooltip: str,
+):
     indicator.set_icon_full(icon_name, tooltip)
     indicator.set_icon_theme_path(icon_theme_path)
     logger.info(
-        'Set icon %s/%s',
-        indicator.get_icon_theme_path(),
-        indicator.get_icon()
+        'Set icon %s/%s', indicator.get_icon_theme_path(), indicator.get_icon()
     )
 
 
-class StatusIcon():
+class StatusIcon:
     app: 'Application'
     _indicator: AppIndicator3.Indicator
     _last_fractions: Optional[Tuple[float, ...]] = None
@@ -99,8 +106,7 @@ class StatusIcon():
         self._init_menu()
 
     def _create_menu_items(
-            self,
-            directory_views: Optional[DirectoryViews] = None
+        self, directory_views: Optional[DirectoryViews] = None
     ) -> Iterator[Gtk.MenuItem]:
         # TODO: Limit the maximum number of items shown.
         if directory_views:
@@ -109,34 +115,30 @@ class StatusIcon():
                 icon_image = draw_pie_chart_png(
                     icon_size,
                     directory_views.fractions,
-                    directory_views.get_colors_with_one_highlighted(i)
+                    directory_views.get_colors_with_one_highlighted(i),
                 )
                 icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(
                     directory_view.text,
                     tooltip=directory_view.tooltip,
-                    icon_pixbuf=icon_pixbuf
+                    icon_pixbuf=icon_pixbuf,
                 )
         else:
             yield create_menu_item(texts.MENU_EMPTY)
         yield Gtk.SeparatorMenuItem()
+        yield create_menu_item(_('Setup'), lambda event: self.app.show_setup())
         yield create_menu_item(
-            _('Setup'),
-            lambda event: self.app.show_setup()
-        )
-        yield create_menu_item(
-            _('Advanced configuration'),
-            lambda event: self.app.show_settings()
+            _('Advanced configuration'), lambda event: self.app.show_settings()
         )
         yield create_menu_item(
             _('About'),
             lambda event: self.app.show_about(),
-            icon_name='help-about'
+            icon_name='help-about',
         )
         yield create_menu_item(
             _('Quit'),
             lambda event: self.app.quit(),
-            icon_name='application-exit'
+            icon_name='application-exit',
         )
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
@@ -154,15 +156,13 @@ class StatusIcon():
         svg = draw_pie_chart_svg(directory_views.fractions)
         icon_hash = calc_icon_hash(directory_views.fractions)
         icon_temp_dir = write_temp_file(
-            svg,
-            filename=icon_hash + '.svg',
-            prefix=__application_id__ + '-',
+            svg, filename=icon_hash + '.svg', prefix=__application_id__ + '-'
         )
         set_indicator_icon(
             self._indicator,
             icon_theme_path=icon_temp_dir.name,
             icon_name=icon_hash,
-            tooltip=directory_views.tooltip
+            tooltip=directory_views.tooltip,
         )
         self._icon_temp_dir = icon_temp_dir
 

@@ -33,9 +33,9 @@ def add_content_intro(parent: wx.Panel):
     add_text_list(parent, sizer, texts.SETUP_LIST.splitlines())
 
 
-def init_wizard(wizard: wx.adv.Wizard,
-                page_funcs: List[Callable],
-                callback: Callable):
+def init_wizard(
+    wizard: wx.adv.Wizard, page_funcs: List[Callable], callback: Callable
+):
     pages = []
     for page_func in page_funcs:
         page = wx.adv.WizardPageSimple(wizard)
@@ -66,10 +66,10 @@ class Setup(wx.adv.Wizard):
                     NamedDirsForm,
                     self._config.named_dirs,
                     self._on_named_dirs_change,
-                    use_parent_panel=True
-                )
+                    use_parent_panel=True,
+                ),
             ],
-            self._on_wizard_accept
+            self._on_wizard_accept,
         )
 
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):

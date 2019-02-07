@@ -4,12 +4,8 @@ from lidske_aktivity.icon import gen_random_slices, hue_from_index
 
 
 class TestIcon(TestCase):
-
     def test_hue_from_index(self):
-        result = [
-            hue_from_index(i, steps=4)
-            for i in range(10)
-        ]
+        result = [hue_from_index(i, steps=4) for i in range(10)]
         expected = [
             1 * 0.25,
             2 * 0.25,

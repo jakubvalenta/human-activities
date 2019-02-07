@@ -19,11 +19,7 @@ MODES = {
 }
 DEFAULT_NAMED_DIRS: TNamedDirs = {
     os.path.expanduser('~/' + name): name
-    for name in (
-        _('Paid work'),
-        _('Unpaid work'),
-        _('Others'),
-    )
+    for name in (_('Paid work'), _('Unpaid work'), _('Others'))
 }
 UNIT_SIZE_BYTES = 'size_bytes'
 UNIT_NUM_FILES = 'num_files'

@@ -6,7 +6,11 @@ from threading import Event, Thread, Timer
 from typing import Any, Optional
 
 from lidske_aktivity import (
-    __authors__, __copyright__, __title__, __uri__, __version__,
+    __authors__,
+    __copyright__,
+    __title__,
+    __uri__,
+    __version__,
 )
 from lidske_aktivity.config import Config, load_config, save_config
 from lidske_aktivity.icon import draw_pie_chart_png, gen_random_slices
@@ -70,9 +74,7 @@ class Application:
         directories.save()
         directory_views = DirectoryViews()
         directory_views.config(
-            self._config.unit,
-            self._config.threshold_days_ago,
-            named_dirs
+            self._config.unit, self._config.threshold_days_ago, named_dirs
         )
         directory_views.load(*directories)
         return directory_views
@@ -89,7 +91,7 @@ class Application:
                     threshold_days_ago=self._config.threshold_days_ago,
                     event_stop=self._scan_event_stop,
                     callback=partial(self._on_scan, directory_views),
-                    test=self._config.test
+                    test=self._config.test,
                 )
                 for path in directory_views.keys()
             ]
@@ -116,8 +118,9 @@ class Application:
         self._redraw_thread = Thread(target=self._redraw)
         self._redraw_thread.start()
 
-    def _redraw_trigger(self,
-                        directory_views: Optional[DirectoryViews] = None):
+    def _redraw_trigger(
+        self, directory_views: Optional[DirectoryViews] = None
+    ):
         if self._redraw_queue is not None:
             self._redraw_queue.put(directory_views)
 
@@ -130,10 +133,7 @@ class Application:
                 continue
             logger.info('Redrawing')
             self._ui.lib.call_tick(
-                partial(
-                    self._status_icon.update,
-                    directory_views
-                )
+                partial(self._status_icon.update, directory_views)
             )
 
     def _redraw_stop(self):
@@ -153,16 +153,12 @@ class Application:
 
     def show_setup(self):
         self._ui_app.spawn_frame(
-            self._ui.setup.Setup,
-            self._config,
-            self.set_config
+            self._ui.setup.Setup, self._config, self.set_config
         )
 
     def show_settings(self):
         self._ui_app.spawn_frame(
-            self._ui.settings.Settings,
-            self._config,
-            self.set_config
+            self._ui.settings.Settings, self._config, self.set_config
         )
 
     def show_about(self):
@@ -172,7 +168,7 @@ class Application:
             version=__version__,
             copyright=__copyright__,
             uri=__uri__,
-            authors=__authors__
+            authors=__authors__,
         )
 
     def quit(self):

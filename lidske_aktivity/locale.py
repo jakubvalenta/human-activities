@@ -14,8 +14,6 @@ if getattr(sys, 'frozen', False):  # Running in a bundle
 gettext_windows.setup_env()
 
 t = gettext.translation(
-    __application_name__,
-    **translation_kwargs,
-    fallback=True
+    __application_name__, **translation_kwargs, fallback=True
 )
 _ = t.gettext

@@ -15,6 +15,7 @@ def measure_time(f):
         duration = time.time() - time_start
         logger.info('Called %s in %f s', f.__name__, duration)
         return ret
+
     return wrapper
 
 

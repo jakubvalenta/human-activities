@@ -4,11 +4,21 @@ import gi
 
 from lidske_aktivity import texts
 from lidske_aktivity.config import (
-    MODE_NAMED_DIRS, MODE_ROOT_PATH, MODES, UNITS, Config, TNamedDirs,
+    MODE_NAMED_DIRS,
+    MODE_ROOT_PATH,
+    MODES,
+    UNITS,
+    Config,
+    TNamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
-    NamedDirsForm, RadioConfig, RootPathForm, box_add, create_label,
-    create_radio_group, create_spin_button,
+    NamedDirsForm,
+    RadioConfig,
+    RootPathForm,
+    box_add,
+    create_label,
+    create_radio_group,
+    create_spin_button,
 )
 
 gi.require_version('Gtk', '3.0')
@@ -27,10 +37,9 @@ class Settings(Gtk.Dialog):
     _root_path_form: RootPathForm
     _named_dirs_form: NamedDirsForm
 
-    def __init__(self,
-                 config: Config,
-                 on_accept: Callable,
-                 parent: Gtk.Window):
+    def __init__(
+        self, config: Config, on_accept: Callable, parent: Gtk.Window
+    ):
         self._config = config
         self._on_accept = on_accept
         super().__init__(
@@ -41,8 +50,8 @@ class Settings(Gtk.Dialog):
                 Gtk.STOCK_CANCEL,
                 Gtk.ResponseType.CANCEL,
                 Gtk.STOCK_OK,
-                Gtk.ResponseType.OK
-            )
+                Gtk.ResponseType.OK,
+            ),
         )
         self.set_default_size(500, 600)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -61,46 +70,43 @@ class Settings(Gtk.Dialog):
         self._create_unit_radios()
         self._threshold_days_ago_entry = create_spin_button(
             value=self._config.threshold_days_ago,
-            callback=self._on_threshold_days_ago_changed
+            callback=self._on_threshold_days_ago_changed,
         )
         self._root_path_form = RootPathForm(
-            self._config.root_path,
-            self._on_root_path_change,
-            parent=self
+            self._config.root_path, self._on_root_path_change, parent=self
         )
         self._named_dirs_form = NamedDirsForm(
-            self._config.named_dirs,
-            self._on_named_dirs_change,
-            parent=self
+            self._config.named_dirs, self._on_named_dirs_change, parent=self
         )
         # Mode radios must be created after the forms, because the radio
         # callback immediately tries to set sensitivity of the forms.
         self._create_mode_radios()
 
     def _add_widgets(self):
-        widgets = [
-            create_label(texts.SETTINGS_UNIT)
-        ] + list(self._unit_radios.values()) + [
-            create_label(texts.SETTINGS_THRESHOLD_DAYS_OLD),
-            self._threshold_days_ago_entry,
-            create_label(texts.SETTINGS_MODE),
-            self._mode_radios[MODE_ROOT_PATH],
-            self._root_path_form,
-            self._mode_radios[MODE_NAMED_DIRS],
-            self._named_dirs_form,
-        ]
+        widgets = (
+            [create_label(texts.SETTINGS_UNIT)]
+            + list(self._unit_radios.values())
+            + [
+                create_label(texts.SETTINGS_THRESHOLD_DAYS_OLD),
+                self._threshold_days_ago_entry,
+                create_label(texts.SETTINGS_MODE),
+                self._mode_radios[MODE_ROOT_PATH],
+                self._root_path_form,
+                self._mode_radios[MODE_NAMED_DIRS],
+                self._named_dirs_form,
+            ]
+        )
         for widget in widgets:
             box_add(self._box, widget, expand=False)
 
     def _create_unit_radios(self):
         radio_configs = [
-            RadioConfig(value, label)
-            for value, label in UNITS.items()
+            RadioConfig(value, label) for value, label in UNITS.items()
         ]
         self._unit_radios = create_radio_group(
             radio_configs,
             active_value=self._config.unit,
-            callback=self._on_unit_radio_toggled
+            callback=self._on_unit_radio_toggled,
         )
 
     def _on_unit_radio_toggled(self, unit: str):
@@ -111,20 +117,17 @@ class Settings(Gtk.Dialog):
 
     def _create_mode_radios(self):
         radio_configs = [
-            RadioConfig(value, label)
-            for value, label in MODES.items()
+            RadioConfig(value, label) for value, label in MODES.items()
         ]
         self._mode_radios = create_radio_group(
             radio_configs,
             active_value=self._config.mode,
-            callback=self._on_mode_radio_toggled
+            callback=self._on_mode_radio_toggled,
         )
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
-        self._root_path_form.set_sensitive(
-            self._config.mode == MODE_ROOT_PATH
-        )
+        self._root_path_form.set_sensitive(self._config.mode == MODE_ROOT_PATH)
         self._named_dirs_form.set_sensitive(
             self._config.mode == MODE_NAMED_DIRS
         )

@@ -13,9 +13,11 @@ SETTINGS_MODE = _('Directories')
 
 SETUP_TITLE = _('Lidské Aktivity setup')
 SETUP_HEADING = _('Please adjust your OS settings like this:')
-SETUP_LIST = _('''first do this
+SETUP_LIST = _(
+    '''first do this
 than that
-and finally something different''')
+and finally something different'''
+)
 SETUP_STEP_INTRO_TITLE = _('Intro')
 SETUP_STEP_SETUP_TITLE = _('Setup')
 LIST_BULLET = '\N{BULLET} {item}'

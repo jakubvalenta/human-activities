@@ -6,7 +6,10 @@ import gi
 from lidske_aktivity import texts
 from lidske_aktivity.config import Config, TNamedDirs
 from lidske_aktivity.gtk.lib import (
-    NamedDirsForm, box_add, create_box, create_label,
+    NamedDirsForm,
+    box_add,
+    create_box,
+    create_label,
 )
 
 gi.require_version('Gdk', '3.0')
@@ -45,9 +48,9 @@ class Page(NamedTuple):
     page_type: Gtk.AssistantPageType
 
 
-def create_assistant(parent: Gtk.Window,
-                     pages: List[Page],
-                     callback: Callable) -> Gtk.Assistant:
+def create_assistant(
+    parent: Gtk.Window, pages: List[Page], callback: Callable
+) -> Gtk.Assistant:
     assistant = Gtk.Assistant(
         modal=True,
         transient_for=parent,
@@ -58,10 +61,7 @@ def create_assistant(parent: Gtk.Window,
     )
     assistant.set_default_size(500, 400)
     assistant.set_position(Gtk.WindowPosition.CENTER)
-    assistant.connect(
-        'apply',
-        partial(on_assistant_apply, callback=callback)
-    )
+    assistant.connect('apply', partial(on_assistant_apply, callback=callback))
     assistant.connect('cancel', on_assistant_cancel)
     for page in pages:
         content = page.content_func(parent=assistant)
@@ -86,10 +86,9 @@ class Setup:
     _config: Config
     assistant: Gtk.Assistant
 
-    def __init__(self,
-                 config: Config,
-                 on_finish: Callable,
-                 parent: Gtk.Window):
+    def __init__(
+        self, config: Config, on_finish: Callable, parent: Gtk.Window
+    ):
         self._config = config
         self._config.reset_named_dirs()
         self._on_finish = on_finish
@@ -100,19 +99,19 @@ class Setup:
                 Page(
                     title=texts.SETUP_STEP_INTRO_TITLE,
                     content_func=create_content_intro,
-                    page_type=Gtk.AssistantPageType.INTRO
+                    page_type=Gtk.AssistantPageType.INTRO,
                 ),
                 Page(
                     title=texts.SETUP_STEP_SETUP_TITLE,
                     content_func=partial(
                         NamedDirsForm,
                         self._config.named_dirs,
-                        self._on_named_dirs_change
+                        self._on_named_dirs_change,
                     ),
-                    page_type=Gtk.AssistantPageType.CONFIRM
-                )
+                    page_type=Gtk.AssistantPageType.CONFIRM,
+                ),
             ],
-            self._on_assistant_apply
+            self._on_assistant_apply,
         )
 
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):

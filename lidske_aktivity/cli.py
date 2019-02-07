@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 def is_appindicator_available() -> bool:
     try:
         import gi
+
         gi.require_version('AppIndicator3', '0.1')
         logger.info('AppIndicator is available')
         return True
@@ -23,45 +24,44 @@ def is_appindicator_available() -> bool:
 def main():
     parser = argparse.ArgumentParser(description=__title__)
     parser.add_argument(
-        '-v',
-        '--verbose',
-        action='store_true',
-        help='Enable debugging output'
+        '-v', '--verbose', action='store_true', help='Enable debugging output'
     )
     parser.add_argument(
-        '-c',
-        '--clean',
-        action='store_true',
-        help='Clean cache and exit'
+        '-c', '--clean', action='store_true', help='Clean cache and exit'
     )
     parser.add_argument(
         '-s',
         '--scan',
         action='store_true',
-        help='Scan all directories, write the results to cache, and exit'
+        help='Scan all directories, write the results to cache, and exit',
     )
     parser.add_argument(
         '-i',
         '--interval',
         type=int,
         default=21600,
-        help=('Number of seconds between periodic directory scans '
-              '(default 21600 = 6h). If set to 0, periodic scanning will be '
-              'disabled.')
+        help=(
+            'Number of seconds between periodic directory scans '
+            '(default 21600 = 6h). If set to 0, periodic scanning will be '
+            'disabled.'
+        ),
     )
     parser.add_argument(
         '-w',
         '--wxwidgets',
         action='store_true',
-        help=('Force the use of the WxWidget backend; by default, GTK is '
-              'always used when AppIndicator is available')
+        help=(
+            'Force the use of the WxWidget backend; by default, GTK is '
+            'always used when AppIndicator is available'
+        ),
     )
     args = parser.parse_args()
     if args.verbose:
         logging.basicConfig(
             stream=sys.stdout,
             level=logging.INFO,
-            format='[%(threadName)s] %(message)s')
+            format='[%(threadName)s] %(message)s',
+        )
     if args.clean:
         clean_cache()
         return

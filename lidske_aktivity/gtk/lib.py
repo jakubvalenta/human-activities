@@ -16,20 +16,24 @@ from gi.repository import GdkPixbuf, Gtk, GLib  # noqa:E402  # isort:skip
 logger = logging.getLogger(__name__)
 
 
-def create_box(orientation: Gtk.Orientation = Gtk.Orientation.VERTICAL,
-               homogeneous: bool = True,
-               **kwargs) -> Gtk.Box:
+def create_box(
+    orientation: Gtk.Orientation = Gtk.Orientation.VERTICAL,
+    homogeneous: bool = True,
+    **kwargs
+) -> Gtk.Box:
     box = Gtk.Box(orientation=orientation, **kwargs)
     if not homogeneous:
         box.set_homogeneous(homogeneous)
     return box
 
 
-def box_add(box: Gtk.Box,
-            widget: Gtk.Widget,
-            expand: bool = True,
-            fill: bool = True,
-            padding: int = 0):
+def box_add(
+    box: Gtk.Box,
+    widget: Gtk.Widget,
+    expand: bool = True,
+    fill: bool = True,
+    padding: int = 0,
+):
     box.pack_start(widget, expand, fill, padding)
     box.show_all()
 
@@ -41,9 +45,11 @@ def create_label(text: str) -> Gtk.Label:
     return label
 
 
-def create_button(callback: Callable,
-                  label: Optional[str] = None,
-                  stock_id: Optional[str] = None) -> Gtk.Button:
+def create_button(
+    callback: Callable,
+    label: Optional[str] = None,
+    stock_id: Optional[str] = None,
+) -> Gtk.Button:
     if label:
         button = Gtk.Button.new_with_label(label)
     else:
@@ -64,16 +70,16 @@ class RadioConfig(NamedTuple):
 
 
 def create_radio_group(
-        radio_configs: Iterable[RadioConfig],
-        active_value: str,
-        callback: Callable,
-        use_toggle_buttons: bool = False) -> Dict[str, Gtk.RadioButton]:
+    radio_configs: Iterable[RadioConfig],
+    active_value: str,
+    callback: Callable,
+    use_toggle_buttons: bool = False,
+) -> Dict[str, Gtk.RadioButton]:
     radio_buttons = {}
     group = None
     for radio_config in radio_configs:
         radio_button = Gtk.RadioButton.new_with_label_from_widget(
-            group,
-            radio_config.label
+            group, radio_config.label
         )
         if use_toggle_buttons:
             radio_button.set_mode(False)
@@ -84,16 +90,16 @@ def create_radio_group(
         radio_button.connect(
             'toggled',
             partial(on_radio_toggled, callback=callback),
-            radio_config.value
+            radio_config.value,
         )
         radio_button.set_active(radio_config.value == active_value)
         radio_buttons[radio_config.value] = radio_button
     return radio_buttons
 
 
-def on_radio_toggled(radio_button: Gtk.RadioButton,
-                     value: str,
-                     callback: Callable):
+def on_radio_toggled(
+    radio_button: Gtk.RadioButton, value: str, callback: Callable
+):
     callback(value)
 
 
@@ -109,17 +115,18 @@ def on_entry_changed(entry: Gtk.Entry, callback: Callable):
     callback(entry.get_text())
 
 
-def create_spin_button(value: int,
-                       callback: Callable,
-                       min_val: int = 0,
-                       max_val: int = 9999,
-                       step: int = 1) -> Gtk.SpinButton:
+def create_spin_button(
+    value: int,
+    callback: Callable,
+    min_val: int = 0,
+    max_val: int = 9999,
+    step: int = 1,
+) -> Gtk.SpinButton:
     spin_button = Gtk.SpinButton.new_with_range(min_val, max_val, step)
     if value:
         spin_button.set_value(value)
     spin_button.connect(
-        'value_changed',
-        partial(on_spin_button_changed, callback=callback)
+        'value_changed', partial(on_spin_button_changed, callback=callback)
     )
     return spin_button
 
@@ -129,11 +136,10 @@ def on_spin_button_changed(spin_button: Gtk.SpinButton, callback: Callable):
 
 
 def create_file_chooser_button(
-        value: Optional[str],
-        callback: Callable[[str], None]) -> Gtk.FileChooserButton:
+    value: Optional[str], callback: Callable[[str], None]
+) -> Gtk.FileChooserButton:
     button = Gtk.FileChooserButton.new(
-        texts.FILE_CHOOSER_BUTTON,
-        Gtk.FileChooserAction.SELECT_FOLDER
+        texts.FILE_CHOOSER_BUTTON, Gtk.FileChooserAction.SELECT_FOLDER
     )
     if value:
         button.set_filename(value)
@@ -160,10 +166,12 @@ def call_tick(func: Callable):
 class RootPathForm(Gtk.Box):
     _root_path: str
 
-    def __init__(self,
-                 root_path: str,
-                 on_change: Callable[[str], None],
-                 parent: Gtk.Window):
+    def __init__(
+        self,
+        root_path: str,
+        on_change: Callable[[str], None],
+        parent: Gtk.Window,
+    ):
         self._root_path = root_path
         self._on_change = on_change
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -171,8 +179,7 @@ class RootPathForm(Gtk.Box):
 
     def _init_entry(self):
         button = create_file_chooser_button(
-            value=self._root_path or None,
-            callback=self._on_path_changed
+            value=self._root_path or None, callback=self._on_path_changed
         )
         button.set_hexpand(True)
         box_add(self, button)
@@ -189,13 +196,14 @@ class NamedDir(NamedTuple):
 class NamedDirsForm(Gtk.Grid):
     _named_dirs_list: List[NamedDir]
 
-    def __init__(self,
-                 named_dirs: TNamedDirs,
-                 on_change: Callable[[TNamedDirs], None],
-                 parent: Gtk.Window):
+    def __init__(
+        self,
+        named_dirs: TNamedDirs,
+        on_change: Callable[[TNamedDirs], None],
+        parent: Gtk.Window,
+    ):
         self._named_dirs_list = [
-            NamedDir(path, name)
-            for path, name in named_dirs.items()
+            NamedDir(path, name) for path, name in named_dirs.items()
         ]
         self._on_change = on_change
         super().__init__()
@@ -207,7 +215,7 @@ class NamedDirsForm(Gtk.Grid):
         for i, named_dir in enumerate(self._named_dirs_list):
             name_entry = create_entry(
                 value=named_dir.name or '',
-                callback=partial(self._on_name_changed, i)
+                callback=partial(self._on_name_changed, i),
             )
             name_entry.set_hexpand(True)
             self.attach(name_entry, left=0, top=i, width=2, height=1)
@@ -222,15 +230,14 @@ class NamedDirsForm(Gtk.Grid):
             )
             self.attach(remove_button, left=4, top=i, width=1, height=1)
         add_button = create_button(
-            stock_id=Gtk.STOCK_ADD,
-            callback=self._on_add_clicked
+            stock_id=Gtk.STOCK_ADD, callback=self._on_add_clicked
         )
         self.attach(
             add_button,
             left=4,
             top=len(self._named_dirs_list),
             width=1,
-            height=1
+            height=1,
         )
         self.show_all()
 

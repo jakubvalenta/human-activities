@@ -11,7 +11,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data check clean-lang gen-lang bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -129,6 +129,9 @@ lint-data:
 	desktop-file-validate "data/${_name}.desktop"
 	systemd-analyze verify "data/${_name}.service"
 	systemd-analyze verify "data/${_name}.timer"
+
+reformat:  ## Reformat Python code using Black
+	black -l 79 --skip-string-normalization ${_pypkgname}
 
 check:  ## Test installed app
 	python3 -m pytest ${_pypkgname}/tests
