@@ -126,6 +126,7 @@ class StatusIcon:
                     directory_view.text, icon_pixbuf=icon_pixbuf
                 )
             if directory_views.threshold_days_ago:
+                yield Gtk.SeparatorMenuItem()
                 yield create_menu_item(
                     label='',
                     markup=texts.MENU_THRESHOLD_DAYS_AGO.format(
