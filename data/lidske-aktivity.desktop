@@ -1,7 +1,8 @@
 [Desktop Entry]
 Version=1.0
 Name=Lidské Aktivity
-Comment=Description of Lidské Aktivity
+Comment=Monitor size of directories
+Comment[cs]=Monitorování velikosti adresářů
 Exec=/usr/bin/lidske-aktivity --interval=0
 Icon=lidske-aktivity
 StartupNotify=true

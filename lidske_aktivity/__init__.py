@@ -9,7 +9,7 @@ __application_name__ = 'lidske-aktivity'
 __title__ = 'Lidské Aktivity'
 __version__ = '0.4.0'
 
-__summary__ = 'Lidské Aktivity'
+__summary__ = 'Monitor size of directories'
 __uri__ = 'https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'
 
 __authors__ = ['Jakub Valenta', 'Jiří Skála']
@@ -19,9 +19,9 @@ __license__ = 'GNU GPL 3'
 __copyright__ = '\N{COPYRIGHT SIGN} 2018-2019 Jakub Valenta, Jiří Skála'
 
 
-def get_dir(mac_dir: str,
-            xdg_var: str,
-            fallback_dir: str) -> Union[Path, PurePosixPath, PureWindowsPath]:
+def get_dir(
+    mac_dir: str, xdg_var: str, fallback_dir: str
+) -> Union[Path, PurePosixPath, PureWindowsPath]:
     if platform.win32_ver()[0]:
         win_app_dir = os.environ.get('APPDATA')
         if win_app_dir:
