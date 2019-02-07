@@ -12,8 +12,8 @@ def has_hidden_attribute(entry: os.DirEntry) -> bool:
     """See https://stackoverflow.com/a/6365265"""
     return bool(
         getattr(entry.stat(), 'st_file_attributes', 0)
-        & stat.FILE_ATTRIBUTE_HIDDEN
-    )  # type: ignore
+        & stat.FILE_ATTRIBUTE_HIDDEN  # type: ignore
+    )
 
 
 def is_hidden(entry: os.DirEntry) -> bool:

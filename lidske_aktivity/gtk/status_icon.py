@@ -19,11 +19,11 @@ gi.require_version('AppIndicator3', '0.1')
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import (
+from gi.repository import (  # noqa:E402  # isort:skip
     AppIndicator3,
     GdkPixbuf,
     Gtk,
-)  # noqa:E402  # isort:skip
+)
 
 if TYPE_CHECKING:
     from lidske_aktivity.app import Application
