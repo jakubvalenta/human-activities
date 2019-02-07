@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lidske-aktivity 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-31 00:48+0100\n"
-"PO-Revision-Date: 2019-01-31 00:49+0100\n"
+"POT-Creation-Date: 2019-02-07 21:44+0100\n"
+"PO-Revision-Date: 2019-02-07 21:46+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -54,7 +54,7 @@ msgstr "Základní nastavení Lidských Aktivit"
 msgid "Please adjust your OS settings like this:"
 msgstr "Prosím upravte nastavení svého operačního systému takto:"
 
-#: lidske_aktivity/texts.py:16
+#: lidske_aktivity/texts.py:17
 msgid ""
 "first do this\n"
 "than that\n"
@@ -64,23 +64,28 @@ msgstr ""
 "pak tamto\n"
 "a nakonec něco jiného"
 
-#: lidske_aktivity/texts.py:19
+#: lidske_aktivity/texts.py:21
 msgid "Intro"
 msgstr "Úvod"
 
-#: lidske_aktivity/texts.py:20 lidske_aktivity/gtk/status_icon.py:123
+#: lidske_aktivity/texts.py:22 lidske_aktivity/gtk/status_icon.py:145
 msgid "Setup"
 msgstr "Nastavení"
 
-#: lidske_aktivity/texts.py:23
+#: lidske_aktivity/texts.py:25
 msgid "No directories configured"
 msgstr "Nejsou nastavené žádné adresáře"
 
-#: lidske_aktivity/config.py:16
+#: lidske_aktivity/texts.py:27
+#, python-brace-format
+msgid "Counting only files modified in the past {days} days"
+msgstr "Započítává pouze soubory změněné v posledních {days} dnech"
+
+#: lidske_aktivity/config.py:17
 msgid "All directories in selected directory"
 msgstr "Všechny adresáře ve zvoleném adresáři"
 
-#: lidske_aktivity/config.py:17
+#: lidske_aktivity/config.py:18
 msgid "Predefined directories"
 msgstr "Vybrané adresáře"
 
@@ -88,64 +93,51 @@ msgstr "Vybrané adresáře"
 msgid "Paid work"
 msgstr "Honorovaná práce"
 
-#: lidske_aktivity/config.py:23
+#: lidske_aktivity/config.py:22
 msgid "Unpaid work"
 msgstr "Nehonorovaná práce"
 
-#: lidske_aktivity/config.py:24
+#: lidske_aktivity/config.py:22
 msgid "Others"
 msgstr "Ostatní"
 
-#: lidske_aktivity/config.py:30
+#: lidske_aktivity/config.py:27
 msgid "Size in bytes"
 msgstr "Velikost v bytech"
 
-#: lidske_aktivity/config.py:31
+#: lidske_aktivity/config.py:28
 msgid "Number of files"
 msgstr "Počet souborů"
 
-#: lidske_aktivity/model.py:141
-msgid "of the size "
-msgstr "velikosti "
-
-#: lidske_aktivity/model.py:145
-msgid "all files in configured directories"
-msgstr "všech souborů ve zvolených adresářích"
-
 #: lidske_aktivity/model.py:147
 #, python-brace-format
-msgid "the files modified in the past {days} days"
-msgstr "souborů změněných v posledních {days} dnech"
+msgid "{value} files"
+msgstr "{value} souborů"
 
-#: lidske_aktivity/model.py:150
-#, python-brace-format
-msgid "{fraction:.2%} {unit_text}of {set_text}"
-msgstr "{fraction:.2%} {unit_text}{set_text}"
-
-#: lidske_aktivity/wx/status_icon.py:89 lidske_aktivity/wx/status_icon.py:100
+#: lidske_aktivity/wx/status_icon.py:95 lidske_aktivity/wx/status_icon.py:106
 msgid "&Setup"
 msgstr "Nastavení"
 
-#: lidske_aktivity/wx/status_icon.py:107
+#: lidske_aktivity/wx/status_icon.py:113
 msgid "Advanced &configuration"
 msgstr "Pokročilé nastavení"
 
-#: lidske_aktivity/wx/status_icon.py:114
+#: lidske_aktivity/wx/status_icon.py:120
 msgid "&About"
 msgstr "O &aplikaci"
 
-#: lidske_aktivity/wx/status_icon.py:121
+#: lidske_aktivity/wx/status_icon.py:127
 msgid "&Quit"
 msgstr "Ukončit"
 
-#: lidske_aktivity/gtk/status_icon.py:127
+#: lidske_aktivity/gtk/status_icon.py:147
 msgid "Advanced configuration"
 msgstr "Pokročilé nastavení"
 
-#: lidske_aktivity/gtk/status_icon.py:131
+#: lidske_aktivity/gtk/status_icon.py:150
 msgid "About"
 msgstr "O aplikaci"
 
-#: lidske_aktivity/gtk/status_icon.py:136
+#: lidske_aktivity/gtk/status_icon.py:155
 msgid "Quit"
 msgstr "Ukončit"

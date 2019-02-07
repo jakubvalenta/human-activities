@@ -151,20 +151,20 @@ ${_pypkgname}/locale/%/LC_MESSAGES/${_name}.mo: lang/%.po
 	mkdir -p "$$(dirname "$@")"
 	msgfmt $< -o $@
 
-clean-lang:
+clean-lang:  ## Clean gettext .pot and .mo files
 	-rm lang/${_name}.pot
 	-rm ${_pypkgname}/locale/*/LC_MESSAGES/${_name}.mo
 
-gen-lang: | ${_pypkgname}/locale/en_US/LC_MESSAGES/${_name}.mo ${_pypkgname}/locale/cs_CZ/LC_MESSAGES/${_name}.mo
+gen-lang: | ${_pypkgname}/locale/en_US/LC_MESSAGES/${_name}.mo ${_pypkgname}/locale/cs_CZ/LC_MESSAGES/${_name}.mo  ## Generate gettext .pot and .mo files
 
 bump-version:  ## Increase application version (automatically change code)
 ifeq (,$(version))
 	@echo "You must set the variable 'version'."
 	@exit 1
 endif
-	sed -E -i s/${_version}/${version}/ Makefile
-	sed -E -i s/${_version}/${version}/ ${_pypkgname}/__init__.py
-	sed -E -i s/${_version}/${version}/ arch_linux/PKGBUILD
+	sed -i s/${_version}/${version}/ Makefile
+	sed -i s/${_version}/${version}/ ${_pypkgname}/__init__.py
+	sed -i s/${_version}/${version}/ arch_linux/PKGBUILD
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
 		lidske_aktivity_debian dch -v "${version}-${_pkgrel}" "New version"
@@ -177,4 +177,4 @@ backup:  ## Backup built packages (currently Debian-only)
 	cp "${_debian_dist_parent}/${_debian_pkg_filename}" "bak/$$timestamp"
 
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\0.4.0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'

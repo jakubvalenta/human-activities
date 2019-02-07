@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lidske-aktivity 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-31 00:48+0100\n"
+"POT-Creation-Date: 2019-02-07 21:44+0100\n"
 "PO-Revision-Date: 2019-01-30 21:41+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: English\n"
@@ -53,30 +53,35 @@ msgstr ""
 msgid "Please adjust your OS settings like this:"
 msgstr ""
 
-#: lidske_aktivity/texts.py:16
+#: lidske_aktivity/texts.py:17
 msgid ""
 "first do this\n"
 "than that\n"
 "and finally something different"
 msgstr ""
 
-#: lidske_aktivity/texts.py:19
+#: lidske_aktivity/texts.py:21
 msgid "Intro"
 msgstr ""
 
-#: lidske_aktivity/texts.py:20 lidske_aktivity/gtk/status_icon.py:123
+#: lidske_aktivity/texts.py:22 lidske_aktivity/gtk/status_icon.py:145
 msgid "Setup"
 msgstr ""
 
-#: lidske_aktivity/texts.py:23
+#: lidske_aktivity/texts.py:25
 msgid "No directories configured"
 msgstr ""
 
-#: lidske_aktivity/config.py:16
+#: lidske_aktivity/texts.py:27
+#, python-brace-format
+msgid "Counting only files modified in the past {days} days"
+msgstr ""
+
+#: lidske_aktivity/config.py:17
 msgid "All directories in selected directory"
 msgstr "All directories in selected directory"
 
-#: lidske_aktivity/config.py:17
+#: lidske_aktivity/config.py:18
 msgid "Predefined directories"
 msgstr "Predefined directories"
 
@@ -84,64 +89,51 @@ msgstr "Predefined directories"
 msgid "Paid work"
 msgstr "Paid work"
 
-#: lidske_aktivity/config.py:23
+#: lidske_aktivity/config.py:22
 msgid "Unpaid work"
 msgstr "Unpaid work"
 
-#: lidske_aktivity/config.py:24
+#: lidske_aktivity/config.py:22
 msgid "Others"
 msgstr "Others"
 
-#: lidske_aktivity/config.py:30
+#: lidske_aktivity/config.py:27
 msgid "Size in bytes"
 msgstr "Size in bytes"
 
-#: lidske_aktivity/config.py:31
+#: lidske_aktivity/config.py:28
 msgid "Number of files"
 msgstr "Number of files"
 
-#: lidske_aktivity/model.py:141
-msgid "of the size "
-msgstr ""
-
-#: lidske_aktivity/model.py:145
-msgid "all files in configured directories"
-msgstr "All directories in selected directory"
-
 #: lidske_aktivity/model.py:147
 #, python-brace-format
-msgid "the files modified in the past {days} days"
+msgid "{value} files"
 msgstr ""
 
-#: lidske_aktivity/model.py:150
-#, python-brace-format
-msgid "{fraction:.2%} {unit_text}of {set_text}"
-msgstr ""
-
-#: lidske_aktivity/wx/status_icon.py:89 lidske_aktivity/wx/status_icon.py:100
+#: lidske_aktivity/wx/status_icon.py:95 lidske_aktivity/wx/status_icon.py:106
 msgid "&Setup"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:107
+#: lidske_aktivity/wx/status_icon.py:113
 msgid "Advanced &configuration"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:114
+#: lidske_aktivity/wx/status_icon.py:120
 msgid "&About"
 msgstr ""
 
-#: lidske_aktivity/wx/status_icon.py:121
+#: lidske_aktivity/wx/status_icon.py:127
 msgid "&Quit"
 msgstr ""
 
-#: lidske_aktivity/gtk/status_icon.py:127
+#: lidske_aktivity/gtk/status_icon.py:147
 msgid "Advanced configuration"
 msgstr ""
 
-#: lidske_aktivity/gtk/status_icon.py:131
+#: lidske_aktivity/gtk/status_icon.py:150
 msgid "About"
 msgstr ""
 
-#: lidske_aktivity/gtk/status_icon.py:136
+#: lidske_aktivity/gtk/status_icon.py:155
 msgid "Quit"
 msgstr ""
