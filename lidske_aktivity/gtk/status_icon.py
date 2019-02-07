@@ -6,7 +6,12 @@ from typing import TYPE_CHECKING, Callable, Iterator, Optional, Tuple
 import gi
 
 from lidske_aktivity import __application_id__, __application_name__, texts
-from lidske_aktivity.gtk.lib import create_box, image_to_pixbuf
+from lidske_aktivity.gtk.lib import (
+    box_add,
+    create_box,
+    create_label,
+    image_to_pixbuf,
+)
 from lidske_aktivity.icon import (
     calc_icon_hash,
     draw_pie_chart_png,
@@ -38,6 +43,7 @@ def create_menu_item(
     icon_name: Optional[str] = None,
     icon_pixbuf: Optional[GdkPixbuf.Pixbuf] = None,
     markup: Optional[str] = None,
+    right: Optional[str] = None,
 ) -> Gtk.MenuItem:
     menu_item = Gtk.MenuItem()
     if icon_name:
@@ -47,10 +53,15 @@ def create_menu_item(
     else:
         image = None
     if image:
-        hbox = create_box(Gtk.Orientation.HORIZONTAL, spacing=6)
-        hbox.add(image)
-        label_widget = Gtk.Label(label)
-        hbox.add(label_widget)
+        hbox = create_box(
+            Gtk.Orientation.HORIZONTAL, spacing=6, homogeneous=False
+        )
+        box_add(hbox, image, expand=False)
+        label_widget = create_label(label)
+        box_add(hbox, label_widget)
+        if right:
+            right_widget = create_label(right)
+            box_add(hbox, right_widget, expand=False)
         menu_item.add(hbox)
     else:
         menu_item.set_label(label)
@@ -127,7 +138,7 @@ class StatusIcon:
                 )
                 icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(
-                    directory_view.text, icon_pixbuf=icon_pixbuf
+                    directory_view.text, icon_pixbuf=icon_pixbuf, right='foo'
                 )
             if directory_views.threshold_days_ago:
                 yield Gtk.SeparatorMenuItem()
