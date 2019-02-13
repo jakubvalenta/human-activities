@@ -12,42 +12,21 @@ $ make setup
 # systemctl start lidske-aktivity.timer
 ```
 
+### Mac
+
+```
+pip3 install Pillow sqlalchemy wxpython
+```
+
 ### Windows
 
-#. Install [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
-
-#. Install [Git](https://www.git-scm.com/).
-
-#. Install [Python3](https://www.python.org/).
-
-    Check _Add python to environment variables_.
-
-#. Open Git Bash.
-
-#. Configure Git:
-
-    ```
-    git config --global user.name "Jakub Valenta"
-    git config --global user.email "jakub@jakubvalenta.cz"
-    ```
-
-#. Clone this repo:
-
-    ```
-    git clone gogs@lab.saloun.cz:jakub/art-lidske-aktivity-gtk.git
-    ```
-
-#. Install Python dependencies:
-
-    ```
-    pip install Pillow sqlalchemy wxpython
-    ```
-
-#. Optional: Install additional language pack via Windows Update to test translations.
+```
+pip install Pillow sqlalchemy wxpython
+```
 
 ## Usage
 
-### Linux and Mac
+### Linux
 
 ```
 make run
@@ -57,6 +36,12 @@ Debugging:
 
 ```
 make run-debug
+```
+
+### Mac
+
+```
+python3 -m lidske_aktivity --verbose
 ```
 
 ### Windows
@@ -91,7 +76,7 @@ make dist-pyinstaller-build dist-pyinstaller
 ### Mac
 
 ```
-pip install pyinstaller
+pip3 install pyinstaller
 sh mac/pyinstaller.sh
 ```
 
