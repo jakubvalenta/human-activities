@@ -18,7 +18,7 @@ class Application(QtWidgets.QApplication):
         self.on_init(self)
 
     def spawn_frame(self, func: Callable[..., T], *args, **kwargs) -> T:
-        return func(*args, **kwargs)
+        return func(*args, ui_app=self, **kwargs)
 
     def quit(self):
         logger.info('App quit')
