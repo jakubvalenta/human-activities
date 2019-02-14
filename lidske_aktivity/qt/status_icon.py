@@ -1,7 +1,7 @@
 import logging
 from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from lidske_aktivity import __title__, is_mac, is_win, texts
 from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
@@ -42,10 +42,12 @@ def create_menu_item(
 class StatusIcon(QtWidgets.QSystemTrayIcon):
     app: 'Application'
     _last_fractions: Optional[Tuple[float, ...]] = None
+    _update_signal = QtCore.pyqtSignal(DirectoryViews)
 
     def __init__(self, app: 'Application'):
         self.app = app
         super().__init__(parent=None)
+        self._update_signal.connect(self._on_update)
         self._init_menu()
         self._set_icon(DEFAULT_FRACTIONS, __title__)
         self.show()
@@ -101,6 +103,10 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
         self.setContextMenu(menu)
 
     def update(self, directory_views: DirectoryViews):
+        self._update_signal.emit(directory_views)
+
+    def _on_update(self, directory_views: DirectoryViews):
+        logger.info('Qt StatusIcon on_update')
         self._init_menu(directory_views)
         if self._last_fractions == directory_views.fractions:
             return
