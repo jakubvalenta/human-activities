@@ -11,7 +11,7 @@ from lidske_aktivity.config import TNamedDirs
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import GdkPixbuf, Gtk, GLib  # noqa:E402  # isort:skip
+from gi.repository import GdkPixbuf, Gtk  # noqa:E402  # isort:skip
 
 logger = logging.getLogger(__name__)
 
@@ -157,10 +157,6 @@ def image_to_pixbuf(image: Image.Image) -> GdkPixbuf.Pixbuf:
     pixbuf = loader.get_pixbuf()
     loader.close()
     return pixbuf
-
-
-def call_tick(func: Callable):
-    GLib.idle_add(func)
 
 
 class RootPathForm(Gtk.Box):

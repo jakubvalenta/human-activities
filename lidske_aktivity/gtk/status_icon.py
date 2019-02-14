@@ -1,5 +1,6 @@
 import logging
 import tempfile
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Iterator, Optional, Tuple
 
@@ -27,6 +28,7 @@ gi.require_version('Gtk', '3.0')
 
 from gi.repository import (  # noqa:E402  # isort:skip
     AppIndicator3,
+    GLib,
     GdkPixbuf,
     Gtk,
 )
@@ -172,6 +174,9 @@ class StatusIcon:
         self._indicator.set_menu(menu)
 
     def update(self, directory_views: DirectoryViews):
+        GLib.idle_add(partial(self._on_update, directory_views))
+
+    def _on_update(self, directory_views: DirectoryViews):
         self._init_menu(directory_views)
         if self._last_fractions == directory_views.fractions:
             return

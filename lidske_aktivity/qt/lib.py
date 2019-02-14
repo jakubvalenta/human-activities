@@ -1,6 +1,5 @@
 import io
 import logging
-from typing import Callable
 
 from PIL import Image
 from PyQt5 import QtGui, QtWidgets
@@ -36,7 +35,3 @@ def get_icon_size(
 
 def create_icon(pixmap: QtGui.QPixmap) -> QtGui.QIcon:
     return QtGui.QIcon(pixmap)
-
-
-def call_tick(func: Callable):
-    func()

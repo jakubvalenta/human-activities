@@ -134,9 +134,7 @@ class Application:
                 logger.info('Redrawing received empty queue item')
                 continue
             logger.info('Redrawing')
-            self._ui.lib.call_tick(
-                partial(self._status_icon.update, directory_views)
-            )
+            self._status_icon.update(directory_views)
 
     def _redraw_stop(self):
         if self._redraw_event_stop is not None:

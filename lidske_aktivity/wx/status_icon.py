@@ -132,6 +132,9 @@ class StatusIcon(wx.adv.TaskBarIcon):
         return context_menu
 
     def update(self, directory_views: DirectoryViews):
+        wx.CallAfter(partial(self._on_update, directory_views))
+
+    def _on_update(self, directory_views: DirectoryViews):
         self._init_menu(directory_views)
         if self._last_fractions == directory_views.fractions:
             return

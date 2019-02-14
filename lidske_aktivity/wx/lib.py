@@ -166,10 +166,6 @@ def image_to_icon(image: Image.Image) -> wx.Icon:
     return wx.Icon(image_to_bitmap(image))
 
 
-def call_tick(func: Callable):
-    wx.CallAfter(func)
-
-
 class Form:
     panel: wx.Panel
 
