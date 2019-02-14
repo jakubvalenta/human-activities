@@ -1,17 +1,17 @@
 import logging
 from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtGui, QtWidgets
 
-from lidske_aktivity import texts, is_win, is_mac
+from lidske_aktivity import is_mac, is_win, texts
 from lidske_aktivity.icon import draw_pie_chart_png
 from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.qt.lib import (
-    get_icon_size,
-    create_icon_pixmap,
-    image_to_pixmap,
     create_icon,
+    create_icon_pixmap,
+    get_icon_size,
+    image_to_pixmap,
 )
 
 if TYPE_CHECKING:

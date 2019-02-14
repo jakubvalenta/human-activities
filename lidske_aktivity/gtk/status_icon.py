@@ -57,8 +57,8 @@ def create_menu_item(
     if tooltip:
         menu_item.set_tooltip_text(tooltip)
     if markup:
-        label = menu_item.get_child()
-        label.set_markup(markup)
+        label_widget = menu_item.get_child()
+        label_widget.set_markup(markup)
     if callback:
         menu_item.connect('activate', callback)
     else:

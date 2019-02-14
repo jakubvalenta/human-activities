@@ -143,7 +143,7 @@ class DirectoryView(NamedTuple):
     @property
     def value_str(self) -> str:
         if self.unit == UNIT_SIZE_BYTES:
-            return filesystem.humansize(self.value)
+            return filesystem.humansize(self.value or 0)
         return _('{value} files').format(value=self.value)
 
 

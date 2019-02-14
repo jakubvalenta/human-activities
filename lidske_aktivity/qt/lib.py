@@ -1,11 +1,9 @@
+import io
 import logging
 from typing import Callable
 
 from PIL import Image
-
 from PyQt5 import QtGui, QtWidgets
-
-import io
 
 logger = logging.getLogger(__name__)
 

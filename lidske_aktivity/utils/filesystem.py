@@ -31,7 +31,7 @@ def list_dirs(path: str) -> List[str]:
 suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
 
 
-def humansize(nbytes: int) -> str:
+def humansize(nbytes: float) -> str:
     """https://stackoverflow.com/a/14996816"""
     i = 0
     while nbytes >= 1024 and i < len(suffixes) - 1:
