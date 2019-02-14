@@ -55,6 +55,15 @@ def main():
             'always used when AppIndicator is available'
         ),
     )
+    parser.add_argument(
+        '-q',
+        '--qt',
+        action='store_true',
+        help=(
+            'Force the use of the Qt5 backend; by default, GTK is '
+            'always used when AppIndicator is available'
+        ),
+    )
     args = parser.parse_args()
     if args.verbose:
         logging.basicConfig(
@@ -73,7 +82,11 @@ def main():
     if args.scan:
         app.scan_start()
         return
-    if not args.wxwidgets and is_appindicator_available():
+    if args.wxwidgets:
+        import lidske_aktivity.wx as ui
+    elif args.qt:
+        import lidske_aktivity.qt as ui
+    elif is_appindicator_available():
         import lidske_aktivity.gtk as ui
     else:
         import lidske_aktivity.wx as ui

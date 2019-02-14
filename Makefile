@@ -11,7 +11,7 @@ _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 
-.PHONY: build install setup setup-dev run run-debug run-wx dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-pyinstaller-build dist-pyinstaller dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -38,6 +38,9 @@ run-debug:  ## Start the app with extended logging
 
 run-wx:  ## Start the app with the WxWidgets backend and extended logging
 	pipenv run python3 -m ${_pypkgname} --verbose --wxwidgets
+
+run-qt:  ## Start the app with the Qt backend and extended logging
+	pipenv run python3 -m ${_pypkgname} --verbose --qt
 
 dist-pyinstaller-build:
 	docker build -f linux_pyinstaller/Dockerfile -t lidske_aktivity_pyinstaller .
