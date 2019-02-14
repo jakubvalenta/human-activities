@@ -5,8 +5,8 @@ import wx
 import wx.adv
 from PIL import Image
 
-from lidske_aktivity import texts
-from lidske_aktivity.icon import draw_pie_chart_png
+from lidske_aktivity import __title__, texts
+from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
 from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.wx.lib import (
@@ -64,6 +64,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
             wx.adv.EVT_TASKBAR_LEFT_DOWN, lambda event: self._show_menu()
         )
         self._init_menu()
+        self._set_icon(DEFAULT_FRACTIONS, __title__)
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
         # TODO: Limit the maximum number of items shown.
@@ -135,9 +136,12 @@ class StatusIcon(wx.adv.TaskBarIcon):
         if self._last_fractions == directory_views.fractions:
             return
         self._last_fractions = directory_views.fractions
-        image = draw_pie_chart_png(self.icon_size, directory_views.fractions)
+        self._set_icon(directory_views.fractions, directory_views.tooltip)
+
+    def _set_icon(self, fractions: Tuple[float, ...], tooltip: str):
+        image = draw_pie_chart_png(self.icon_size, fractions)
         icon = image_to_icon(image)
-        self.SetIcon(icon, directory_views.tooltip)
+        self.SetIcon(icon, tooltip)
 
     @property
     def icon_size(self) -> int:

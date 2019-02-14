@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 MAX_COLORS = 64
 ICON_CACHE_SIZE = 128
+DEFAULT_FRACTIONS = (0.35, 0.25, 0.20, 0.15, 0.05)
 
 
 class Color(NamedTuple):
@@ -217,6 +218,5 @@ def calc_icon_hash(fractions: Tuple[float, ...]) -> str:
 
 
 def print_default_svg_icon():
-    fractions = (0.35, 0.25, 0.20, 0.15, 0.05)
-    svg = draw_pie_chart_svg(fractions)
+    svg = draw_pie_chart_svg(DEFAULT_FRACTIONS)
     sys.stdout.write(svg)

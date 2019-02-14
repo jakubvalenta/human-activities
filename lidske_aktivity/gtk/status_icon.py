@@ -5,9 +5,15 @@ from typing import TYPE_CHECKING, Callable, Iterator, Optional, Tuple
 
 import gi
 
-from lidske_aktivity import __application_id__, __application_name__, texts
+from lidske_aktivity import (
+    __application_id__,
+    __application_name__,
+    __title__,
+    texts,
+)
 from lidske_aktivity.gtk.lib import create_box, image_to_pixbuf
 from lidske_aktivity.icon import (
+    DEFAULT_FRACTIONS,
     calc_icon_hash,
     draw_pie_chart_png,
     draw_pie_chart_svg,
@@ -111,6 +117,7 @@ class StatusIcon:
     def __init__(self, app: 'Application'):
         self.app = app
         self._indicator = create_indicator()
+        self._set_icon(DEFAULT_FRACTIONS, __title__)
         self._init_menu()
 
     def _create_menu_items(
@@ -169,8 +176,11 @@ class StatusIcon:
         if self._last_fractions == directory_views.fractions:
             return
         self._last_fractions = directory_views.fractions
-        svg = draw_pie_chart_svg(directory_views.fractions)
-        icon_hash = calc_icon_hash(directory_views.fractions)
+        self._set_icon(directory_views.fractions, directory_views.tooltip)
+
+    def _set_icon(self, fractions: Tuple[float, ...], tooltip: str):
+        svg = draw_pie_chart_svg(fractions)
+        icon_hash = calc_icon_hash(fractions)
         icon_temp_dir = write_temp_file(
             svg, filename=icon_hash + '.svg', prefix=__application_id__ + '-'
         )
@@ -178,7 +188,7 @@ class StatusIcon:
             self._indicator,
             icon_theme_path=icon_temp_dir.name,
             icon_name=icon_hash,
-            tooltip=directory_views.tooltip,
+            tooltip=tooltip,
         )
         self._icon_temp_dir = icon_temp_dir
 

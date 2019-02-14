@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
 from PyQt5 import QtGui, QtWidgets
 
-from lidske_aktivity import is_mac, is_win, texts
-from lidske_aktivity.icon import draw_pie_chart_png
+from lidske_aktivity import __title__, is_mac, is_win, texts
+from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
 from lidske_aktivity.locale import _
 from lidske_aktivity.model import DirectoryViews
 from lidske_aktivity.qt.lib import (
@@ -47,6 +47,8 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
         self.app = app
         super().__init__(parent=None)
         self._init_menu()
+        self._set_icon(DEFAULT_FRACTIONS, __title__)
+        self.show()
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
         menu = QtWidgets.QMenu(parent=None)
@@ -103,12 +105,14 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
         if self._last_fractions == directory_views.fractions:
             return
         self._last_fractions = directory_views.fractions
-        image = draw_pie_chart_png(self.icon_size, directory_views.fractions)
+        self._set_icon(directory_views.fractions, directory_views.tooltip)
+
+    def _set_icon(self, fractions: Tuple[float, ...], tooltip: str):
+        image = draw_pie_chart_png(self.icon_size, fractions)
         pixmap = image_to_pixmap(image)
         icon = create_icon(pixmap)
         self.setIcon(icon)
-        self.setToolTip(directory_views.tooltip)
-        self.show()
+        self.setToolTip(tooltip)
 
     @property
     def icon_size(self) -> int:

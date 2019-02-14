@@ -13,7 +13,7 @@ from lidske_aktivity import (
     __version__,
 )
 from lidske_aktivity.config import Config, load_config, save_config
-from lidske_aktivity.icon import draw_pie_chart_png, gen_random_slices
+from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
 from lidske_aktivity.model import Directories, DirectoryViews, scan_directory
 
 logger = logging.getLogger(__name__)
@@ -165,7 +165,7 @@ class Application:
 
     def show_about(self):
         self._ui.about.show_about(
-            image=draw_pie_chart_png(148, tuple(gen_random_slices())),
+            image=draw_pie_chart_png(148, DEFAULT_FRACTIONS),
             title=__title__,
             version=__version__,
             copyright=__copyright__,
