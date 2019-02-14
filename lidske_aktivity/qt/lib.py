@@ -1,43 +1,44 @@
 import logging
-import signal
-import sys
+from typing import Callable
+
+from PIL import Image
 
 from PyQt5 import QtGui, QtWidgets
+
+import io
 
 logger = logging.getLogger(__name__)
 
 
-def refresh(*args):
-    logger.warning('Hello')
+def image_to_pixmap(image: Image.Image) -> QtGui.QPixmap:
+    with io.BytesIO() as f:
+        image.save(f, format='PNG')
+        f.seek(0)
+        pixmap = QtGui.QPixmap()
+        pixmap.loadFromData(f.read())
+    return pixmap
 
 
-class Application(QtWidgets.QApplication):
-    def event(self, e):
-        return QtWidgets.QApplication.event(self, e)
-
-
-class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
-    def __init__(self, icon, parent=None):
-        QtWidgets.QSystemTrayIcon.__init__(self, icon, parent)
-        self.menu = QtWidgets.QMenu(parent)
-        self.refresh_action = self.menu.addAction("Refresh")
-        self.exit_action = self.menu.addAction("Exit")
-        self.refresh_action.triggered.connect(refresh)
-        self.setContextMenu(self.menu)
-
-
-def main():
-    app = Application(sys.argv)
+def create_icon_pixmap(
+    app: QtWidgets.QApplication,
+    standard_pixmap: QtWidgets.QStyle.StandardPixmap,
+) -> QtGui.QPixmap:
     style = app.style()
-    icon = QtGui.QIcon(style.standardPixmap(QtWidgets.QStyle.SP_FileIcon))
-    tray_icon = SystemTrayIcon(icon)
-    tray_icon.exit_action.triggered.connect(app.quit)
-    signal.signal(signal.SIGINT, lambda *a: app.quit())
-    # Timer calls Application.event repeatedly.
-    app.startTimer(200)
-    tray_icon.show()
-    sys.exit(app.exec_())
+    pixmap = style.standardPixmap(standard_pixmap)
+    return pixmap
 
 
-if __name__ == '__main__':
-    main()
+def get_icon_size(
+    app: QtWidgets.QApplication, pixel_metric: QtWidgets.QStyle.PixelMetric
+) -> int:
+    style = app.style()
+    size = style.pixelMetric(pixel_metric)
+    return size
+
+
+def create_icon(pixmap: QtGui.QPixmap) -> QtGui.QIcon:
+    return QtGui.QIcon(pixmap)
+
+
+def call_tick(func: Callable):
+    func()
