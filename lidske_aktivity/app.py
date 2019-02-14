@@ -31,8 +31,8 @@ class Application:
     _ui_app: Any
     _status_icon: Any
 
-    _scan_event_stop: Event
-    _scan_timer: Timer
+    _scan_event_stop: Optional[Event] = None
+    _scan_timer: Optional[Timer] = None
     _redraw_event_stop: Optional[Event] = None
     _redraw_queue: Optional[Queue] = None
     _redraw_thread: Optional[Thread] = None
@@ -107,8 +107,10 @@ class Application:
         self._redraw_trigger(directory_views.copy())
 
     def _scan_stop(self):
-        self._scan_event_stop.set()
-        self._scan_timer.cancel()
+        if self._scan_event_stop is not None:
+            self._scan_event_stop.set()
+        if self._scan_timer is not None:
+            self._scan_timer.cancel()
         logger.info('Scan thread stopped')
 
     def _redraw_start(self):
