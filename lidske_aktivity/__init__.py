@@ -19,14 +19,22 @@ __license__ = 'GNU GPL 3'
 __copyright__ = '\N{COPYRIGHT SIGN} 2018-2019 Jakub Valenta, Jiří Skála'
 
 
+def is_win() -> bool:
+    return bool(platform.win32_ver()[0])
+
+
+def is_mac() -> bool:
+    return bool(platform.mac_ver()[0])
+
+
 def get_dir(
     mac_dir: str, xdg_var: str, fallback_dir: str
 ) -> Union[Path, PurePosixPath, PureWindowsPath]:
-    if platform.win32_ver()[0]:
+    if is_win():
         win_app_dir = os.environ.get('APPDATA')
         if win_app_dir:
             return PureWindowsPath(win_app_dir) / __application_name__
-    elif platform.mac_ver()[0]:
+    elif is_mac():
         return Path.home() / mac_dir / __application_id__
     else:
         xdg_cache_dir = os.environ.get(xdg_var)
