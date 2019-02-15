@@ -64,7 +64,11 @@ def create_radio_group(
     radio_buttons = {}
     for radio_config in radio_configs:
         radio = QRadioButton(radio_config.label, parent)
-        radio.toggled.connect(partial(on_radio_toggled, value=radio_config.value, callback=callback))
+        radio.toggled.connect(
+            partial(
+                on_radio_toggled, value=radio_config.value, callback=callback
+            )
+        )
         if radio_config.value == active_value:
             radio.setChecked(True)
         radio_buttons[radio_config.value] = radio
@@ -100,14 +104,19 @@ def create_file_chooser_button(
         parent,
         label=_('Choose'),
         callback=partial(
-            on_file_chooser_button_clicked, parent=parent, callback=callback
+            on_file_chooser_button_clicked,
+            parent=parent,
+            value=value,
+            callback=callback,
         ),
     )
     return button
 
 
-def on_file_chooser_button_clicked(parent: QWidget, callback: Callable):
-    value = QFileDialog.getOpenFileName(parent, 'Open file', '/home')
+def on_file_chooser_button_clicked(
+    parent: QWidget, value: str, callback: Callable
+):
+    value = QFileDialog.getExistingDirectory(parent, 'Choose directory', value)
     callback(value)
 
 
