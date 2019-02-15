@@ -62,6 +62,7 @@ class Settings(QDialog):
         )
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
+        self._layout.addWidget(button_box)
 
     def _create_widgets(self):
         self._create_unit_radios()
