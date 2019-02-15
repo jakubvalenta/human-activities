@@ -15,6 +15,7 @@ from PIL import Image
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
+    QButtonGroup,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
@@ -71,6 +72,7 @@ def create_radio_group(
     active_value: str,
     callback: Callable,
 ) -> Dict[str, QRadioButton]:
+    group = QButtonGroup(parent)
     radio_buttons = {}
     for radio_config in radio_configs:
         radio = QRadioButton(radio_config.label, parent)
@@ -81,6 +83,7 @@ def create_radio_group(
         )
         if radio_config.value == active_value:
             radio.setChecked(True)
+        group.addButton(radio)
         radio_buttons[radio_config.value] = radio
     return radio_buttons
 
