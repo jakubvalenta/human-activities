@@ -1,7 +1,15 @@
 import io
 import logging
 from functools import partial
-from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    NamedTuple,
+    Optional,
+)
 
 from PIL import Image
 from PyQt5.QtGui import QIcon, QPixmap
@@ -9,7 +17,9 @@ from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
+    QLayout,
     QLineEdit,
     QPushButton,
     QRadioButton,
@@ -97,31 +107,44 @@ def create_spin_box(
     return spin_box
 
 
-def create_file_chooser_button(
-    ui_app: QApplication,
-    parent: QWidget,
-    value: Optional[str],
-    callback: Callable[[str], None],
-) -> QPushButton:
-    button = create_button(
-        parent,
-        label=_('Choose'),
-        callback=partial(
-            on_file_chooser_button_clicked,
-            parent=parent,
-            value=value,
-            callback=callback,
-        ),
-        icon_pixmap=create_icon_pixmap(ui_app, QStyle.SP_DirOpenIcon),
-    )
-    return button
+class FileChooserForm(QHBoxLayout):
+    _parent: QWidget
+    _edit: QLineEdit
+    _value: str
 
+    def __init__(
+        self,
+        ui_app: QApplication,
+        parent: QWidget,
+        value: Optional[str],
+        callback: Callable[[str], None],
+    ):
+        self._parent = parent
+        self._callback = callback
+        super().__init__()
+        self._value = value or ''
+        self._edit = create_line_edit(
+            self._parent, self._value, self._on_edit_changed
+        )
+        self.addWidget(self._edit)
+        button = create_button(
+            parent,
+            label=_('Choose'),
+            callback=self._on_button_clicked,
+            icon_pixmap=create_icon_pixmap(ui_app, QStyle.SP_DirOpenIcon),
+        )
+        self.addWidget(button)
 
-def on_file_chooser_button_clicked(
-    parent: QWidget, value: str, callback: Callable
-):
-    value = QFileDialog.getExistingDirectory(parent, 'Choose directory', value)
-    callback(value)
+    def _on_button_clicked(self):
+        self._value = QFileDialog.getExistingDirectory(
+            self._parent, 'Choose directory', self._value
+        )
+        self._edit.setText(self._value)
+        self._callback(self._value)
+
+    def _on_edit_changed(self, value: str):
+        self._value = value
+        self._callback(self._value)
 
 
 def image_to_pixmap(image: Image.Image) -> QPixmap:
@@ -151,6 +174,23 @@ def create_icon(pixmap: QPixmap) -> QIcon:
     return QIcon(pixmap)
 
 
+def get_layout_widgets(layout: QLayout) -> Iterator[QWidget]:
+    for i in range(layout.count()):
+        item = layout.itemAt(i)
+        sub_layout = item.layout()
+        if sub_layout:
+            yield from get_layout_widgets(sub_layout)
+        else:
+            widget = item.widget()
+            if widget:
+                yield widget
+
+
+def toggle_layout_widgets(layout: QLayout, enabled: bool):
+    for widget in get_layout_widgets(layout):
+        widget.setEnabled(enabled)
+
+
 class RootPathForm(QVBoxLayout):
     _ui_app: QApplication
     _root_path: str
@@ -171,22 +211,16 @@ class RootPathForm(QVBoxLayout):
         self._init_button()
 
     def _init_button(self):
-        button = create_file_chooser_button(
+        file_chooser_form = FileChooserForm(
             self._ui_app,
             self._parent,
             value=self._root_path or '',
             callback=self._on_dir_changed,
         )
-        self.addWidget(button)
+        self.addLayout(file_chooser_form)
 
     def _on_dir_changed(self, path: str):
         self._on_change(path)
-
-    def toggle(self, enabled: bool):
-        for i in range(self.count()):
-            item = self.itemAt(i)
-            widget = item.widget()
-            widget.setEnabled(enabled)
 
 
 class NamedDir(NamedTuple):
@@ -224,13 +258,13 @@ class NamedDirsForm(QGridLayout):
                 callback=partial(self._on_name_changed, i),
             )
             self.addWidget(name_line_edit, i, 0)
-            choose_button = create_file_chooser_button(
+            file_chooser_form = FileChooserForm(
                 self._ui_app,
                 self._parent,
                 value=named_dir.path or None,
                 callback=partial(self._on_path_changed, i),
             )
-            self.addWidget(choose_button, i, 1)
+            self.addLayout(file_chooser_form, i, 1)
             remove_button = create_button(
                 self._parent,
                 icon_pixmap=create_icon_pixmap(
@@ -284,9 +318,3 @@ class NamedDirsForm(QGridLayout):
             for named_dir in self._named_dirs_list
             if named_dir.path and named_dir.name
         }
-
-    def toggle(self, enabled: bool):
-        for i in range(self.count()):
-            item = self.itemAt(i)
-            widget = item.widget()
-            widget.setEnabled(enabled)

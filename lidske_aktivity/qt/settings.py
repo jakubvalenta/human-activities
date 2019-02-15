@@ -26,6 +26,7 @@ from lidske_aktivity.qt.lib import (
     create_layout,
     create_radio_group,
     create_spin_box,
+    toggle_layout_widgets,
 )
 
 
@@ -73,7 +74,9 @@ class Settings(QDialog):
         )
         self._root_path_form = RootPathForm(
             self._ui_app,
-            self._config.root_path, self._on_root_path_change, parent=self
+            self._config.root_path,
+            self._on_root_path_change,
+            parent=self,
         )
         self._named_dirs_form = NamedDirsForm(
             self._ui_app,
@@ -128,8 +131,12 @@ class Settings(QDialog):
         )
 
     def _toggle_forms(self):
-        self._root_path_form.toggle(self._config.mode == MODE_ROOT_PATH)
-        self._named_dirs_form.toggle(self._config.mode == MODE_NAMED_DIRS)
+        toggle_layout_widgets(
+            self._root_path_form, self._config.mode == MODE_ROOT_PATH
+        )
+        toggle_layout_widgets(
+            self._named_dirs_form, self._config.mode == MODE_NAMED_DIRS
+        )
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
