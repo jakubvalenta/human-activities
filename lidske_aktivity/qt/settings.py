@@ -126,8 +126,8 @@ class Settings(QDialog):
         )
 
     def _toggle_forms(self):
-        self._root_path_form.setEnabled(self._config.mode == MODE_ROOT_PATH)
-        self._named_dirs_form.setEnabled(self._config.mode == MODE_NAMED_DIRS)
+        self._root_path_form.toggle(self._config.mode == MODE_ROOT_PATH)
+        self._named_dirs_form.toggle(self._config.mode == MODE_NAMED_DIRS)
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode

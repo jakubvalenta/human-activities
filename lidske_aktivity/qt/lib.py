@@ -138,7 +138,15 @@ def create_icon(pixmap: QPixmap) -> QIcon:
     return QIcon(pixmap)
 
 
-class RootPathForm(QVBoxLayout):
+class Form:
+    def toggle(self, enabled: bool):
+        for i in range(self.count()):
+            item = self.itemAt(i)
+            widget = item.widget()
+            widget.setEnabled(enabled)
+
+
+class RootPathForm(Form, QVBoxLayout):
     _root_path: str
     _parent: QWidget
 
@@ -168,7 +176,7 @@ class NamedDir(NamedTuple):
     name: str = ''
 
 
-class NamedDirsForm(QGridLayout):
+class NamedDirsForm(Form, QGridLayout):
     _ui_app: QApplication
     _named_dirs_list: List[NamedDir]
     _parent: QWidget
