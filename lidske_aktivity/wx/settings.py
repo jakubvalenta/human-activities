@@ -30,7 +30,7 @@ class Settings(wx.Dialog):
     _sizer: wx.Sizer
     _border_sizer: wx.Sizer
     _unit_radios: Dict[str, wx.RadioButton]
-    _threshold_days_ago_control: Dict[str, wx.RadioButton]
+    _threshold_days_ago_control: Dict[str, wx.SpinCtrl]
     _mode_radios: Dict[str, wx.RadioButton]
     _root_path_form: RootPathForm
     _named_dirs_form: NamedDirsForm
@@ -107,7 +107,7 @@ class Settings(wx.Dialog):
             self._mode_radios[MODE_NAMED_DIRS], flag=wx.ALL, border=5
         )
         self._sizer.Add(self._named_dirs_form.panel, flag=wx.EXPAND)
-        self._toggle_controls()
+        self._toggle_forms()
 
     def _create_unit_radios(self):
         radio_configs = [
@@ -137,13 +137,13 @@ class Settings(wx.Dialog):
             callback=self._on_mode_radio_toggled,
         )
 
-    def _toggle_controls(self):
+    def _toggle_forms(self):
         self._root_path_form.toggle(self._config.mode == MODE_ROOT_PATH)
         self._named_dirs_form.toggle(self._config.mode == MODE_NAMED_DIRS)
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
-        self._toggle_controls()
+        self._toggle_forms()
 
     def _on_root_path_change(self, root_path: str):
         self._config.root_path = root_path

@@ -171,9 +171,9 @@ class RootPathForm(Gtk.Box):
         self._root_path = root_path
         self._on_change = on_change
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        self._init_entry()
+        self._init_button()
 
-    def _init_entry(self):
+    def _init_button(self):
         button = create_file_chooser_button(
             value=self._root_path or None, callback=self._on_path_changed
         )

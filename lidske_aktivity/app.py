@@ -56,6 +56,7 @@ class Application:
             self.show_setup()
         else:
             self.scan_start()
+        self.show_settings()
 
     def scan_start(self, interval: int = 0):
         logger.info(f'Starting scan timer in %ss', interval)

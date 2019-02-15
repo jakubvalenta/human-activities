@@ -1,10 +1,23 @@
 import io
 import logging
 from functools import partial
-from typing import Callable, List, NamedTuple, Optional
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
 
 from PIL import Image
-from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QSpinBox,
+    QStyle,
+    QVBoxLayout,
+    QWidget,
+)
 
 from lidske_aktivity.config import TNamedDirs
 from lidske_aktivity.texts import _
@@ -12,22 +25,21 @@ from lidske_aktivity.texts import _
 logger = logging.getLogger(__name__)
 
 
-def create_layout() -> QtWidgets.QVBoxLayout:
-    # TODO: Horizontal layout
-    return QtWidgets.QVBoxLayout()
+def create_layout() -> QVBoxLayout:
+    return QVBoxLayout()
 
 
-def create_label(parent: QtWidgets.QWidget, text: str) -> QtWidgets.QLabel:
-    return QtWidgets.QLabel(text, parent)
+def create_label(parent: QWidget, text: str) -> QLabel:
+    return QLabel(text, parent)
 
 
 def create_button(
-    parent: QtWidgets.QWidget,
+    parent: QWidget,
     callback: Callable,
     label: Optional[str] = None,
-    icon_pixmap: Optional[QtGui.QPixmap] = None,
-) -> QtWidgets.QPushButton:
-    button = QtWidgets.QPushButton(parent)
+    icon_pixmap: Optional[QPixmap] = None,
+) -> QPushButton:
+    button = QPushButton(parent)
     if label:
         button.setText(label)
     if icon_pixmap:
@@ -37,19 +49,52 @@ def create_button(
     return button
 
 
+class RadioConfig(NamedTuple):
+    value: str
+    label: str
+    tooltip: Optional[str] = None
+
+
+def create_radio_group(
+    parent: QWidget,
+    radio_configs: Iterable[RadioConfig],
+    active_value: str,
+    callback: Callable,
+) -> Dict[str, QRadioButton]:
+    radio_buttons = {}
+    for radio_config in radio_configs:
+        radio = QRadioButton(radio_config.label, parent)
+        radio.toggled.connect(partial(on_radio_toggled, callback=callback))
+        if radio_config.value == active_value:
+            radio.setChecked(True)
+        radio_buttons[radio_config.value] = radio
+    return radio_buttons
+
+
+def on_radio_toggled(checked: bool, callback: Callable):
+    callback(checked)
+
+
 def create_line_edit(
-    parent: QtWidgets.QWidget, value: str, callback: Callable
-) -> QtWidgets.QLineEdit:
-    line_edit = QtWidgets.QLineEdit(value, parent)
+    parent: QWidget, value: str, callback: Callable
+) -> QLineEdit:
+    line_edit = QLineEdit(value, parent)
     line_edit.textChanged[str].connect(callback)
     return line_edit
 
 
+def create_spin_box(
+    parent: QWidget, value: int, callback: Callable
+) -> QSpinBox:
+    spin_box = QSpinBox(parent)
+    spin_box.setValue(value)
+    spin_box.valueChanged[int].connect(callback)
+    return spin_box
+
+
 def create_file_chooser_button(
-    parent: QtWidgets.QWidget,
-    value: Optional[str],
-    callback: Callable[[str], None],
-) -> QtWidgets.QPushButton:
+    parent: QWidget, value: Optional[str], callback: Callable[[str], None]
+) -> QPushButton:
     button = create_button(
         parent,
         label=_('Choose'),
@@ -60,41 +105,61 @@ def create_file_chooser_button(
     return button
 
 
-def on_file_chooser_button_clicked(
-    parent: QtWidgets.QWidget, callback: Callable
-):
-    value = QtWidgets.QFileDialog.getOpenFileName(parent, 'Open file', '/home')
+def on_file_chooser_button_clicked(parent: QWidget, callback: Callable):
+    value = QFileDialog.getOpenFileName(parent, 'Open file', '/home')
     callback(value)
 
 
-def image_to_pixmap(image: Image.Image) -> QtGui.QPixmap:
+def image_to_pixmap(image: Image.Image) -> QPixmap:
     with io.BytesIO() as f:
         image.save(f, format='PNG')
         f.seek(0)
-        pixmap = QtGui.QPixmap()
+        pixmap = QPixmap()
         pixmap.loadFromData(f.read())
     return pixmap
 
 
 def create_icon_pixmap(
-    app: QtWidgets.QApplication,
-    standard_pixmap: QtWidgets.QStyle.StandardPixmap,
-) -> QtGui.QPixmap:
+    app: QApplication, standard_pixmap: QStyle.StandardPixmap
+) -> QPixmap:
     style = app.style()
     pixmap = style.standardPixmap(standard_pixmap)
     return pixmap
 
 
-def get_icon_size(
-    app: QtWidgets.QApplication, pixel_metric: QtWidgets.QStyle.PixelMetric
-) -> int:
+def get_icon_size(app: QApplication, pixel_metric: QStyle.PixelMetric) -> int:
     style = app.style()
     size = style.pixelMetric(pixel_metric)
     return size
 
 
-def create_icon(pixmap: QtGui.QPixmap) -> QtGui.QIcon:
-    return QtGui.QIcon(pixmap)
+def create_icon(pixmap: QPixmap) -> QIcon:
+    return QIcon(pixmap)
+
+
+class RootPathForm(QVBoxLayout):
+    _root_path: str
+    _parent: QWidget
+
+    def __init__(
+        self, root_path: str, on_change: Callable[[str], None], parent: QWidget
+    ):
+        self._root_path = root_path
+        self._on_change = on_change
+        self._parent = parent
+        super().__init__()
+        self._init_button()
+
+    def _init_button(self):
+        button = create_file_chooser_button(
+            self._parent,
+            value=self._root_path or '',
+            callback=self._on_dir_changed,
+        )
+        self.addWidget(button)
+
+    def _on_dir_changed(self, path: str):
+        self._on_change(path)
 
 
 class NamedDir(NamedTuple):
@@ -102,17 +167,17 @@ class NamedDir(NamedTuple):
     name: str = ''
 
 
-class NamedDirsForm(QtWidgets.QGridLayout):
-    _ui_app: QtWidgets.QApplication
+class NamedDirsForm(QGridLayout):
+    _ui_app: QApplication
     _named_dirs_list: List[NamedDir]
-    _parent: QtWidgets.QWidget
+    _parent: QWidget
 
     def __init__(
         self,
-        ui_app: QtWidgets.QApplication,
+        ui_app: QApplication,
         named_dirs: TNamedDirs,
         on_change: Callable[[TNamedDirs], None],
-        parent: QtWidgets.QWidget,
+        parent: QWidget,
     ):
         self._ui_app = ui_app
         self._named_dirs_list = [
@@ -141,7 +206,7 @@ class NamedDirsForm(QtWidgets.QGridLayout):
             remove_button = create_button(
                 self._parent,
                 icon_pixmap=create_icon_pixmap(
-                    self._ui_app, QtWidgets.QStyle.SP_TrashIcon
+                    self._ui_app, QStyle.SP_TrashIcon
                 ),
                 callback=partial(self._on_remove_clicked, i),
             )
@@ -150,7 +215,7 @@ class NamedDirsForm(QtWidgets.QGridLayout):
             self._parent,
             callback=self._on_add_clicked,
             icon_pixmap=create_icon_pixmap(
-                self._ui_app, QtWidgets.QStyle.SP_DialogOpenButton
+                self._ui_app, QStyle.SP_DialogOpenButton
             ),  # TODO: Icon "add"
         )
         self.addWidget(add_button, len(self._named_dirs_list), 2)

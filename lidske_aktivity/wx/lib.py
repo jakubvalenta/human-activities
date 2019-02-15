@@ -198,9 +198,9 @@ class RootPathForm(Form):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent, *args, **kwargs)
-        self._init_control()
+        self._init_button()
 
-    def _init_control(self):
+    def _init_button(self):
         vbox = create_sizer(self.panel)
         button = create_dir_browse_button(
             self.panel,
