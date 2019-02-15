@@ -64,15 +64,16 @@ def create_radio_group(
     radio_buttons = {}
     for radio_config in radio_configs:
         radio = QRadioButton(radio_config.label, parent)
-        radio.toggled.connect(partial(on_radio_toggled, callback=callback))
+        radio.toggled.connect(partial(on_radio_toggled, value=radio_config.value, callback=callback))
         if radio_config.value == active_value:
             radio.setChecked(True)
         radio_buttons[radio_config.value] = radio
     return radio_buttons
 
 
-def on_radio_toggled(checked: bool, callback: Callable):
-    callback(checked)
+def on_radio_toggled(checked: bool, value: str, callback: Callable):
+    if checked:
+        callback(value)
 
 
 def create_line_edit(

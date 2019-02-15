@@ -30,6 +30,7 @@ UNITS = {
 
 
 class Config:
+    # TODO: Make Config immutable
     mode: str = MODE_NAMED_DIRS
     root_path: Optional[str] = None
     named_dirs: TNamedDirs
