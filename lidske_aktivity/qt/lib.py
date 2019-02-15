@@ -98,7 +98,10 @@ def create_spin_box(
 
 
 def create_file_chooser_button(
-    parent: QWidget, value: Optional[str], callback: Callable[[str], None]
+    ui_app: QApplication,
+    parent: QWidget,
+    value: Optional[str],
+    callback: Callable[[str], None],
 ) -> QPushButton:
     button = create_button(
         parent,
@@ -109,6 +112,7 @@ def create_file_chooser_button(
             value=value,
             callback=callback,
         ),
+        icon_pixmap=create_icon_pixmap(ui_app, QStyle.SP_DirOpenIcon),
     )
     return button
 
@@ -147,21 +151,19 @@ def create_icon(pixmap: QPixmap) -> QIcon:
     return QIcon(pixmap)
 
 
-class Form:
-    def toggle(self, enabled: bool):
-        for i in range(self.count()):
-            item = self.itemAt(i)
-            widget = item.widget()
-            widget.setEnabled(enabled)
-
-
-class RootPathForm(Form, QVBoxLayout):
+class RootPathForm(QVBoxLayout):
+    _ui_app: QApplication
     _root_path: str
     _parent: QWidget
 
     def __init__(
-        self, root_path: str, on_change: Callable[[str], None], parent: QWidget
+        self,
+        ui_app: QApplication,
+        root_path: str,
+        on_change: Callable[[str], None],
+        parent: QWidget,
     ):
+        self._ui_app = ui_app
         self._root_path = root_path
         self._on_change = on_change
         self._parent = parent
@@ -170,6 +172,7 @@ class RootPathForm(Form, QVBoxLayout):
 
     def _init_button(self):
         button = create_file_chooser_button(
+            self._ui_app,
             self._parent,
             value=self._root_path or '',
             callback=self._on_dir_changed,
@@ -179,13 +182,19 @@ class RootPathForm(Form, QVBoxLayout):
     def _on_dir_changed(self, path: str):
         self._on_change(path)
 
+    def toggle(self, enabled: bool):
+        for i in range(self.count()):
+            item = self.itemAt(i)
+            widget = item.widget()
+            widget.setEnabled(enabled)
+
 
 class NamedDir(NamedTuple):
     path: str = ''
     name: str = ''
 
 
-class NamedDirsForm(Form, QGridLayout):
+class NamedDirsForm(QGridLayout):
     _ui_app: QApplication
     _named_dirs_list: List[NamedDir]
     _parent: QWidget
@@ -216,6 +225,7 @@ class NamedDirsForm(Form, QGridLayout):
             )
             self.addWidget(name_line_edit, i, 0)
             choose_button = create_file_chooser_button(
+                self._ui_app,
                 self._parent,
                 value=named_dir.path or None,
                 callback=partial(self._on_path_changed, i),
@@ -274,3 +284,9 @@ class NamedDirsForm(Form, QGridLayout):
             for named_dir in self._named_dirs_list
             if named_dir.path and named_dir.name
         }
+
+    def toggle(self, enabled: bool):
+        for i in range(self.count()):
+            item = self.itemAt(i)
+            widget = item.widget()
+            widget.setEnabled(enabled)

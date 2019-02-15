@@ -72,6 +72,7 @@ class Settings(QDialog):
             callback=self._on_threshold_days_ago_changed,
         )
         self._root_path_form = RootPathForm(
+            self._ui_app,
             self._config.root_path, self._on_root_path_change, parent=self
         )
         self._named_dirs_form = NamedDirsForm(
