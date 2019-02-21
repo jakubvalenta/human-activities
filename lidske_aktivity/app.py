@@ -1,4 +1,5 @@
 import logging
+import threading
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import partial
 from queue import Queue
@@ -123,6 +124,7 @@ class Application:
             self._scan_event_stop.set()
         if self._scan_timer is not None:
             self._scan_timer.cancel()
+            self._scan_timer.join()
         logger.info('Scan thread stopped')
 
     def _redraw_start(self):
@@ -186,3 +188,4 @@ class Application:
         logger.info('App on_quit')
         self._scan_stop()
         self._redraw_stop()
+        logger.info('Alive threads: %s', threading.enumerate())
