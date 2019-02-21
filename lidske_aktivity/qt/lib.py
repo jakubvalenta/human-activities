@@ -47,10 +47,8 @@ def add_layout_items(
 ):
     for item in items:
         if isinstance(item, QWidget):
-            logger.info('AAA %s', item)
             layout.addWidget(item)
         else:
-            logger.info('LLL %s', item)
             layout.addLayout(item)
 
 
