@@ -67,12 +67,6 @@ but from a git tag specified as `v` + Makefile variable `_version`.
 make dist-debian-build dist-debian
 ```
 
-### Linux with Pyinstaller
-
-```
-make dist-pyinstaller-build dist-pyinstaller
-```
-
 ### Mac
 
 ```
