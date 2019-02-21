@@ -37,5 +37,6 @@ class Application(wx.App):
         super().OnExit()
         return True
 
-    def run(self):
+    def run(self) -> int:
         self.MainLoop()
+        return 0

@@ -42,9 +42,10 @@ class Application:
         self._config = load_config()
         save_config(self._config)
 
-    def run_ui(self, ui: Any):
+    def run_ui(self, ui: Any) -> int:
         self._ui = ui
-        self._ui.app.Application(self._on_init, self._on_quit).run()
+        ui_app = self._ui.app.Application(self._on_init, self._on_quit)
+        return ui_app.run()
 
     def _on_init(self, ui_app: Any):
         self._ui_app = ui_app

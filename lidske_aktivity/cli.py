@@ -90,4 +90,5 @@ def main():
         import lidske_aktivity.gtk as ui
     else:
         import lidske_aktivity.wx as ui
-    app.run_ui(ui)
+    return_code = app.run_ui(ui)
+    sys.exit(return_code)
