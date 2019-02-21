@@ -1,3 +1,9 @@
+lidske-aktivity (0.6.0-1) unstable; urgency=medium
+
+  * Make pie chart colors more distinct.
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 21 Feb 2019 20:12:17 +0000
+
 lidske-aktivity (0.5.0-1) unstable; urgency=medium
 
   * Add Qt5 version.
