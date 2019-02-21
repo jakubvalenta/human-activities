@@ -1,6 +1,7 @@
 from typing import Callable, Dict
 
 from PyQt5.QtWidgets import (
+    QWidget,
     QApplication,
     QDialog,
     QDialogButtonBox,
@@ -22,11 +23,12 @@ from lidske_aktivity.qt.lib import (
     RadioConfig,
     RootPathForm,
     TNamedDirs,
-    create_label,
-    create_layout,
     create_radio_group,
     create_spin_box,
     toggle_layout_widgets,
+    create_group_box,
+    add_layout_items,
+    create_layout,
 )
 
 
@@ -47,9 +49,13 @@ class Settings(QDialog):
         self._ui_app = ui_app
         super().__init__()
         self._init_window()
-        self._create_widgets()
-        self._add_widgets()
-        self._init_dialog_buttons()
+        widgets = [
+            self._create_unit_box(),
+            self._create_threshold_box(),
+            self._create_mode_box(),
+            self._create_dialog_buttons(),
+        ]
+        add_layout_items(self._layout, widgets)
         self._show()
 
     def _init_window(self):
@@ -57,86 +63,69 @@ class Settings(QDialog):
         self._layout = create_layout()
         self.setLayout(self._layout)
 
-    def _init_dialog_buttons(self):
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+    def _create_unit_box(self) -> QWidget:
+        box = create_group_box(texts.SETTINGS_UNIT, self)
+        radio_configs = [
+            RadioConfig(value, label) for value, label in UNITS.items()
+        ]
+        self._unit_radios = create_radio_group(
+            box,
+            radio_configs,
+            active_value=self._config.unit,
+            callback=self._on_unit_radio_toggled,
         )
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
-        self._layout.addWidget(button_box)
+        add_layout_items(box.layout(), self._unit_radios.values())
+        return box
 
-    def _create_widgets(self):
-        self._create_unit_radios()
+    def _on_unit_radio_toggled(self, unit: str):
+        self._config.unit = unit
+
+    def _create_threshold_box(self) -> QWidget:
+        box = create_group_box(texts.SETTINGS_THRESHOLD_DAYS_OLD, self)
         self._threshold_days_ago_entry = create_spin_box(
             self,
             value=self._config.threshold_days_ago,
             callback=self._on_threshold_days_ago_changed,
         )
+        add_layout_items(box.layout(), [self._threshold_days_ago_entry])
+        return box
+
+    def _on_threshold_days_ago_changed(self, threshold_days_ago: int):
+        self._config.threshold_days_ago = threshold_days_ago
+
+    def _create_mode_box(self) -> QWidget:
+        box = create_group_box(texts.SETTINGS_MODE, self)
         self._root_path_form = RootPathForm(
             self._ui_app,
             self._config.root_path,
             self._on_root_path_change,
-            parent=self,
+            parent=box,
         )
         self._named_dirs_form = NamedDirsForm(
             self._ui_app,
             self._config.named_dirs,
             self._on_named_dirs_change,
-            parent=self,
+            parent=box,
         )
-        self._create_mode_radios()
-
-    def _add_widgets(self):
-        label = create_label(self, texts.SETTINGS_UNIT)
-        self._layout.addWidget(label)
-        for radio in self._unit_radios.values():
-            self._layout.addWidget(radio)
-        label = create_label(self, texts.SETTINGS_THRESHOLD_DAYS_OLD)
-        self._layout.addWidget(label)
-        self._layout.addWidget(self._threshold_days_ago_entry)
-        label = create_label(self, texts.SETTINGS_MODE)
-        self._layout.addWidget(label)
-        self._layout.addWidget(self._mode_radios[MODE_ROOT_PATH])
-        self._layout.addLayout(self._root_path_form)
-        self._layout.addWidget(self._mode_radios[MODE_NAMED_DIRS])
-        self._layout.addLayout(self._named_dirs_form)
-        self._toggle_forms()
-
-    def _create_unit_radios(self):
-        radio_configs = [
-            RadioConfig(value, label) for value, label in UNITS.items()
-        ]
-        self._unit_radios = create_radio_group(
-            self,
-            radio_configs,
-            active_value=self._config.unit,
-            callback=self._on_unit_radio_toggled,
-        )
-
-    def _on_unit_radio_toggled(self, unit: str):
-        self._config.unit = unit
-
-    def _on_threshold_days_ago_changed(self, threshold_days_ago: int):
-        self._config.threshold_days_ago = threshold_days_ago
-
-    def _create_mode_radios(self):
         radio_configs = [
             RadioConfig(value, label) for value, label in MODES.items()
         ]
         self._mode_radios = create_radio_group(
-            self,
+            box,
             radio_configs,
             active_value=self._config.mode,
             callback=self._on_mode_radio_toggled,
         )
-
-    def _toggle_forms(self):
-        toggle_layout_widgets(
-            self._root_path_form, self._config.mode == MODE_ROOT_PATH
+        add_layout_items(
+            box.layout(),
+            [
+                self._mode_radios[MODE_ROOT_PATH],
+                self._root_path_form,
+                self._mode_radios[MODE_NAMED_DIRS],
+                self._named_dirs_form,
+            ],
         )
-        toggle_layout_widgets(
-            self._named_dirs_form, self._config.mode == MODE_NAMED_DIRS
-        )
+        return box
 
     def _on_mode_radio_toggled(self, mode: str):
         self._config.mode = mode
@@ -147,6 +136,22 @@ class Settings(QDialog):
 
     def _on_named_dirs_change(self, named_dirs: TNamedDirs):
         self._config.named_dirs = named_dirs
+
+    def _toggle_forms(self):
+        toggle_layout_widgets(
+            self._root_path_form, self._config.mode == MODE_ROOT_PATH
+        )
+        toggle_layout_widgets(
+            self._named_dirs_form, self._config.mode == MODE_NAMED_DIRS
+        )
+
+    def _create_dialog_buttons(self) -> QWidget:
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        return button_box
 
     def _show(self):
         if self.exec_():

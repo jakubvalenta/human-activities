@@ -9,6 +9,7 @@ from typing import (
     List,
     NamedTuple,
     Optional,
+    Union,
 )
 
 from PIL import Image
@@ -28,6 +29,7 @@ from PyQt5.QtWidgets import (
     QStyle,
     QVBoxLayout,
     QWidget,
+    QGroupBox,
 )
 
 from lidske_aktivity.config import TNamedDirs
@@ -38,6 +40,42 @@ logger = logging.getLogger(__name__)
 
 def create_layout() -> QVBoxLayout:
     return QVBoxLayout()
+
+
+def add_layout_items(
+    layout: QLayout, items: Iterable[Union[QWidget, QLayout]]
+):
+    for item in items:
+        if isinstance(item, QWidget):
+            logger.info('AAA %s', item)
+            layout.addWidget(item)
+        else:
+            logger.info('LLL %s', item)
+            layout.addLayout(item)
+
+
+def get_layout_widgets(layout: QLayout) -> Iterator[QWidget]:
+    for i in range(layout.count()):
+        item = layout.itemAt(i)
+        sub_layout = item.layout()
+        if sub_layout:
+            yield from get_layout_widgets(sub_layout)
+        else:
+            widget = item.widget()
+            if widget:
+                yield widget
+
+
+def toggle_layout_widgets(layout: QLayout, enabled: bool):
+    for widget in get_layout_widgets(layout):
+        widget.setEnabled(enabled)
+
+
+def create_group_box(label: str, parent: QWidget) -> QGroupBox:
+    group_box = QGroupBox(label, parent)
+    layout = create_layout()
+    group_box.setLayout(layout)
+    return group_box
 
 
 def create_label(parent: QWidget, text: str) -> QLabel:
@@ -177,23 +215,6 @@ def create_icon(pixmap: QPixmap) -> QIcon:
     return QIcon(pixmap)
 
 
-def get_layout_widgets(layout: QLayout) -> Iterator[QWidget]:
-    for i in range(layout.count()):
-        item = layout.itemAt(i)
-        sub_layout = item.layout()
-        if sub_layout:
-            yield from get_layout_widgets(sub_layout)
-        else:
-            widget = item.widget()
-            if widget:
-                yield widget
-
-
-def toggle_layout_widgets(layout: QLayout, enabled: bool):
-    for widget in get_layout_widgets(layout):
-        widget.setEnabled(enabled)
-
-
 class RootPathForm(QVBoxLayout):
     _ui_app: QApplication
     _root_path: str
@@ -250,7 +271,6 @@ class NamedDirsForm(QGridLayout):
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent)
-        self.setSpacing(10)
         self._init_line_edits()
 
     def _init_line_edits(self):
