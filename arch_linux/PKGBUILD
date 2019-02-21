@@ -20,7 +20,7 @@ options=()
 install=
 changelog=
 source=($pkgname-$pkgver.tar.xz)
-md5sums=('1c8c06bc270fa63d32ee8c3f51dac9f7')
+md5sums=('be6d2e90015e17d771fa4e9543a727a9')
 noextract=()
 
 build() {
@@ -47,4 +47,3 @@ package() {
 }
 
 # vim:set ts=2 sw=2 et:
-md5sums=('bc50d13991f75eea97ce2979132d6c12')
