@@ -15,6 +15,7 @@ class Application(QApplication):
         self.on_init = on_init
         self.on_quit = on_quit
         super().__init__(sys.argv, *args, **kwargs)
+        self.setQuitOnLastWindowClosed(False)
         self.on_init(self)
 
     def spawn_frame(self, func: Callable[..., T], *args, **kwargs) -> T:
