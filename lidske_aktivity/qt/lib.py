@@ -163,7 +163,7 @@ def create_icon_pixmap(
     app: QApplication, standard_pixmap: QStyle.StandardPixmap
 ) -> QPixmap:
     style = app.style()
-    pixmap = style.standardPixmap(standard_pixmap)
+    pixmap = style.standardPixmap(standard_pixmap, None)
     return pixmap
 
 
