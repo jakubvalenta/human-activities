@@ -69,6 +69,14 @@ def toggle_layout_widgets(layout: QLayout, enabled: bool):
         widget.setEnabled(enabled)
 
 
+def remove_layout_items(layout: QLayout):
+    for widget in get_layout_widgets(layout):
+        widget.deleteLater()
+    while layout.count():
+        item = layout.itemAt(0)
+        layout.removeItem(item)
+
+
 def create_group_box(label: str, parent: QWidget) -> QGroupBox:
     group_box = QGroupBox(label, parent)
     layout = create_layout()
@@ -300,10 +308,7 @@ class NamedDirsForm(QGridLayout):
         self.addWidget(add_button, len(self._named_dirs_list), 2)
 
     def _clear(self):
-        while self.count():
-            item = self.itemAt(0)
-            item.widget().deleteLater()
-            self.removeItem(item)
+        remove_layout_items(self)
 
     def _on_name_changed(self, i: int, name: str):
         named_dir = self._named_dirs_list[i]
