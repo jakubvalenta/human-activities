@@ -134,7 +134,7 @@ class FileChooserForm(QHBoxLayout):
             parent,
             label=_('Choose'),
             callback=self._on_button_clicked,
-            icon_pixmap=create_icon_pixmap(ui_app, QStyle.SP_DirOpenIcon),
+            icon_pixmap=create_icon_pixmap(ui_app, QStyle.SP_DialogOpenButton),
         )
         self.addWidget(button)
 
@@ -271,17 +271,13 @@ class NamedDirsForm(QGridLayout):
             remove_button = create_button(
                 self._parent,
                 icon_pixmap=create_icon_pixmap(
-                    self._ui_app, QStyle.SP_TrashIcon
+                    self._ui_app, QStyle.SP_DialogDiscardButton
                 ),
                 callback=partial(self._on_remove_clicked, i),
             )
             self.addWidget(remove_button, i, 2)
         add_button = create_button(
-            self._parent,
-            callback=self._on_add_clicked,
-            icon_pixmap=create_icon_pixmap(
-                self._ui_app, QStyle.SP_DialogOpenButton
-            ),  # TODO: Icon "add"
+            self._parent, label='Add', callback=self._on_add_clicked
         )
         self.addWidget(add_button, len(self._named_dirs_list), 2)
 

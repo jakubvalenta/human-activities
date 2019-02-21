@@ -84,22 +84,8 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
         create_menu_item(
             menu, _('Advanced &configuration'), callback=self.app.show_settings
         )
-        create_menu_item(
-            menu,
-            _('&About'),
-            callback=self.app.show_about,
-            icon_pixmap=create_icon_pixmap(
-                self.app._ui_app, QtWidgets.QStyle.SP_DialogHelpButton
-            ),
-        )
-        create_menu_item(
-            menu,
-            _('&Quit'),
-            callback=self.app.quit,
-            icon_pixmap=create_icon_pixmap(
-                self.app._ui_app, QtWidgets.QStyle.SP_DialogCloseButton
-            ),
-        )
+        create_menu_item(menu, _('&About'), callback=self.app.show_about)
+        create_menu_item(menu, _('&Quit'), callback=self.app.quit)
         self.setContextMenu(menu)
 
     def update(self, directory_views: DirectoryViews):
