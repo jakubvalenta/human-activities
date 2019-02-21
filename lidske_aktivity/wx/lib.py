@@ -276,10 +276,17 @@ class NamedDirsForm(Form):
             else:
                 flag = wx.EXPAND | wx.TOP
             self._vbox.Add(hbox, flag=flag, border=5)
-        add_button = create_button(
-            self.panel, texts.BUTTON_ADD, callback=self._on_add_clicked
-        )
-        self._vbox.Add(add_button, flag=wx.TOP, border=10)
+        if len(self._named_dirs_list) < self._max_len:
+            add_button = create_button(
+                self.panel, texts.BUTTON_ADD, callback=self._on_add_clicked
+            )
+            self._vbox.Add(add_button, flag=wx.TOP, border=10)
+        else:
+            label = create_label(
+                self.panel,
+                texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len),
+            )
+            self._vbox.Add(label, flag=wx.TOP, border=10)
 
     def _recreate(self):
         self.panel.DestroyChildren()

@@ -27,4 +27,6 @@ MENU_EMPTY = _('No directories configured')
 MENU_THRESHOLD_DAYS_AGO = _(
     'Counting only files modified in the past {days} days'
 )
-MENU_DIRS_TRUNCATED = _('Showing only first {max_len} directories')
+MENU_DIRS_TRUNCATED = _(
+    'Maximum number of directories exceeded, showing only the first {max_len}'
+)

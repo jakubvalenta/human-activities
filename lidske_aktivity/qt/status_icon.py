@@ -49,7 +49,6 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
         menu = QtWidgets.QMenu(parent=None)
-        # TODO: Limit the maximum number of items shown.
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
                 icon_size = get_icon_size(
@@ -61,6 +60,13 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
                 icon_pixmap = image_to_pixmap(icon_image)
                 create_menu_item(
                     menu, directory_view.text, icon_pixmap=icon_pixmap
+                )
+            if directory_views.truncated:
+                create_menu_item(
+                    menu,
+                    texts.MENU_DIRS_TRUNCATED.format(
+                        max_len=directory_views.max_len
+                    ),
                 )
             if directory_views.threshold_days_ago:
                 menu.addSeparator()

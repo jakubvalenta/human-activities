@@ -67,7 +67,6 @@ class StatusIcon(wx.adv.TaskBarIcon):
         self._set_icon(DEFAULT_FRACTIONS, __title__)
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
-        # TODO: Limit the maximum number of items shown.
         menu = wx.Menu()
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
@@ -76,6 +75,14 @@ class StatusIcon(wx.adv.TaskBarIcon):
                 )
                 create_menu_item(
                     self, menu, directory_view.text, icon_image=icon_image
+                )
+            if directory_views.truncated:
+                create_menu_item(
+                    self,
+                    menu,
+                    texts.MENU_DIRS_TRUNCATED.format(
+                        max_len=directory_views.max_len
+                    ),
                 )
             if directory_views.threshold_days_ago:
                 menu.AppendSeparator()

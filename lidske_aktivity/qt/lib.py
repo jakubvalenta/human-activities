@@ -32,6 +32,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from lidske_aktivity import texts
 from lidske_aktivity.config import NamedDirs
 from lidske_aktivity.texts import _
 
@@ -304,10 +305,19 @@ class NamedDirsForm(QGridLayout):
                 callback=partial(self._on_remove_clicked, i),
             )
             self.addWidget(remove_button, i, 2)
-        add_button = create_button(
-            self._parent, label='Add', callback=self._on_add_clicked
-        )
-        self.addWidget(add_button, len(self._named_dirs_list), 2)
+        if len(self._named_dirs_list) < self._max_len:
+            add_button = create_button(
+                self._parent,
+                label=texts.BUTTON_ADD,
+                callback=self._on_add_clicked,
+            )
+            self.addWidget(add_button, len(self._named_dirs_list), 2)
+        else:
+            label = create_label(
+                self._parent,
+                texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len),
+            )
+            self.addWidget(label, len(self._named_dirs_list), 0)
 
     def _clear(self):
         remove_layout_items(self)
