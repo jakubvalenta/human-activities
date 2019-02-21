@@ -1,5 +1,5 @@
 Source: lidske-aktivity
-Section: unknown
+Section: utils
 Priority: optional
 Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
 Build-Depends: debhelper (>= 9.20160709~),
@@ -20,4 +20,11 @@ Depends: gir1.2-appindicator3-0.1,
          python3-sqlalchemy,
          ${python3:Depends},
          ${misc:Depends}
-Description: Monitor size of directories
+Description: monitor size of directories
+ Display a system tray icon (GTK+ AppIndicator) with a menu. The icon is a pie
+ chart that shows ratio between the size of configured directories. The menu
+ shows a list of the directories with exact size in bytes and percents.
+ .
+ The application can be configured to compare number of files instead of size
+ of directories. It can also be configured to only count files that are newer
+ than specified number of days.
