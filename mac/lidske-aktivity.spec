@@ -46,6 +46,10 @@ app = BUNDLE(  # noqa: F821
     exe,
     name='lidske-aktivity.app',
     icon=os.path.join('data', 'lidske-aktivity.icns'),
-    bundle_identifier='cz.jakubvalenta.lidske-aktivity'
-    # TODO: info_plist
+    bundle_identifier='cz.jakubvalenta.lidske-aktivity',
+    info_plist={
+        'NSPrincipleClass': 'NSApplication',
+        'NSAppleScriptEnabled': False,
+        'LSUIElement': '1',
+    }
 )
