@@ -27,6 +27,6 @@ for size in "${sizes[@]}"; do
 done
 
 echo "Writing lidske-aktivity.icns" >&2
-iconutil -c icns "$temp_dir"
+iconutil -c icns -o data/lidske-aktivity.icns "$iconset_dir"
 
 echo "Done" >&2
