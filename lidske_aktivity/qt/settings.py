@@ -1,13 +1,13 @@
 from typing import Callable, Dict
 
 from PyQt5.QtWidgets import (
-    QWidget,
     QApplication,
     QDialog,
     QDialogButtonBox,
     QRadioButton,
     QSpinBox,
     QVBoxLayout,
+    QWidget,
 )
 
 from lidske_aktivity import texts
@@ -23,17 +23,18 @@ from lidske_aktivity.qt.lib import (
     RadioConfig,
     RootPathForm,
     TNamedDirs,
+    add_layout_items,
+    create_group_box,
+    create_layout,
     create_radio_group,
     create_spin_box,
     toggle_layout_widgets,
-    create_group_box,
-    add_layout_items,
-    create_layout,
 )
 
 
 class Settings(QDialog):
     config: Config
+    _ui_app: QApplication
     _layout: QVBoxLayout
     _unit_radios: Dict[str, QRadioButton]
     _threshold_days_ago_entry: Dict[str, QSpinBox]

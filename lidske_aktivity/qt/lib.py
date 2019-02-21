@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
     QButtonGroup,
     QFileDialog,
     QGridLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLayout,
@@ -29,7 +30,6 @@ from PyQt5.QtWidgets import (
     QStyle,
     QVBoxLayout,
     QWidget,
-    QGroupBox,
 )
 
 from lidske_aktivity.config import TNamedDirs
@@ -217,13 +217,13 @@ def create_icon(pixmap: QPixmap) -> QIcon:
 
 class RootPathForm(QVBoxLayout):
     _ui_app: QApplication
-    _root_path: str
+    _root_path: Optional[str]
     _parent: QWidget
 
     def __init__(
         self,
         ui_app: QApplication,
-        root_path: str,
+        root_path: Optional[str],
         on_change: Callable[[str], None],
         parent: QWidget,
     ):

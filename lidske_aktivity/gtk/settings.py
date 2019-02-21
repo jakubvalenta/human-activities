@@ -23,7 +23,7 @@ from lidske_aktivity.gtk.lib import (
 
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import GdkPixbuf, Gtk, GLib  # noqa:E402  # isort:skip
+from gi.repository import Gtk  # noqa:E402  # isort:skip
 
 
 class Settings(Gtk.Dialog):

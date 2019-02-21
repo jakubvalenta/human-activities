@@ -25,7 +25,7 @@ def create_sizer(
     parent: Union[wx.Sizer, wx.Panel],
     orientation: int = wx.VERTICAL,
     *args,
-    **kwargs
+    **kwargs,
 ) -> wx.BoxSizer:
     sizer = wx.BoxSizer(orientation)
     if isinstance(parent, wx.Sizer):
@@ -183,16 +183,16 @@ class Form:
 
 
 class RootPathForm(Form):
-    _root_path: str
+    _root_path: Optional[str]
     _parent: wx.Panel
 
     def __init__(
         self,
-        root_path: str,
+        root_path: Optional[str],
         on_change: Callable[[str], None],
         parent: wx.Panel,
         *args,
-        **kwargs
+        **kwargs,
     ):
         self._root_path = root_path
         self._on_change = on_change
@@ -229,7 +229,7 @@ class NamedDirsForm(Form):
         parent: wx.Panel,
         on_redraw: Optional[Callable[[], None]] = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         self._named_dirs_list = [
             NamedDir(path, name) for path, name in named_dirs.items()

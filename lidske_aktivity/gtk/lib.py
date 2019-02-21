@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def create_box(
     orientation: Gtk.Orientation = Gtk.Orientation.VERTICAL,
     homogeneous: bool = True,
-    **kwargs
+    **kwargs,
 ) -> Gtk.Box:
     box = Gtk.Box(orientation=orientation, **kwargs)
     if not homogeneous:
@@ -160,11 +160,11 @@ def image_to_pixbuf(image: Image.Image) -> GdkPixbuf.Pixbuf:
 
 
 class RootPathForm(Gtk.Box):
-    _root_path: str
+    _root_path: Optional[str]
 
     def __init__(
         self,
-        root_path: str,
+        root_path: Optional[str],
         on_change: Callable[[str], None],
         parent: Gtk.Window,
     ):
