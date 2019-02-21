@@ -4,15 +4,11 @@ import random
 import sys
 from functools import lru_cache, partial
 from hashlib import sha1
-from typing import Callable, Iterator, List, NamedTuple, Tuple
+from typing import Callable, Iterator, List, NamedTuple, Optional, Tuple
 
 from PIL import Image
 
 logger = logging.getLogger(__name__)
-
-MAX_COLORS = 64
-ICON_CACHE_SIZE = 128
-DEFAULT_FRACTIONS = (0.35, 0.25, 0.20, 0.15, 0.05)
 
 
 class Color(NamedTuple):
@@ -22,16 +18,43 @@ class Color(NamedTuple):
     a: int = 255
 
 
+# https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+COLORS = (
+    Color(230, 25, 75),
+    Color(60, 180, 75),
+    Color(255, 225, 25),
+    Color(0, 130, 200),
+    Color(245, 130, 48),
+    Color(145, 30, 180),
+    Color(70, 240, 240),
+    Color(240, 50, 230),
+    Color(210, 245, 60),
+    Color(250, 190, 190),
+    Color(0, 128, 128),
+    Color(230, 190, 255),
+    Color(170, 110, 40),
+    Color(255, 250, 200),
+    Color(128, 0, 0),
+    Color(170, 255, 195),
+    Color(128, 128, 0),
+    Color(255, 215, 180),
+    Color(0, 0, 128),
+    Color(128, 128, 128),
+    Color(255, 255, 255),
+    Color(0, 0, 0),
+)
+COLOR_TRANSPARENT = Color(0, 0, 0, 0)
+COLOR_DEFAULT = Color(147, 161, 161)
+
+
 class Slice(NamedTuple):
     start: float
     end: float
-    color: Color
+    color: Color = COLOR_DEFAULT
 
 
-COLOR_TRANSPARENT = Color(0, 0, 0, 0)
-COLOR_WHITE = Color(255, 255, 255)
-COLOR_GRAY = Color(147, 161, 161)
-COLOR_BLACK = Color(0, 0, 0)
+ICON_CACHE_SIZE = 128
+DEFAULT_FRACTIONS = (0.35, 0.25, 0.20, 0.15, 0.05)
 
 
 def _frac_to_rad(frac: float) -> float:
@@ -48,53 +71,20 @@ def _hash_to_fraction(s: str) -> float:
     return fraction
 
 
-def _hue_to_rgb(p: float, q: float, t: float) -> float:
-    if t < 0:
-        t += 1
-    if t > 1:
-        t -= 1
-    if t < 1 / 6:
-        return p + (q - p) * 6 * t
-    if t < 1 / 2:
-        return q
-    if t < 2 / 3:
-        return p + (q - p) * (2 / 3 - t) * 6
-    return p
+def _color_from_index(i: int) -> Color:
+    if -1 < i < len(COLORS):
+        return COLORS[i]
+    return COLOR_DEFAULT
 
 
-def _hsl_to_rgb(h: float, s: float, l: float) -> Tuple[int, int, int]:
-    """https://stackoverflow.com/a/9493060"""
-    if s == 0:
-        r = g = b = l  # achromatic
-    else:
-        q = l * (1 + s) if l < 0.5 else l + s - l * s
-        p = 2 * l - q
-        r = _hue_to_rgb(p, q, h + 1 / 3)
-        g = _hue_to_rgb(p, q, h)
-        b = _hue_to_rgb(p, q, h - 1 / 3)
-    return round(r * 255), round(g * 255), round(b * 255)
-
-
-def hue_from_index(i: int, steps: int = 6) -> float:
-    mod = i % steps
-    frac = 1 / steps
-    div = i // steps + 1
-    shift = frac / div
-    return mod * frac + shift
-
-
-@lru_cache(MAX_COLORS + 1)
-def color_from_index(
-    i: int,
-    s: float = 0.8,
-    l: float = 0.5,
-    default_color: Color = COLOR_GRAY,
-    **kwargs,
-) -> Color:
-    if i == -1:
-        return default_color
-    rgb = _hsl_to_rgb(hue_from_index(i, **kwargs), s, l)
-    return Color(*rgb)
+def _gen_colors(
+    num: int, highlighted: Optional[int] = None
+) -> Tuple[Color, ...]:
+    if highlighted is not None:
+        colors = [COLOR_DEFAULT for i in range(num)]
+        colors[highlighted] = _color_from_index(highlighted)
+        return tuple(colors)
+    return tuple(_color_from_index(i) for i in range(num))
 
 
 def _pie_chart_shader(
@@ -134,16 +124,13 @@ def _draw_image(
 
 
 def _create_slices(
-    fractions: Tuple[float, ...],
-    colors: Tuple[Color, ...] = (),
-    default_color: Color = COLOR_WHITE,
+    fractions: Tuple[float, ...], highlighted: Optional[int] = None
 ) -> Iterator[Slice]:
     if not fractions or sum(fractions) == 0:
-        yield Slice(start=0, end=_frac_to_rad(1), color=default_color)
+        yield Slice(start=0, end=_frac_to_rad(1))
         return
     cumulative_frac = 0.0
-    if not colors:
-        colors = tuple(color_from_index(i) for i in range(len(fractions)))
+    colors = _gen_colors(len(fractions), highlighted)
     for frac, color in zip(fractions, colors):
         frac = round(frac, 2)
         if frac == 0:
@@ -158,10 +145,10 @@ def _create_slices(
 
 @lru_cache(ICON_CACHE_SIZE)
 def draw_pie_chart_png(
-    size: int, fractions: Tuple[float, ...], colors: Tuple[Color, ...] = ()
+    size: int, fractions: Tuple[float, ...], highlighted: Optional[int] = None
 ) -> Image.Image:
     logger.info('Drawing PNG icon %s', [f'{fract:.2f}' for fract in fractions])
-    slices = list(_create_slices(fractions, colors))
+    slices = list(_create_slices(fractions, highlighted))
     return _draw_image(
         w=size, h=size, shader=partial(_pie_chart_shader, slices=slices)
     )
@@ -169,10 +156,10 @@ def draw_pie_chart_png(
 
 @lru_cache(ICON_CACHE_SIZE)
 def draw_pie_chart_svg(
-    fractions: Tuple[float, ...], colors: Tuple[Color, ...] = ()
+    fractions: Tuple[float, ...], highlighted: Optional[int] = None
 ) -> str:
     logger.info('Drawing SVG icon %s', [f'{fract:.2f}' for fract in fractions])
-    slices = _create_slices(fractions, colors)
+    slices = _create_slices(fractions, highlighted)
     lines = []
     lines.append('<?xml version="1.0" encoding="UTF-8" ?>')
     lines.append(

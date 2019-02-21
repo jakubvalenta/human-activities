@@ -117,7 +117,8 @@ class Application:
     ):
         if directory is not None:
             directory_views.load(directory, pending=False)
-        self._redraw_queue.put(directory_views.copy())
+        if self._redraw_queue is not None:
+            self._redraw_queue.put(directory_views.copy())
 
     def _scan_stop(self):
         if self._scan_event_stop is not None:

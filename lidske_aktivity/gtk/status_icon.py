@@ -130,9 +130,7 @@ class StatusIcon:
             for i, directory_view in enumerate(directory_views.values()):
                 icon_size = Gtk.IconSize.lookup(Gtk.IconSize.MENU)[1]
                 icon_image = draw_pie_chart_png(
-                    icon_size,
-                    directory_views.fractions,
-                    directory_views.get_colors_with_one_highlighted(i),
+                    icon_size, directory_views.fractions, highlighted=i
                 )
                 icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(

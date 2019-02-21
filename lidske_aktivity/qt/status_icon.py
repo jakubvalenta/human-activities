@@ -56,9 +56,7 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
                     self.app._ui_app, QtWidgets.QStyle.PM_SmallIconSize
                 )
                 icon_image = draw_pie_chart_png(
-                    icon_size,
-                    directory_views.fractions,
-                    directory_views.get_colors_with_one_highlighted(i),
+                    icon_size, directory_views.fractions, highlighted=i
                 )
                 icon_pixmap = image_to_pixmap(icon_image)
                 create_menu_item(

@@ -21,7 +21,8 @@ def is_appindicator_available() -> bool:
 
 def is_pyqt5_available() -> bool:
     try:
-        from PyQt5.QtWidgets import QApplication
+        from PyQt5.QtWidgets import QApplication  # noqa: F401
+
         return True
     except ModuleNotFoundError:
         return False

@@ -72,11 +72,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
                 icon_image = draw_pie_chart_png(
-                    16,
-                    directory_views.fractions,
-                    directory_views.get_colors_with_one_highlighted(
-                        i, grayscale=True
-                    ),
+                    16, directory_views.fractions, highlighted=i
                 )
                 create_menu_item(
                     self, menu, directory_view.text, icon_image=icon_image
