@@ -19,6 +19,14 @@ def is_appindicator_available() -> bool:
         return False
 
 
+def is_pyqt5_available() -> bool:
+    try:
+        from PyQt5.QtWidgets import QApplication
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description=__title__)
     parser.add_argument(
@@ -89,8 +97,11 @@ def main():
     elif is_appindicator_available():
         logger.info('Using UI toolkit Gtk+3 (reason: AppIndicator available)')
         import lidske_aktivity.gtk as ui
+    elif is_pyqt5_available():
+        logger.info('Using UI toolkit Qt5 (reason: PyQt5 available)')
+        import lidske_aktivity.qt as ui
     else:
-        logger.info('Using UI toolkit WxWidgets (reason: AppIndicator n/a)')
+        logger.info('Using UI toolkit WxWidgets (reason: PyQt5 not available)')
         import lidske_aktivity.wx as ui
     return_code = app.run_ui(ui)
     sys.exit(return_code)
