@@ -9,7 +9,7 @@ from lidske_aktivity.config import (
     MODES,
     UNITS,
     Config,
-    TNamedDirs,
+    NamedDirs,
 )
 from lidske_aktivity.gtk.lib import (
     NamedDirsForm,
@@ -79,7 +79,7 @@ class Settings(Gtk.Dialog):
             self._config.named_dirs, self._on_named_dirs_change, parent=self
         )
         # Mode radios must be created after the forms, because the radio
-        # callback immediately tries to set sensitivity of the forms.
+        # callback immediately tries to toggle the forms.
         self._create_mode_radios()
 
     def _add_widgets(self):
@@ -135,7 +135,7 @@ class Settings(Gtk.Dialog):
     def _on_root_path_change(self, root_path: str):
         self._config.root_path = root_path
 
-    def _on_named_dirs_change(self, named_dirs: TNamedDirs):
+    def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs
 
     def _show(self):

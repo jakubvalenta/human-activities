@@ -32,7 +32,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from lidske_aktivity.config import TNamedDirs
+from lidske_aktivity.config import NamedDirs
 from lidske_aktivity.texts import _
 
 logger = logging.getLogger(__name__)
@@ -261,19 +261,21 @@ class NamedDir(NamedTuple):
 class NamedDirsForm(QGridLayout):
     _ui_app: QApplication
     _named_dirs_list: List[NamedDir]
+    _max_len: int
     _parent: QWidget
 
     def __init__(
         self,
         ui_app: QApplication,
-        named_dirs: TNamedDirs,
-        on_change: Callable[[TNamedDirs], None],
+        named_dirs: NamedDirs,
+        on_change: Callable[[NamedDirs], None],
         parent: QWidget,
     ):
         self._ui_app = ui_app
         self._named_dirs_list = [
             NamedDir(path, name) for path, name in named_dirs.items()
         ]
+        self._max_len = named_dirs.max_len
         self._on_change = on_change
         self._parent = parent
         super().__init__(self._parent)
@@ -334,9 +336,11 @@ class NamedDirsForm(QGridLayout):
         self._init_line_edits()
 
     @property
-    def _named_dirs(self) -> TNamedDirs:
-        return {
-            named_dir.path: named_dir.name
-            for named_dir in self._named_dirs_list
-            if named_dir.path and named_dir.name
-        }
+    def _named_dirs(self) -> NamedDirs:
+        return NamedDirs(
+            {
+                named_dir.path: named_dir.name
+                for named_dir in self._named_dirs_list
+                if named_dir.path and named_dir.name
+            }
+        )

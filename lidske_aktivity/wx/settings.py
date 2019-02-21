@@ -11,10 +11,10 @@ from lidske_aktivity.config import (
     Config,
 )
 from lidske_aktivity.wx.lib import (
+    NamedDirs,
     NamedDirsForm,
     RadioConfig,
     RootPathForm,
-    TNamedDirs,
     create_label,
     create_radio_group,
     create_sizer,
@@ -148,7 +148,7 @@ class Settings(wx.Dialog):
     def _on_root_path_change(self, root_path: str):
         self._config.root_path = root_path
 
-    def _on_named_dirs_change(self, named_dirs: TNamedDirs):
+    def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs
 
     def _fit(self):

@@ -10,6 +10,7 @@ SETTINGS_THRESHOLD_DAYS_OLD = _(
     'Include only files newer than (days), 0 = all files'
 )
 SETTINGS_MODE = _('Directories')
+SETTINGS_MAX_DIRS_REACHED = _('Reached the maximumg of {max_len} directories')
 
 SETUP_TITLE = _('Lidské Aktivity setup')
 SETUP_HEADING = _('Please adjust your OS settings like this:')
@@ -26,3 +27,4 @@ MENU_EMPTY = _('No directories configured')
 MENU_THRESHOLD_DAYS_AGO = _(
     'Counting only files modified in the past {days} days'
 )
+MENU_DIRS_TRUNCATED = _('Showing only first {max_len} directories')

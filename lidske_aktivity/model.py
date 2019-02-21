@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
 
 from lidske_aktivity import CACHE_PATH
-from lidske_aktivity.config import UNIT_SIZE_BYTES, TNamedDirs
+from lidske_aktivity.config import UNIT_SIZE_BYTES, NamedDirs
 from lidske_aktivity.locale import _
 from lidske_aktivity.utils import filesystem, func
 from lidske_aktivity.utils.math import safe_div
@@ -144,9 +144,11 @@ class DirectoryView(NamedTuple):
 class DirectoryViews(dict):
     unit: str
     threshold_days_ago: int = 0
+    max_len: int = 0
+    truncated: bool = False
 
     def config(
-        self, unit: str, threshold_days_ago: int, named_dirs: TNamedDirs
+        self, unit: str, threshold_days_ago: int, named_dirs: NamedDirs
     ):
         self.unit = unit
         self.threshold_days_ago = threshold_days_ago
@@ -155,6 +157,8 @@ class DirectoryViews(dict):
             self[path] = DirectoryView(
                 label=label, unit=unit, threshold_days_ago=threshold_days_ago
             )
+        self.max_len = named_dirs.max_len
+        self.truncated = named_dirs.truncated
 
     def load(self, *directories: Directory, **extra_props):
         for directory in directories:
@@ -183,10 +187,11 @@ class DirectoryViews(dict):
         return '\n'.join(dv.text for dv in self.values())
 
     def copy(self) -> 'DirectoryViews':
-        new = DirectoryViews()
+        new = self.__class__(self)
         new.unit = self.unit
         new.threshold_days_ago = self.threshold_days_ago
-        new.update(self)
+        new.max_len = self.max_len
+        new.truncated = self.truncated
         return new
 
 

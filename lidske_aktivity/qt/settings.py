@@ -19,10 +19,10 @@ from lidske_aktivity.config import (
     Config,
 )
 from lidske_aktivity.qt.lib import (
+    NamedDirs,
     NamedDirsForm,
     RadioConfig,
     RootPathForm,
-    TNamedDirs,
     add_layout_items,
     create_group_box,
     create_layout,
@@ -108,6 +108,8 @@ class Settings(QDialog):
             self._on_named_dirs_change,
             parent=box,
         )
+        # Mode radios must be created after the forms, because the radio
+        # callback immediately tries to toggle the forms.
         radio_configs = [
             RadioConfig(value, label) for value, label in MODES.items()
         ]
@@ -135,7 +137,7 @@ class Settings(QDialog):
     def _on_root_path_change(self, root_path: str):
         self._config.root_path = root_path
 
-    def _on_named_dirs_change(self, named_dirs: TNamedDirs):
+    def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs
 
     def _toggle_forms(self):

@@ -5,7 +5,7 @@ import wx
 import wx.adv
 
 from lidske_aktivity import texts
-from lidske_aktivity.config import Config, TNamedDirs
+from lidske_aktivity.config import Config, NamedDirs
 from lidske_aktivity.wx.lib import NamedDirsForm, create_label, create_sizer
 
 
@@ -72,7 +72,7 @@ class Setup(wx.adv.Wizard):
             self._on_wizard_accept,
         )
 
-    def _on_named_dirs_change(self, named_dirs: TNamedDirs):
+    def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs
 
     def _on_wizard_accept(self):

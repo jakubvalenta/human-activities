@@ -6,7 +6,7 @@ import gi
 from PIL import Image
 
 from lidske_aktivity import texts
-from lidske_aktivity.config import TNamedDirs
+from lidske_aktivity.config import NamedDirs
 
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('Gtk', '3.0')
@@ -191,16 +191,18 @@ class NamedDir(NamedTuple):
 
 class NamedDirsForm(Gtk.Grid):
     _named_dirs_list: List[NamedDir]
+    _max_len: int
 
     def __init__(
         self,
-        named_dirs: TNamedDirs,
-        on_change: Callable[[TNamedDirs], None],
+        named_dirs: NamedDirs,
+        on_change: Callable[[NamedDirs], None],
         parent: Gtk.Window,
     ):
         self._named_dirs_list = [
             NamedDir(path, name) for path, name in named_dirs.items()
         ]
+        self._max_len = named_dirs.max_len
         self._on_change = on_change
         super().__init__()
         self.set_column_spacing(10)
@@ -225,16 +227,28 @@ class NamedDirsForm(Gtk.Grid):
                 callback=partial(self._on_remove_clicked, i),
             )
             self.attach(remove_button, left=4, top=i, width=1, height=1)
-        add_button = create_button(
-            stock_id=Gtk.STOCK_ADD, callback=self._on_add_clicked
-        )
-        self.attach(
-            add_button,
-            left=4,
-            top=len(self._named_dirs_list),
-            width=1,
-            height=1,
-        )
+        if len(self._named_dirs_list) < self._max_len:
+            add_button = create_button(
+                stock_id=Gtk.STOCK_ADD, callback=self._on_add_clicked
+            )
+            self.attach(
+                add_button,
+                left=4,
+                top=len(self._named_dirs_list),
+                width=1,
+                height=1,
+            )
+        else:
+            label = create_label(
+                texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len)
+            )
+            self.attach(
+                label,
+                left=0,
+                top=len(self._named_dirs_list),
+                width=5,
+                height=1,
+            )
         self.show_all()
 
     def _clear(self):
@@ -265,9 +279,11 @@ class NamedDirsForm(Gtk.Grid):
         self._init_entries()
 
     @property
-    def _named_dirs(self) -> TNamedDirs:
-        return {
-            named_dir.path: named_dir.name
-            for named_dir in self._named_dirs_list
-            if named_dir.path and named_dir.name
-        }
+    def _named_dirs(self) -> NamedDirs:
+        return NamedDirs(
+            {
+                named_dir.path: named_dir.name
+                for named_dir in self._named_dirs_list
+                if named_dir.path and named_dir.name
+            }
+        )

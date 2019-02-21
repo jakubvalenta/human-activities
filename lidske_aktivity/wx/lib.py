@@ -8,7 +8,7 @@ import wx.lib.filebrowsebutton
 from PIL import Image
 
 from lidske_aktivity import texts
-from lidske_aktivity.config import TNamedDirs
+from lidske_aktivity.config import NamedDirs
 
 logger = logging.getLogger(__name__)
 
@@ -220,12 +220,13 @@ class NamedDir(NamedTuple):
 
 class NamedDirsForm(Form):
     _named_dirs_list: List[NamedDir]
+    _max_len: int
     _vbox: wx.BoxSizer
 
     def __init__(
         self,
-        named_dirs: TNamedDirs,
-        on_change: Callable[[TNamedDirs], None],
+        named_dirs: NamedDirs,
+        on_change: Callable[[NamedDirs], None],
         parent: wx.Panel,
         on_redraw: Optional[Callable[[], None]] = None,
         *args,
@@ -234,6 +235,7 @@ class NamedDirsForm(Form):
         self._named_dirs_list = [
             NamedDir(path, name) for path, name in named_dirs.items()
         ]
+        self._max_len = named_dirs.max_len
         self._on_change = on_change
         self._on_redraw = on_redraw
         self._parent = parent
@@ -309,9 +311,11 @@ class NamedDirsForm(Form):
         wx.CallAfter(self._recreate)
 
     @property
-    def _named_dirs(self) -> TNamedDirs:
-        return {
-            named_dir.path: named_dir.name
-            for named_dir in self._named_dirs_list
-            if named_dir.path and named_dir.name
-        }
+    def _named_dirs(self) -> NamedDirs:
+        return NamedDirs(
+            {
+                named_dir.path: named_dir.name
+                for named_dir in self._named_dirs_list
+                if named_dir.path and named_dir.name
+            }
+        )

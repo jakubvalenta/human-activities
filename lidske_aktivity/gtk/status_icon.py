@@ -125,7 +125,6 @@ class StatusIcon:
     def _create_menu_items(
         self, directory_views: Optional[DirectoryViews] = None
     ) -> Iterator[Gtk.MenuItem]:
-        # TODO: Limit the maximum number of items shown.
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
                 icon_size = Gtk.IconSize.lookup(Gtk.IconSize.MENU)[1]
@@ -135,6 +134,12 @@ class StatusIcon:
                 icon_pixbuf = image_to_pixbuf(icon_image)
                 yield create_menu_item(
                     directory_view.text, icon_pixbuf=icon_pixbuf
+                )
+            if directory_views.truncated:
+                yield create_menu_item(
+                    texts.MENU_DIRS_TRUNCATED.format(
+                        max_len=directory_views.max_len
+                    )
                 )
             if directory_views.threshold_days_ago:
                 yield Gtk.SeparatorMenuItem()
