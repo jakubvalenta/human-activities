@@ -10,8 +10,10 @@ _debian_dist_parent=dist/debian
 _debian_src_filename=${_name}_${_version}.orig.tar.xz
 _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
+_uid=$(shell id -u)
+_gid=$(shell id -g)
 
-.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -56,7 +58,9 @@ ${_arch_linux_dist_parent}/PKGBUILD: ${_arch_linux_dist_parent}/${_arch_linux_sr
 ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}: ${_arch_linux_dist_parent}/PKGBUILD
 	cd "${_arch_linux_dist_parent}" && makepkg -sf
 
-dist-arch-linux: ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}  ## Build an Arch Linux package
+dist-arch-linux:  ## Build an Arch Linux package
+	-rm -r dist/arch_linux
+	$(MAKE) ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}
 
 install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux package
 	sudo pacman -U "${_arch_linux_pkg_path}"
@@ -80,9 +84,11 @@ ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_
 
 ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
 	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" lidske_aktivity_debian \
-		sh -c 'cd "${_debian_src_dirname}" && debuild -us -uc'
+		sh -c 'cd "${_debian_src_dirname}" && debuild -us -uc; chown -R ${_uid}:${_gid} .'
 
-dist-debian: ${_debian_dist_parent}/${_debian_pkg_filename}  ## Build a Debian package
+dist-debian:  ## Build a Debian package
+	-rm -r dist/debian
+	$(MAKE) ${_debian_dist_parent}/${_debian_pkg_filename}
 
 install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install built Debian package
 	sudo dpkg -i "${_debian_dist_parent}/${_debian_pkg_filename}"
@@ -101,10 +107,6 @@ data/${_name}.icns: data/${_name}.svg
 	sh data/bin/create_icns.sh
 
 generate-data: data/${_name}.png
-
-clean:  ## Clean distribution package
-	-rm -rf build/*
-	-rm -rf dist/*
 
 clean-cache:  ## Clean cache
 	pipenv run python3 -m ${_pypkgname} --verbose --clean
