@@ -14,10 +14,8 @@ def is_appindicator_available() -> bool:
         import gi
 
         gi.require_version('AppIndicator3', '0.1')
-        logger.info('AppIndicator is available')
         return True
     except (ModuleNotFoundError, ValueError):
-        logger.info('AppIndicator is not available')
         return False
 
 
@@ -83,12 +81,16 @@ def main():
         app.scan_start()
         return
     if args.wxwidgets:
+        logger.info('Using UI toolkit WxWidgets (reason: cli option)')
         import lidske_aktivity.wx as ui
     elif args.qt:
+        logger.info('Using UI toolkit Qt5 (reason: cli option)')
         import lidske_aktivity.qt as ui
     elif is_appindicator_available():
+        logger.info('Using UI toolkit Gtk+3 (reason: AppIndicator available)')
         import lidske_aktivity.gtk as ui
     else:
+        logger.info('Using UI toolkit WxWidgets (reason: AppIndicator n/a)')
         import lidske_aktivity.wx as ui
     return_code = app.run_ui(ui)
     sys.exit(return_code)
