@@ -84,7 +84,7 @@ ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_
 
 ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
 	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" lidske_aktivity_debian \
-		sh -c 'cd "${_debian_src_dirname}" && debuild -us -uc; chown -R ${_uid}:${_gid} .'
+		sh -c 'cd "${_debian_src_dirname}" && debuild -us -uc; chown -R ${_uid}:${_gid} /app'
 
 dist-debian:  ## Build a Debian package
 	-rm -r dist/debian
