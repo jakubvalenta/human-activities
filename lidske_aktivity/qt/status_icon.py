@@ -41,7 +41,7 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
 
     def __init__(self, app: 'Application'):
         self.app = app
-        super().__init__(parent=None)
+        super().__init__(parent=self.app._ui_app)
         self._update_signal.connect(self._on_update)
         self._init_menu()
         self._set_icon(DEFAULT_FRACTIONS, __title__)
