@@ -1,3 +1,9 @@
+lidske-aktivity (0.5.0-1) unstable; urgency=medium
+
+  * Add Qt5 version.
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 21 Feb 2019 17:25:41 +0000
+
 lidske-aktivity (0.4.1-1) unstable; urgency=medium
 
   * Add value (size or number of files) to menu items.
