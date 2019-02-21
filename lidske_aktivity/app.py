@@ -162,12 +162,12 @@ class Application:
 
     def show_setup(self):
         self._ui_app.spawn_frame(
-            self._ui.setup.Setup, self._config, self.set_config
+            self._ui.setup.Setup, self._config.copy(), self.set_config
         )
 
     def show_settings(self):
         self._ui_app.spawn_frame(
-            self._ui.settings.Settings, self._config, self.set_config
+            self._ui.settings.Settings, self._config.copy(), self.set_config
         )
 
     def show_about(self):

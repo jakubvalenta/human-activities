@@ -65,7 +65,6 @@ UNITS = {
 
 
 class Config:
-    # TODO: Make Config immutable
     mode: str = MODE_NAMED_DIRS
     root_path: Optional[str] = None
     named_dirs: NamedDirs
@@ -76,6 +75,17 @@ class Config:
 
     def __init__(self):
         self.named_dirs = NamedDirs()
+
+    def copy(self):
+        new = self.__class__()
+        new.mode = self.mode
+        new.root_path = self.root_path
+        new.named_dirs = self.named_dirs
+        new.unit = self.unit
+        new.threshold_days_ago = self.threshold_days_ago
+        new.show_setup = self.show_setup
+        new.test = self.test
+        return new
 
     def to_json(self) -> str:
         d = {
