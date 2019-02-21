@@ -14,7 +14,12 @@ from lidske_aktivity import (
 )
 from lidske_aktivity.config import Config, load_config, save_config
 from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
-from lidske_aktivity.model import Directories, DirectoryViews, scan_directory
+from lidske_aktivity.model import (
+    Directories,
+    Directory,
+    DirectoryViews,
+    scan_directory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +87,7 @@ class Application:
 
     def _scan(self):
         directory_views = self._create_directory_views()
+        self._on_scan(directory_views, None)
         logger.info('Starting scan threads')
         with ThreadPoolExecutor() as executor:
             futures = [
@@ -103,9 +109,14 @@ class Application:
         else:
             logger.info('No further scanning scheduled')
 
-    def _on_scan(self, directory_views: DirectoryViews, directory):
-        directory_views.load(directory, pending=False)
-        self._redraw_trigger(directory_views.copy())
+    def _on_scan(
+        self,
+        directory_views: DirectoryViews,
+        directory: Optional[Directory] = None,
+    ):
+        if directory is not None:
+            directory_views.load(directory, pending=False)
+        self._redraw_queue.put(directory_views.copy())
 
     def _scan_stop(self):
         if self._scan_event_stop is not None:
@@ -121,12 +132,6 @@ class Application:
         self._redraw_thread = Thread(target=self._redraw)
         self._redraw_thread.start()
 
-    def _redraw_trigger(
-        self, directory_views: Optional[DirectoryViews] = None
-    ):
-        if self._redraw_queue is not None:
-            self._redraw_queue.put(directory_views)
-
     def _redraw(self):
         while not self._redraw_event_stop.is_set():
             logger.info('Waiting for an item in the redrawing queue')
@@ -140,7 +145,8 @@ class Application:
     def _redraw_stop(self):
         if self._redraw_event_stop is not None:
             self._redraw_event_stop.set()
-        self._redraw_trigger()
+        if self._redraw_queue is not None:
+            self._redraw_queue.put(None)
         if self._redraw_thread is not None:
             self._redraw_thread.join()
         logger.info('Redrawing thread stopped')
@@ -150,7 +156,6 @@ class Application:
         save_config(config)
         self._scan_stop()
         self.scan_start()
-        self._redraw_trigger()
 
     def show_setup(self):
         self._ui_app.spawn_frame(
@@ -179,5 +184,5 @@ class Application:
 
     def _on_quit(self):
         logger.info('App on_quit')
-        self._redraw_stop()
         self._scan_stop()
+        self._redraw_stop()
