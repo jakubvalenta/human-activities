@@ -168,11 +168,18 @@ endif
 	sed -i s/${_version}/${version}/ Makefile
 	sed -i s/${_version}/${version}/ ${_pypkgname}/__init__.py
 	sed -i s/${_version}/${version}/ arch_linux/PKGBUILD
+	docker info &> /dev/null || sudo systemctl start docker
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
 		lidske_aktivity_debian dch -v "${version}-${_pkgrel}" "New version"
-	@echo "Now commit the changes and run:"
-	@echo "    git tag -a v${version}"
+	@echo "Editing changelog..."
+	"${EDITOR}" debian/changelog
+	@echo "Committing changes..."
+	git add Makefile ${_pypkgname}/__init__.py arch_linux/PKGBUILD debian/changelog
+	git commit -m "Version ${version}"
+	@echo "Creating tag..."
+	git tag "v${version}"
+	@echo "Done"
 
 backup:  ## Backup built packages (currently Debian-only)
 	timestamp=$$(date +%s) && \
