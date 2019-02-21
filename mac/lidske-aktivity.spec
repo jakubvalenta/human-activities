@@ -39,12 +39,11 @@ exe = EXE(  # noqa: F821
     strip=False,
     upx=True,
     runtime_tmpdir=None,
-    console=False,
-    icon=os.path.join('data', 'lidske-aktivity.ico')
+    console=False
 )
 app = BUNDLE(  # noqa: F821
     exe,
-    name='lidske-aktivity.app',
+    name='Lidske Aktivity.app',
     icon=os.path.join('data', 'lidske-aktivity.icns'),
     bundle_identifier='cz.jakubvalenta.lidske-aktivity',
     info_plist={
