@@ -21,10 +21,11 @@ Depends: gir1.2-appindicator3-0.1,
          ${python3:Depends},
          ${misc:Depends}
 Description: monitor size of directories
- Display a system tray icon (GTK+ AppIndicator) with a menu. The icon is a pie
- chart that shows ratio between the size of configured directories. The menu
- shows a list of the directories with exact size in bytes and percents.
+ Human Activities is an application that displays a pie chart icon in the System
+ Tray using GTK+ AppIndicator. The icon shows ratio between the
+ size of configured directories. When clicked, a menu with a list of the
+ directories and their exact size in bytes appears.
  .
- The application can be configured to compare number of files instead of size
- of directories. It can also be configured to only count files that are newer
- than specified number of days.
+ The application can be configured to compare number of files instead of size of
+ directories. It can also be configured to only count files that are newer than
+ specified number of days.

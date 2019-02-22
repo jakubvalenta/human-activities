@@ -1,3 +1,16 @@
+# Human Activities
+
+/monitor size of directories/
+
+Human Activities is an application that displays a pie chart icon in the Windows
+Taskbar, macOS Menu Bar or Linux System Tray. The icon shows ratio between the
+size of configured directories. When clicked, a menu with a list of the
+directories and their exact size in bytes appears.
+
+The application can be configured to compare number of files instead of size of
+directories. It can also be configured to only count files that are newer than
+specified number of days.
+
 ## Installation
 
 ### Arch Linux
