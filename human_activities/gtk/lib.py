@@ -1,4 +1,5 @@
 import logging
+import os.path
 from functools import partial
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional
 
@@ -189,67 +190,68 @@ class NamedDir(NamedTuple):
     name: str = ''
 
 
-class NamedDirsForm(Gtk.Grid):
+class NamedDirsForm(Gtk.Box):
     _named_dirs_list: List[NamedDir]
     _max_len: int
+    _custom_names_enabled: bool
 
     def __init__(
         self,
         named_dirs: NamedDirs,
         on_change: Callable[[NamedDirs], None],
         parent: Gtk.Window,
+        custom_names_enabled: bool = True,
     ):
         self._named_dirs_list = [
             NamedDir(path, name) for path, name in named_dirs.items()
         ]
         self._max_len = named_dirs.max_len
         self._on_change = on_change
-        super().__init__()
-        self.set_column_spacing(10)
-        self.set_row_spacing(10)
+        self._custom_names_enabled = custom_names_enabled
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.set_homogeneous(False)
         self._init_entries()
 
     def _init_entries(self):
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(10)
         for i, named_dir in enumerate(self._named_dirs_list):
-            name_entry = create_entry(
-                value=named_dir.name or '',
-                callback=partial(self._on_name_changed, i),
-            )
-            name_entry.set_hexpand(True)
-            self.attach(name_entry, left=0, top=i, width=2, height=1)
+            left = 0
+            if self._custom_names_enabled:
+                name_entry = create_entry(
+                    value=named_dir.name or '',
+                    callback=partial(self._on_name_changed, i),
+                )
+                name_entry.set_hexpand(True)
+                grid.attach(name_entry, left=left, top=i, width=2, height=1)
+                left += 2
             choose_button = create_file_chooser_button(
                 value=named_dir.path or None,
                 callback=partial(self._on_path_changed, i),
             )
-            self.attach(choose_button, left=2, top=i, width=2, height=1)
+            if left == 0:
+                choose_button.set_hexpand(True)
+            grid.attach(choose_button, left=left, top=i, width=2, height=1)
+            left += 2
             remove_button = create_button(
                 stock_id=Gtk.STOCK_REMOVE,
                 callback=partial(self._on_remove_clicked, i),
             )
-            self.attach(remove_button, left=4, top=i, width=1, height=1)
+            grid.attach(remove_button, left=left, top=i, width=1, height=1)
+        grid.show_all()
+        box_add(self, grid)
         if len(self._named_dirs_list) < self._max_len:
+            # TODO: Make the button not fill the whole box width.
             add_button = create_button(
                 stock_id=Gtk.STOCK_ADD, callback=self._on_add_clicked
             )
-            self.attach(
-                add_button,
-                left=4,
-                top=len(self._named_dirs_list),
-                width=1,
-                height=1,
-            )
+            box_add(self, add_button, expand=False)
         else:
             label = create_label(
                 texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len)
             )
-            self.attach(
-                label,
-                left=0,
-                top=len(self._named_dirs_list),
-                width=5,
-                height=1,
-            )
-        self.show_all()
+            box_add(self, label, expand=False)
 
     def _clear(self):
         for row in self.get_children():
@@ -283,7 +285,8 @@ class NamedDirsForm(Gtk.Grid):
         return NamedDirs(
             {
                 named_dir.path: named_dir.name
+                or os.path.basename(named_dir.path)
                 for named_dir in self._named_dirs_list
-                if named_dir.path and named_dir.name
+                if named_dir.path
             }
         )
