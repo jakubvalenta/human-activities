@@ -13,8 +13,13 @@ from PyQt5.QtWidgets import (
 
 from lidske_aktivity import texts
 from lidske_aktivity.config import Config, NamedDirs
-from lidske_aktivity.qt.lib import NamedDirsForm, create_label, create_layout, image_to_pixmap
-from lidske_aktivity.icon import draw_pie_chart_png, DEFAULT_FRACTIONS
+from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
+from lidske_aktivity.qt.lib import (
+    NamedDirsForm,
+    create_label,
+    create_layout,
+    image_to_pixmap,
+)
 
 
 def add_text_paragraph(parent: QWidget, layout: QVBoxLayout, text: str):
@@ -43,7 +48,11 @@ class Setup(QWizard):
         self._config = config
         self._config.reset_named_dirs()
         super().__init__(parent=None)
-        self._add_page(create_content_intro, texts.SETUP_STEP_INTRO_TITLE, texts.SETUP_HEADING)
+        self._add_page(
+            create_content_intro,
+            texts.SETUP_STEP_INTRO_TITLE,
+            texts.SETUP_HEADING,
+        )
         self._add_page(
             partial(
                 NamedDirsForm,
@@ -52,7 +61,7 @@ class Setup(QWizard):
                 self._on_named_dirs_change,
             ),
             texts.SETUP_STEP_SETUP_TITLE,
-            texts.SETUP_STEP_SETUP_TEXT
+            texts.SETUP_STEP_SETUP_TEXT,
         )
         self.setWindowTitle(texts.SETUP_TITLE)
         image = draw_pie_chart_png(148, DEFAULT_FRACTIONS)
@@ -64,7 +73,12 @@ class Setup(QWizard):
     def sizeHint(self):
         return QSize(700, 400)
 
-    def _add_page(self, page_func: Callable[[QWizardPage], QLayout], title: str, sub_title: str):
+    def _add_page(
+        self,
+        page_func: Callable[[QWizardPage], QLayout],
+        title: str,
+        sub_title: str,
+    ):
         page = QWizardPage()
         page.setTitle(title)
         page.setSubTitle(sub_title)
