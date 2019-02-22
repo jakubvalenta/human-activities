@@ -1,6 +1,6 @@
 # Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
 pkgname=lidske-aktivity
-pkgver=0.6.0
+pkgver=0.7.0
 pkgrel=1
 epoch=
 pkgdesc='Monitor size of directories'
