@@ -81,31 +81,22 @@ class Directories(list):
 
     def __init__(self, paths: Iterable[str]):
         self._session = scoped_session(session_factory)
-        self._load_from_db(paths)
-        self._create_missing(paths)
-        self._save()
-
-    def _load_from_db(self, paths: Iterable[str]):
-        query = self._session.query(Directory).order_by(Directory.path)
-        for directory in query:
-            if directory.path in paths:
-                logger.info('DB: Loaded %s', directory)
-                self.append(directory)
-            else:
-                logger.info('DB: Deleting %s', directory)
-                self._session.delete(directory)
-
-    def _create_missing(self, paths: Iterable[str]):
-        existing_paths = [directory.path for directory in self]
+        query = self._session.query(Directory)
+        directories_by_path = {
+            directory.path: directory for directory in query
+        }
         for path in paths:
-            if path in existing_paths:
-                continue
-            directory = Directory(path=path)
-            logger.info('DB: Inserting %s', directory)
-            self._session.add(directory)
+            if path in directories_by_path:
+                directory = directories_by_path.pop(path)
+                logger.info('DB: Loaded %s', directory)
+            else:
+                directory = Directory(path=path)
+                logger.info('DB: Inserting %s', directory)
+                self._session.add(directory)
             self.append(directory)
-
-    def _save(self):
+        for path, directory in directories_by_path:
+            logger.info('DB: Deleting %s', directory)
+            self._session.delete(directory)
         self._session.commit()
 
     def __del__(self):
