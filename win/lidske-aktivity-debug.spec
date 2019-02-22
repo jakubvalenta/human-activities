@@ -8,10 +8,12 @@ a = Analysis(  # noqa: F821
     [os.path.join('..', 'lidske_aktivity', '__main__.py')],
     pathex=['win'],
     binaries=[],
-    datas=[(
-        os.path.join('..', 'lidske_aktivity', 'locale'),
-        os.path.join('locale')
-    )],
+    datas=[
+        (
+            os.path.join('..', 'lidske_aktivity', 'locale'),
+            os.path.join('locale'),
+        )
+    ],
     hiddenimports=['sqlalchemy.ext.baked'],
     hookspath=[],
     runtime_hooks=[],
@@ -19,13 +21,9 @@ a = Analysis(  # noqa: F821
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
-    noarchive=False
+    noarchive=False,
 )
-pyz = PYZ(  # noqa: F821
-    a.pure,
-    a.zipped_data,
-    cipher=block_cipher
-)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)  # noqa: F821
 exe = EXE(  # noqa: F821
     pyz,
     a.scripts,
@@ -40,5 +38,5 @@ exe = EXE(  # noqa: F821
     upx=True,
     runtime_tmpdir=None,
     console=True,
-    icon=os.path.join('data', 'lidske-aktivity.ico')
+    icon=os.path.join('data', 'lidske-aktivity.ico'),
 )

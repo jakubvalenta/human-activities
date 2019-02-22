@@ -8,10 +8,16 @@ a = Analysis(  # noqa: F821
     [os.path.join('..', 'lidske_aktivity', '__main__.py')],
     pathex=['mac'],
     binaries=[],
-    datas=[(
-        os.path.join('..', 'lidske_aktivity', 'locale'),
-        os.path.join('locale')
-    )],
+    datas=[
+        (
+            os.path.join('..', 'lidske_aktivity', 'locale'),
+            os.path.join('locale'),
+        ),
+        (
+            os.path.join('..', 'lidske_aktivity', 'qt', 'data'),
+            os.path.join('lidske_aktivity', 'qt', 'data'),
+        ),
+    ],
     hiddenimports=['sqlalchemy.ext.baked'],
     hookspath=[],
     runtime_hooks=[],
@@ -19,13 +25,9 @@ a = Analysis(  # noqa: F821
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
-    noarchive=False
+    noarchive=False,
 )
-pyz = PYZ(  # noqa: F821
-    a.pure,
-    a.zipped_data,
-    cipher=block_cipher
-)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)  # noqa: F821
 exe = EXE(  # noqa: F821
     pyz,
     a.scripts,
@@ -39,7 +41,7 @@ exe = EXE(  # noqa: F821
     strip=False,
     upx=True,
     runtime_tmpdir=None,
-    console=False
+    console=False,
 )
 app = BUNDLE(  # noqa: F821
     exe,
@@ -50,5 +52,5 @@ app = BUNDLE(  # noqa: F821
         'NSPrincipleClass': 'NSApplication',
         'NSAppleScriptEnabled': False,
         'LSUIElement': '1',
-    }
+    },
 )
