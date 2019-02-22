@@ -13,7 +13,8 @@ from PyQt5.QtWidgets import (
 
 from lidske_aktivity import texts
 from lidske_aktivity.config import Config, NamedDirs
-from lidske_aktivity.qt.lib import NamedDirsForm, create_label, create_layout
+from lidske_aktivity.qt.lib import NamedDirsForm, create_label, create_layout, image_to_pixmap
+from lidske_aktivity.icon import draw_pie_chart_png, DEFAULT_FRACTIONS
 
 
 def add_text_paragraph(parent: QWidget, layout: QVBoxLayout, text: str):
@@ -54,6 +55,9 @@ class Setup(QWizard):
             texts.SETUP_STEP_SETUP_TEXT
         )
         self.setWindowTitle(texts.SETUP_TITLE)
+        image = draw_pie_chart_png(148, DEFAULT_FRACTIONS)
+        pixmap = image_to_pixmap(image)
+        self.setPixmap(QWizard.BackgroundPixmap, pixmap)
         if self.exec_():
             on_finish(self._config)
 
