@@ -1,7 +1,9 @@
+import pkgutil
 from functools import partial
 from typing import Callable, List
 
 from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QLayout,
@@ -13,13 +15,7 @@ from PyQt5.QtWidgets import (
 
 from lidske_aktivity import texts
 from lidske_aktivity.config import Config, NamedDirs
-from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
-from lidske_aktivity.qt.lib import (
-    NamedDirsForm,
-    create_label,
-    create_layout,
-    image_to_pixmap,
-)
+from lidske_aktivity.qt.lib import NamedDirsForm, create_label, create_layout
 
 
 def add_text_paragraph(parent: QWidget, layout: QVBoxLayout, text: str):
@@ -64,8 +60,12 @@ class Setup(QWizard):
             texts.SETUP_STEP_SETUP_TEXT,
         )
         self.setWindowTitle(texts.SETUP_TITLE)
-        image = draw_pie_chart_png(148, DEFAULT_FRACTIONS)
-        pixmap = image_to_pixmap(image)
+        self.setWizardStyle(QWizard.MacStyle)
+        background = pkgutil.get_data(
+            'lidske_aktivity.qt.data', 'qt_wizard_bg.png'
+        )
+        pixmap = QPixmap()
+        pixmap.loadFromData(background)
         self.setPixmap(QWizard.BackgroundPixmap, pixmap)
         if self.exec_():
             on_finish(self._config)
