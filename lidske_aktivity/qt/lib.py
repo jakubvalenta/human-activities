@@ -182,6 +182,7 @@ class FileChooserForm(QHBoxLayout):
             icon_pixmap=create_icon_pixmap(ui_app, QStyle.SP_DialogOpenButton),
         )
         self.addWidget(button)
+        self.setSpacing(0)
 
     def _on_button_clicked(self):
         self._value = QFileDialog.getExistingDirectory(
