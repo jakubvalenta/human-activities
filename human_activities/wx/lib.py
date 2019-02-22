@@ -1,5 +1,6 @@
 import io
 import logging
+import os.path
 from functools import partial
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
@@ -224,6 +225,7 @@ class NamedDirsForm(Form):
     _named_dirs_list: List[NamedDir]
     _max_len: int
     _vbox: wx.BoxSizer
+    _custom_names_enabled: bool
 
     def __init__(
         self,
@@ -231,6 +233,7 @@ class NamedDirsForm(Form):
         on_change: Callable[[NamedDirs], None],
         parent: wx.Panel,
         on_redraw: Optional[Callable[[], None]] = None,
+        custom_names_enabled: bool = True,
         *args,
         **kwargs,
     ):
@@ -241,6 +244,7 @@ class NamedDirsForm(Form):
         self._on_change = on_change
         self._on_redraw = on_redraw
         self._parent = parent
+        self._custom_names_enabled = custom_names_enabled
         super().__init__(self._parent, *args, **kwargs)
         self._init_controls()
 
@@ -248,17 +252,18 @@ class NamedDirsForm(Form):
         self._vbox = create_sizer(self.panel)
         for i, named_dir in enumerate(self._named_dirs_list):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
-            name_control = create_text_control(
-                self.panel,
-                value=named_dir.name or '',
-                callback=partial(self._on_name_changed, i),
-            )
-            hbox.Add(
-                name_control,
-                proportion=2,
-                flag=wx.EXPAND | wx.RIGHT,
-                border=10,
-            )
+            if self._custom_names_enabled:
+                name_control = create_text_control(
+                    self.panel,
+                    value=named_dir.name or '',
+                    callback=partial(self._on_name_changed, i),
+                )
+                hbox.Add(
+                    name_control,
+                    proportion=2,
+                    flag=wx.EXPAND | wx.RIGHT,
+                    border=10,
+                )
             path_button = create_dir_browse_button(
                 self.panel,
                 value=named_dir.path or '',
@@ -324,7 +329,8 @@ class NamedDirsForm(Form):
         return NamedDirs(
             {
                 named_dir.path: named_dir.name
+                or os.path.basename(named_dir.path)
                 for named_dir in self._named_dirs_list
-                if named_dir.path and named_dir.name
+                if named_dir.path
             }
         )

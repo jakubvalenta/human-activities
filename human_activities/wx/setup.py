@@ -16,17 +16,21 @@ class Setup(wx.adv.Wizard):
         self._config.reset_named_dirs()
         super().__init__(parent, title=texts.SETUP_TITLE)
         page = wx.adv.WizardPageSimple(self)
-        vbox = create_sizer(page)
+        self._vbox = create_sizer(page)
         heading = create_label(
             page, markup=f'<big><b>{texts.SETUP_HEADING}</b></big>'
         )
-        vbox.Add(heading, flag=wx.EXPAND | wx.BOTTOM, border=10)
+        self._vbox.Add(heading, flag=wx.EXPAND | wx.BOTTOM, border=10)
         text = create_label(page, texts.SETUP_TEXT)
-        vbox.Add(text, flag=wx.EXPAND | wx.BOTTOM, border=10)
+        self._vbox.Add(text, flag=wx.EXPAND | wx.BOTTOM, border=10)
         named_dirs_form = NamedDirsForm(
-            self._config.named_dirs, self._on_named_dirs_change, parent=page
+            self._config.named_dirs,
+            self._on_named_dirs_change,
+            on_redraw=self._fit,
+            parent=page,
+            custom_names_enabled=False,
         )
-        vbox.Add(named_dirs_form.panel)
+        self._vbox.Add(named_dirs_form.panel)
         self.GetPageAreaSizer().Add(page)
         val = self.RunWizard(page)
         if val:
@@ -37,3 +41,7 @@ class Setup(wx.adv.Wizard):
 
     def _on_wizard_accept(self):
         self._on_finish(self._config)
+
+    def _fit(self):
+        self._vbox.Layout()
+        self.Fit()
