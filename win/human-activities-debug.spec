@@ -31,7 +31,7 @@ exe = EXE(  # noqa: F821
     a.zipfiles,
     a.datas,
     [],
-    name='human-activities',
+    name='Human Activities',
     debug=True,
     bootloader_ignore_signals=False,
     strip=False,
