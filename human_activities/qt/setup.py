@@ -1,38 +1,13 @@
 import pkgutil
-from functools import partial
-from typing import Callable, List
+from typing import Callable
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import (
-    QApplication,
-    QLayout,
-    QVBoxLayout,
-    QWidget,
-    QWizard,
-    QWizardPage,
-)
+from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage
 
 from human_activities import texts
 from human_activities.config import Config, NamedDirs
-from human_activities.qt.lib import NamedDirsForm, create_label, create_layout
-
-
-def add_text_paragraph(parent: QWidget, layout: QVBoxLayout, text: str):
-    label = create_label(parent, text)
-    layout.addWidget(label)
-
-
-def add_text_list(parent: QWidget, layout: QVBoxLayout, items: List[str]):
-    for item in items:
-        label = create_label(parent, texts.LIST_BULLET.format(item=item))
-        layout.addWidget(label)
-
-
-def create_content_intro(parent: QWidget) -> QVBoxLayout:
-    layout = create_layout()
-    add_text_list(parent, layout, texts.SETUP_LIST.splitlines())
-    return layout
+from human_activities.qt.lib import NamedDirsForm
 
 
 class Setup(QWizard):
@@ -44,21 +19,18 @@ class Setup(QWizard):
         self._config = config
         self._config.reset_named_dirs()
         super().__init__(parent=None)
-        self._add_page(
-            create_content_intro,
-            texts.SETUP_STEP_INTRO_TITLE,
-            texts.SETUP_HEADING,
+        page = QWizardPage()
+        page.setTitle(texts.SETUP_HEADING)
+        page.setSubTitle(texts.SETUP_TEXT)
+        layout = NamedDirsForm(
+            ui_app,
+            self._config.named_dirs,
+            on_change=self._on_named_dirs_change,
+            parent=page,
+            custom_names_enabled=False,
         )
-        self._add_page(
-            partial(
-                NamedDirsForm,
-                ui_app,
-                self._config.named_dirs,
-                self._on_named_dirs_change,
-            ),
-            texts.SETUP_STEP_SETUP_TITLE,
-            texts.SETUP_STEP_SETUP_TEXT,
-        )
+        page.setLayout(layout)
+        self.addPage(page)
         self.setWindowTitle(texts.SETUP_TITLE)
         self.setWizardStyle(QWizard.MacStyle)
         background = pkgutil.get_data(
@@ -72,19 +44,6 @@ class Setup(QWizard):
 
     def sizeHint(self):
         return QSize(700, 400)
-
-    def _add_page(
-        self,
-        page_func: Callable[[QWizardPage], QLayout],
-        title: str,
-        sub_title: str,
-    ):
-        page = QWizardPage()
-        page.setTitle(title)
-        page.setSubTitle(sub_title)
-        layout = page_func(page)
-        page.setLayout(layout)
-        self.addPage(page)
 
     def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs

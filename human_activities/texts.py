@@ -1,7 +1,7 @@
 from human_activities.locale import _
 
 FILE_CHOOSER_BUTTON = _('Please choose a directory')
-BUTTON_ADD = _('Add')
+BUTTON_ADD = _('Add more')
 BUTTON_REMOVE = _('Remove')
 BUTTON_BROWSE = _('Browse')
 
@@ -13,17 +13,9 @@ SETTINGS_THRESHOLD_DAYS_OLD = _(
 SETTINGS_MODE = _('Directories')
 SETTINGS_MAX_DIRS_REACHED = _('Reached the maximumg of {max_len} directories')
 
-SETUP_TITLE = _('Human Activities - Setup')
-SETUP_HEADING = _('Please adjust your OS settings like this:')
-SETUP_LIST = _(
-    '''first do this
-than that
-and finally something different'''
-)
-SETUP_STEP_INTRO_TITLE = _('Intro')
-SETUP_STEP_SETUP_TITLE = _('Setup')
-SETUP_STEP_SETUP_TEXT = _('Now choose the directories you want to monitor.')
-LIST_BULLET = '\N{BULLET} {item}'
+SETUP_TITLE = _('Human Activities')
+SETUP_HEADING = _('Setup')
+SETUP_TEXT = _('Please choose the directories you want to monitor.')
 
 MENU_EMPTY = _('No directories configured')
 MENU_THRESHOLD_DAYS_AGO = _(

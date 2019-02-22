@@ -1,5 +1,6 @@
 import io
 import logging
+import os.path
 from functools import partial
 from typing import (
     Callable,
@@ -13,6 +14,7 @@ from typing import (
 )
 
 from PIL import Image
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
@@ -187,8 +189,9 @@ class FileChooserForm(QHBoxLayout):
         self._value = QFileDialog.getExistingDirectory(
             self._parent, 'Choose directory', self._value
         )
-        self._edit.setText(self._value)
-        self._callback(self._value)
+        if self._value:
+            self._edit.setText(self._value)
+            self._callback(self._value)
 
     def _on_edit_changed(self, value: str):
         self._value = value
@@ -259,11 +262,12 @@ class NamedDir(NamedTuple):
     name: str = ''
 
 
-class NamedDirsForm(QGridLayout):
+class NamedDirsForm(QVBoxLayout):
     _ui_app: QApplication
     _named_dirs_list: List[NamedDir]
     _max_len: int
     _parent: QWidget
+    _custom_names_enabled: bool
 
     def __init__(
         self,
@@ -271,6 +275,7 @@ class NamedDirsForm(QGridLayout):
         named_dirs: NamedDirs,
         on_change: Callable[[NamedDirs], None],
         parent: QWidget,
+        custom_names_enabled: bool = True,
     ):
         self._ui_app = ui_app
         self._named_dirs_list = [
@@ -279,45 +284,51 @@ class NamedDirsForm(QGridLayout):
         self._max_len = named_dirs.max_len
         self._on_change = on_change
         self._parent = parent
+        self._custom_names_enabled = custom_names_enabled
         super().__init__(self._parent)
         self._init_line_edits()
 
     def _init_line_edits(self):
+        grid = QGridLayout(self._parent)
         for i, named_dir in enumerate(self._named_dirs_list):
-            name_line_edit = create_line_edit(
-                self._parent,
-                value=named_dir.name or '',
-                callback=partial(self._on_name_changed, i),
-            )
-            self.addWidget(name_line_edit, i, 0)
+            left = 0
+            if self._custom_names_enabled:
+                name_line_edit = create_line_edit(
+                    self._parent,
+                    value=named_dir.name or '',
+                    callback=partial(self._on_name_changed, i),
+                )
+                grid.addWidget(name_line_edit, i, left)
+                left += 1
             file_chooser_form = FileChooserForm(
                 self._ui_app,
                 self._parent,
                 value=named_dir.path or None,
                 callback=partial(self._on_path_changed, i),
             )
-            self.addLayout(file_chooser_form, i, 1)
+            grid.addLayout(file_chooser_form, i, left)
+            left += 1
             remove_button = create_button(
                 self._parent,
-                icon_pixmap=create_icon_pixmap(
-                    self._ui_app, QStyle.SP_DialogDiscardButton
-                ),
+                label=texts.BUTTON_REMOVE,
                 callback=partial(self._on_remove_clicked, i),
             )
-            self.addWidget(remove_button, i, 2)
+            grid.addWidget(remove_button, i, left)
+            left += 1
+        self.addLayout(grid)
         if len(self._named_dirs_list) < self._max_len:
             add_button = create_button(
                 self._parent,
                 label=texts.BUTTON_ADD,
                 callback=self._on_add_clicked,
             )
-            self.addWidget(add_button, len(self._named_dirs_list), 2)
+            self.addWidget(add_button, alignment=Qt.AlignLeft)
         else:
             label = create_label(
                 self._parent,
                 texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len),
             )
-            self.addWidget(label, len(self._named_dirs_list), 0)
+            self.addWidget(label)
 
     def _clear(self):
         remove_layout_items(self)
@@ -350,7 +361,8 @@ class NamedDirsForm(QGridLayout):
         return NamedDirs(
             {
                 named_dir.path: named_dir.name
+                or os.path.basename(named_dir.path)
                 for named_dir in self._named_dirs_list
-                if named_dir.path and named_dir.name
+                if named_dir.path
             }
         )
