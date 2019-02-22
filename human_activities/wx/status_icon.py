@@ -96,7 +96,13 @@ class StatusIcon(wx.adv.TaskBarIcon):
         else:
             create_menu_item(self, menu, texts.MENU_EMPTY)
             menu.AppendSeparator()
-            menu.Append(self.id_setup, _('&Setup'))
+            create_menu_item(
+                self,
+                menu,
+                _('&Setup'),
+                id=self.id_setup,
+                callback=self.app.show_setup,
+            )
         self._menu = menu
 
     def _show_menu(self):
