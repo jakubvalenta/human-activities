@@ -1,8 +1,10 @@
 from functools import partial
 from typing import Callable, List
 
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (
     QApplication,
+    QLayout,
     QVBoxLayout,
     QWidget,
     QWizard,
@@ -38,19 +40,6 @@ def create_content_intro(parent: QWidget) -> QVBoxLayout:
     return layout
 
 
-def init_wizard(
-    wizard: QWizard, page_funcs: List[Callable], callback: Callable, title: str
-):
-    for page_func in page_funcs:
-        page = QWizardPage()
-        layout = page_func(page)
-        page.setLayout(layout)
-        wizard.addPage(page)
-    wizard.setWindowTitle(title)
-    if wizard.exec_():
-        callback()
-
-
 class Setup(QWizard):
     _config: Config
 
@@ -59,22 +48,28 @@ class Setup(QWizard):
     ):
         self._config = config
         self._config.reset_named_dirs()
-        self._on_finish = on_finish
         super().__init__(parent=None)
-        init_wizard(
-            self,
-            [
-                create_content_intro,
-                partial(
-                    NamedDirsForm,
-                    ui_app,
-                    self._config.named_dirs,
-                    self._on_named_dirs_change,
-                ),
-            ],
-            self._on_wizard_accept,
-            texts.SETUP_TITLE,
+        self._add_page(create_content_intro)
+        self._add_page(
+            partial(
+                NamedDirsForm,
+                ui_app,
+                self._config.named_dirs,
+                self._on_named_dirs_change,
+            )
         )
+        self.setWindowTitle(texts.SETUP_TITLE)
+        if self.exec_():
+            on_finish()
+
+    def sizeHint(self):
+        return QSize(600, 400)
+
+    def _add_page(self, page_func: Callable[[QWizardPage], QLayout]):
+        page = QWizardPage()
+        layout = page_func(page)
+        page.setLayout(layout)
+        self.addPage(page)
 
     def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs

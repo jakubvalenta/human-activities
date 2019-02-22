@@ -1,5 +1,6 @@
 from typing import Callable, Dict
 
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
@@ -58,6 +59,9 @@ class Settings(QDialog):
         ]
         add_layout_items(self._layout, widgets)
         self._show()
+
+    def sizeHint(self):
+        return QSize(600, 400)
 
     def _init_window(self):
         self.setWindowTitle(texts.SETTINGS_TITLE)
