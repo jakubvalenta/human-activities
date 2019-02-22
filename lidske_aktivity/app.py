@@ -25,10 +25,6 @@ from lidske_aktivity.model import (
 logger = logging.getLogger(__name__)
 
 
-class AppError(Exception):
-    pass
-
-
 class Application:
     _interval: int
     _config: Config
@@ -70,7 +66,7 @@ class Application:
         self._scan_timer = Timer(interval, self._scan)
         self._scan_timer.start()
 
-    def _create_directory_views(self):
+    def _scan(self):
         logger.info('Creating directory views')
         configured_dirs = self._config.list_configured_dirs()
         directories = Directories(configured_dirs.paths)
@@ -78,10 +74,7 @@ class Application:
             self._config.unit, self._config.threshold_days_ago, configured_dirs
         )
         directory_views.load(*directories)
-        return directory_views
-
-    def _scan(self):
-        directory_views = self._create_directory_views()
+        logger.info('Drawing initial directory views')
         self._on_scan(directory_views, None)
         logger.info('Starting scan threads')
         with ThreadPoolExecutor() as executor:
