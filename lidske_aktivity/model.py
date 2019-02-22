@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session
 
 from lidske_aktivity import CACHE_PATH
-from lidske_aktivity.config import UNIT_SIZE_BYTES, NamedDirs
+from lidske_aktivity.config import UNIT_SIZE_BYTES, ConfiguredDirs
 from lidske_aktivity.locale import _
 from lidske_aktivity.utils import filesystem, func
 from lidske_aktivity.utils.math import safe_div
@@ -140,20 +140,23 @@ class DirectoryView(NamedTuple):
 class DirectoryViews(dict):
     unit: str
     threshold_days_ago: int
-    named_dirs: NamedDirs
+    configured_dirs: ConfiguredDirs
 
     def __init__(
-        self, unit: str, threshold_days_ago: int, named_dirs: NamedDirs
+        self,
+        unit: str,
+        threshold_days_ago: int,
+        configured_dirs: ConfiguredDirs,
     ):
         self.unit = unit
         self.threshold_days_ago = threshold_days_ago
-        self.named_dirs = named_dirs
+        self.configured_dirs = configured_dirs
 
     def load(self, *directories: Directory, pending: bool = True):
         for directory in directories:
             value = directory.find_value(self.unit, self.threshold_days_ago)
             self[directory.path] = DirectoryView(
-                label=self.named_dirs[directory.path],
+                label=self.configured_dirs[directory.path],
                 unit=self.unit,
                 value=value,
                 pending=pending,
@@ -175,7 +178,7 @@ class DirectoryViews(dict):
 
     def copy(self) -> 'DirectoryViews':
         new = self.__class__(
-            self.unit, self.threshold_days_ago, self.named_dirs
+            self.unit, self.threshold_days_ago, self.configured_dirs
         )
         new.update(self)
         return new

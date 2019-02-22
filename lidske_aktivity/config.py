@@ -43,6 +43,8 @@ class NamedDirs(dict):
         new.truncated = self.truncated
         return new
 
+
+class ConfiguredDirs(NamedDirs):
     @property
     def paths(self) -> List[str]:
         return list(self.keys())
@@ -109,14 +111,14 @@ class Config:
         }
         return json.dumps(d, indent=2)
 
-    def list_effective_named_dirs(self) -> NamedDirs:
+    def list_configured_dirs(self) -> ConfiguredDirs:
         if self.mode == MODE_NAMED_DIRS:
-            return self.named_dirs
+            return ConfiguredDirs(self.named_dirs)
         if self.mode == MODE_ROOT_PATH:
             if not self.root_path or not os.path.isdir(self.root_path):
                 logger.error('Path %s is not a directory', self.root_path)
-                return NamedDirs()
-            return NamedDirs(
+                return ConfiguredDirs()
+            return ConfiguredDirs(
                 {
                     path: os.path.basename(path)
                     for path in filesystem.list_dirs(self.root_path)

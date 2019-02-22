@@ -135,10 +135,10 @@ class StatusIcon:
                 yield create_menu_item(
                     directory_view.text, icon_pixbuf=icon_pixbuf
                 )
-            if directory_views.named_dirs.truncated:
+            if directory_views.configured_dirs.truncated:
                 yield create_menu_item(
                     texts.MENU_DIRS_TRUNCATED.format(
-                        max_len=directory_views.named_dirs.max_len
+                        max_len=directory_views.configured_dirs.max_len
                     )
                 )
             if directory_views.threshold_days_ago:
