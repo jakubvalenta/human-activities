@@ -35,8 +35,13 @@ def create_sizer(
     return sizer
 
 
-def create_label(parent: wx.Window, text: str) -> wx.StaticText:
-    return wx.StaticText(parent, label=text)
+def create_label(
+    parent: wx.Window, text: str = '', markup: str = ''
+) -> wx.StaticText:
+    label = wx.StaticText(parent, label=text)
+    if markup:
+        label.SetLabelMarkup(markup)
+    return label
 
 
 def create_button(
@@ -169,11 +174,8 @@ def image_to_icon(image: Image.Image) -> wx.Icon:
 class Form:
     panel: wx.Panel
 
-    def __init__(self, parent: wx.Window, use_parent_panel: bool = False):
-        if use_parent_panel:
-            self.panel = parent
-        else:
-            self.panel = wx.Panel(parent)
+    def __init__(self, parent: wx.Window):
+        self.panel = wx.Panel(parent)
 
     def toggle(self, enabled: bool):
         if enabled:
