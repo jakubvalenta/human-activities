@@ -49,14 +49,15 @@ class Setup(QWizard):
         self._config = config
         self._config.reset_named_dirs()
         super().__init__(parent=None)
-        self._add_page(create_content_intro)
+        self._add_page(create_content_intro, texts.SETUP_STEP_INTRO_TITLE)
         self._add_page(
             partial(
                 NamedDirsForm,
                 ui_app,
                 self._config.named_dirs,
                 self._on_named_dirs_change,
-            )
+            ),
+            texts.SETUP_STEP_SETUP_TITLE
         )
         self.setWindowTitle(texts.SETUP_TITLE)
         if self.exec_():
@@ -65,8 +66,9 @@ class Setup(QWizard):
     def sizeHint(self):
         return QSize(700, 400)
 
-    def _add_page(self, page_func: Callable[[QWizardPage], QLayout]):
+    def _add_page(self, page_func: Callable[[QWizardPage], QLayout], title: str):
         page = QWizardPage()
+        page.setTitle(title)
         layout = page_func(page)
         page.setLayout(layout)
         self.addPage(page)
