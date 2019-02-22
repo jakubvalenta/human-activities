@@ -94,7 +94,7 @@ class Directories(list):
                 logger.info('DB: Inserting %s', directory)
                 self._session.add(directory)
             self.append(directory)
-        for path, directory in directories_by_path:
+        for path, directory in directories_by_path.items():
             logger.info('DB: Deleting %s', directory)
             self._session.delete(directory)
         self._session.commit()
