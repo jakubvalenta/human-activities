@@ -1,4 +1,4 @@
-Source: lidske-aktivity
+Source: human-activities
 Section: utils
 Priority: optional
 Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
@@ -8,12 +8,12 @@ Build-Depends: debhelper (>= 9.20160709~),
                python3-setuptools,
                tox
 Standards-Version: 3.9.8
-Homepage: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
+Homepage: https://lab.saloun.cz/jakub/human-activities
 X-Python3-Version: >= 3.6
-Vcs-Git: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk.git
-Vcs-Browser: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
+Vcs-Git: https://lab.saloun.cz/jakub/human-activities.git
+Vcs-Browser: https://lab.saloun.cz/jakub/human-activities
 
-Package: lidske-aktivity
+Package: human-activities
 Architecture: all
 Depends: gir1.2-appindicator3-0.1,
          python3-pil,

@@ -1,62 +1,62 @@
-lidske-aktivity (0.7.0-1) unstable; urgency=medium
+human-activities (0.7.0-1) unstable; urgency=medium
 
   * Improve style of Qt5 wizard, add background image.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Fri, 22 Feb 2019 12:26:40 +0000
 
-lidske-aktivity (0.6.0-1) unstable; urgency=medium
+human-activities (0.6.0-1) unstable; urgency=medium
 
   * Make pie chart colors more distinct.
   * Limit the maximum number of directories that can be added and displayed.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 21 Feb 2019 20:12:17 +0000
 
-lidske-aktivity (0.5.0-1) unstable; urgency=medium
+human-activities (0.5.0-1) unstable; urgency=medium
 
   * Add Qt5 version.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 21 Feb 2019 17:25:41 +0000
 
-lidske-aktivity (0.4.1-1) unstable; urgency=medium
+human-activities (0.4.1-1) unstable; urgency=medium
 
   * Add value (size or number of files) to menu items.
   * Add menu item showing current days threshold.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 07 Feb 2019 20:50:24 +0000
 
-lidske-aktivity (0.4.0-1) unstable; urgency=medium
+human-activities (0.4.0-1) unstable; urgency=medium
 
   * i18n
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Fri, 01 Feb 2019 11:26:15 +0000
 
-lidske-aktivity (0.3.0-1) unstable; urgency=medium
+human-activities (0.3.0-1) unstable; urgency=medium
 
   * Scan periodically.
   * Autostart.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Wed, 30 Jan 2019 16:24:53 +0000
 
-lidske-aktivity (0.2.0-1) unstable; urgency=medium
+human-activities (0.2.0-1) unstable; urgency=medium
 
   * Remove window.
   * Remove advanced directory configuration options.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Mon, 21 Jan 2019 11:52:03 +0000
 
-lidske-aktivity (0.1.3-1) unstable; urgency=medium
+human-activities (0.1.3-1) unstable; urgency=medium
 
   * Stabilize Debian package.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Mon, 31 Dec 2018 12:01:30 +0000
 
-lidske-aktivity (0.1.2-1) unstable; urgency=medium
+human-activities (0.1.2-1) unstable; urgency=medium
 
   * Add Debian package.
 
  -- Jakub Valenta <jakub@jakubvalenta.cz>  Sun, 30 Dec 2018 22:03:07 +0000
 
-lidske-aktivity (0.1.1-1) unstable; urgency=medium
+human-activities (0.1.1-1) unstable; urgency=medium
 
   * Initial release
 

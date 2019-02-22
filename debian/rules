@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-export PYBUILD_NAME=lidske-aktivity
+export PYBUILD_NAME=human-activities
 
 %:
 	dh $@ --with python3,systemd --buildsystem=pybuild

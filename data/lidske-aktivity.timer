@@ -1,8 +1,0 @@
-[Unit]
-Description=Run Lidské Aktivity every 6 hours
-
-[Timer]
-OnUnitActiveSec=6h
-
-[Install]
-WantedBy=timers.target

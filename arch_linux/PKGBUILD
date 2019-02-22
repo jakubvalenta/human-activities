@@ -1,11 +1,11 @@
 # Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
-pkgname=lidske-aktivity
+pkgname=human-activities
 pkgver=0.7.0
 pkgrel=1
 epoch=
 pkgdesc='Monitor size of directories'
 arch=('any')
-url='https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk'
+url='https://lab.saloun.cz/jakub/human-activities'
 license=('GPL')
 groups=()
 depends=('python-pillow' 'python-sqlalchemy' 'python-wxpython>=4')
@@ -43,7 +43,7 @@ package() {
   install -D -m644 -t "$pkgdir/etc/xdg/autostart/" data/*.desktop
   install -D -m644 -t "$pkgdir/usr/lib/systemd/system/" data/*.service data/*.timer
   install -d -m755 "$pkgdir/usr/lib/systemd/system/timers.target.wants"
-  ln -s ../lidske-aktivity.timer "$pkgdir/usr/lib/systemd/system/timers.target.wants/lidske-aktivity.timer"
+  ln -s ../human-activities.timer "$pkgdir/usr/lib/systemd/system/timers.target.wants/human-activities.timer"
 }
 
 # vim:set ts=2 sw=2 et:

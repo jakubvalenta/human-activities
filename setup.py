@@ -3,7 +3,7 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-from lidske_aktivity import (
+from human_activities import (
     __application_name__, __author_email__, __authors__, __license__,
     __summary__, __uri__, __version__,
 )
@@ -46,15 +46,15 @@ setup(
         (
             str(
                 Path('share/locale') /
-                Path(path).parent.relative_to('lidske_aktivity/locale')
+                Path(path).parent.relative_to('human_activities/locale')
             ),
             [path]
         )
-        for path in glob.glob('lidske_aktivity/locale/**/*.mo', recursive=True)
+        for path in glob.glob('human_activities/locale/**/*.mo', recursive=True)
     ],
     entry_points={
         'console_scripts': [
-            f'{__application_name__}=lidske_aktivity.cli:main',
+            f'{__application_name__}=human_activities.cli:main',
         ],
     },
 )

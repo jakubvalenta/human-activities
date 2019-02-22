@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: lidske-aktivity
-Source: https://lab.saloun.cz/jakub/art-lidske-aktivity-gtk
+Upstream-Name: human-activities
+Source: https://lab.saloun.cz/jakub/human-activities
 
 Files: *
 Copyright: 2018-2019 Jakub Valenta <jakub@jakubvalenta.cz>

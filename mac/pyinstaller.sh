@@ -1,1 +1,1 @@
-pyinstaller mac/lidske-aktivity.spec
+pyinstaller mac/human-activities.spec

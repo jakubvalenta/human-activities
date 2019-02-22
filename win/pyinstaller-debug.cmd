@@ -1,1 +1,1 @@
-pyinstaller win\lidske-aktivity-debug.spec
+pyinstaller win\human-activities-debug.spec

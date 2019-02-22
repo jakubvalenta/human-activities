@@ -1,5 +1,5 @@
-?package(lidske-aktivity):\
+?package(human-activities):\
   needs="X11"\
   section="Applications/System/Monitoring"\
-  title="Lidské Aktivity"\
-  command="/usr/bin/lidske-aktivity"
+  title="Human Activities"\
+  command="/usr/bin/human-activities"

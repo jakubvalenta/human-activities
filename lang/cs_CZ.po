@@ -1,14 +1,13 @@
-# English translations for lidske-aktivity package.
-# Copyright (C) 2019 THE lidske-aktivity'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the lidske-aktivity package.
-#  <jakub@jakubvalenta.cz>, 2019.
+# English translations for human-activities package.
+# Copyright (C) 2018-2019 Jakub Valenta, Jiří Skála
+# This file is distributed under the same license as the human-activities package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lidske-aktivity 0.3.0\n"
+"Project-Id-Version: human-activities 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-02-07 21:44+0100\n"
-"PO-Revision-Date: 2019-02-07 21:46+0100\n"
+"PO-Revision-Date: 2019-02-22 15:50+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -17,44 +16,44 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lidske_aktivity/texts.py:3
+#: human_activities/texts.py:3
 msgid "Please choose a directory"
 msgstr "Vyberte adresář"
 
-#: lidske_aktivity/texts.py:4
+#: human_activities/texts.py:4
 msgid "Add"
 msgstr "Přidat"
 
-#: lidske_aktivity/texts.py:5
+#: human_activities/texts.py:5
 msgid "Remove"
 msgstr "Odstranit"
 
-#: lidske_aktivity/texts.py:7
-msgid "Lidské Aktivity advanced configuration"
+#: human_activities/texts.py:7
+msgid "Human Activities advanced configuration"
 msgstr "Pokročilé nastavení Lidských Aktivit"
 
-#: lidske_aktivity/texts.py:8
+#: human_activities/texts.py:8
 msgid "Compare"
 msgstr "Porovnávat"
 
-#: lidske_aktivity/texts.py:10
+#: human_activities/texts.py:10
 msgid "Include only files newer than (days), 0 = all files"
 msgstr ""
 "Započítávat pouze adresáře novější než (počet dní), 0 = započítávat vše"
 
-#: lidske_aktivity/texts.py:12
+#: human_activities/texts.py:12
 msgid "Directories"
 msgstr "Adresáře"
 
-#: lidske_aktivity/texts.py:14
-msgid "Lidské Aktivity setup"
+#: human_activities/texts.py:14
+msgid "Human Activities setup"
 msgstr "Základní nastavení Lidských Aktivit"
 
-#: lidske_aktivity/texts.py:15
+#: human_activities/texts.py:15
 msgid "Please adjust your OS settings like this:"
 msgstr "Prosím upravte nastavení svého operačního systému takto:"
 
-#: lidske_aktivity/texts.py:17
+#: human_activities/texts.py:17
 msgid ""
 "first do this\n"
 "than that\n"
@@ -64,80 +63,80 @@ msgstr ""
 "pak tamto\n"
 "a nakonec něco jiného"
 
-#: lidske_aktivity/texts.py:21
+#: human_activities/texts.py:21
 msgid "Intro"
 msgstr "Úvod"
 
-#: lidske_aktivity/texts.py:22 lidske_aktivity/gtk/status_icon.py:145
+#: human_activities/texts.py:22 human_activities/gtk/status_icon.py:145
 msgid "Setup"
 msgstr "Nastavení"
 
-#: lidske_aktivity/texts.py:25
+#: human_activities/texts.py:25
 msgid "No directories configured"
 msgstr "Nejsou nastavené žádné adresáře"
 
-#: lidske_aktivity/texts.py:27
+#: human_activities/texts.py:27
 #, python-brace-format
 msgid "Counting only files modified in the past {days} days"
 msgstr "Započítává pouze soubory změněné v posledních {days} dnech"
 
-#: lidske_aktivity/config.py:17
+#: human_activities/config.py:17
 msgid "All directories in selected directory"
 msgstr "Všechny adresáře ve zvoleném adresáři"
 
-#: lidske_aktivity/config.py:18
+#: human_activities/config.py:18
 msgid "Predefined directories"
 msgstr "Vybrané adresáře"
 
-#: lidske_aktivity/config.py:22
+#: human_activities/config.py:22
 msgid "Paid work"
 msgstr "Honorovaná práce"
 
-#: lidske_aktivity/config.py:22
+#: human_activities/config.py:22
 msgid "Unpaid work"
 msgstr "Nehonorovaná práce"
 
-#: lidske_aktivity/config.py:22
+#: human_activities/config.py:22
 msgid "Others"
 msgstr "Ostatní"
 
-#: lidske_aktivity/config.py:27
+#: human_activities/config.py:27
 msgid "Size in bytes"
 msgstr "Velikost v bytech"
 
-#: lidske_aktivity/config.py:28
+#: human_activities/config.py:28
 msgid "Number of files"
 msgstr "Počet souborů"
 
-#: lidske_aktivity/model.py:147
+#: human_activities/model.py:147
 #, python-brace-format
 msgid "{value} files"
 msgstr "{value} souborů"
 
-#: lidske_aktivity/wx/status_icon.py:95 lidske_aktivity/wx/status_icon.py:106
+#: human_activities/wx/status_icon.py:95 human_activities/wx/status_icon.py:106
 msgid "&Setup"
 msgstr "Nastavení"
 
-#: lidske_aktivity/wx/status_icon.py:113
+#: human_activities/wx/status_icon.py:113
 msgid "Advanced &configuration"
 msgstr "Pokročilé nastavení"
 
-#: lidske_aktivity/wx/status_icon.py:120
+#: human_activities/wx/status_icon.py:120
 msgid "&About"
 msgstr "O &aplikaci"
 
-#: lidske_aktivity/wx/status_icon.py:127
+#: human_activities/wx/status_icon.py:127
 msgid "&Quit"
 msgstr "Ukončit"
 
-#: lidske_aktivity/gtk/status_icon.py:147
+#: human_activities/gtk/status_icon.py:147
 msgid "Advanced configuration"
 msgstr "Pokročilé nastavení"
 
-#: lidske_aktivity/gtk/status_icon.py:150
+#: human_activities/gtk/status_icon.py:150
 msgid "About"
 msgstr "O aplikaci"
 
-#: lidske_aktivity/gtk/status_icon.py:155
+#: human_activities/gtk/status_icon.py:155
 msgid "Quit"
 msgstr "Ukončit"

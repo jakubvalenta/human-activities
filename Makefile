@@ -1,5 +1,5 @@
-_name=lidske-aktivity
-_pypkgname=lidske_aktivity
+_name=human-activities
+_pypkgname=human_activities
 _version=0.7.0
 _pkgrel=1
 _arch_linux_dist_parent=dist/arch_linux
@@ -67,10 +67,10 @@ install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux packag
 	sudo pacman -U "${_arch_linux_pkg_path}"
 
 dist-debian-build:
-	docker build -f debian/Dockerfile -t lidske_aktivity_debian .
+	docker build -f debian/Dockerfile -t human_activities_debian .
 
 dist-debian-shell:
-	docker run -it --volume="$$(pwd)/${_debian_dist_parent}:/app" lidske_aktivity_debian \
+	docker run -it --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
 		bash
 
 ${_debian_dist_parent}/${_debian_src_filename}:
@@ -84,7 +84,7 @@ ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_
 	cp -f data/*.service data/*.timer "${_debian_dist_parent}/${_debian_src_dirname}/debian"
 
 ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
-	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" lidske_aktivity_debian \
+	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
 		sh -c 'cd "${_debian_src_dirname}" && debuild -us -uc; chown -R ${_uid}:${_gid} /app'
 
 dist-debian:  ## Build a Debian package
@@ -167,7 +167,7 @@ endif
 	docker info &> /dev/null || sudo systemctl start docker
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
-		lidske_aktivity_debian dch -v "${version}-${_pkgrel}" "New version"
+		human_activities_debian dch -v "${version}-${_pkgrel}" "New version"
 	@echo "Editing changelog..."
 	"${EDITOR}" debian/changelog
 	@echo "Committing changes..."
@@ -177,10 +177,11 @@ endif
 	git tag "v${version}"
 	@echo "Done"
 
-backup:  ## Backup built packages (currently Debian-only)
+backup:  ## Backup built packages
 	mkdir -p "bak/${_timestamp}"
 	cp "${_debian_dist_parent}/${_debian_pkg_filename}" "bak/${_timestamp}"
 	cp "${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}" "bak/${_timestamp}"
+	cp -a "${_arch_linux_dist_parent}/*.app" "bak/${_timestamp}"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'

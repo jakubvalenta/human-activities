@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Name=Human Activities
+Name[cs]=Lidské Aktivity
+Comment=Monitor size of directories
+Comment[cs]=Monitorování velikosti adresářů
+Exec=/usr/bin/human-activities --interval=0
+Icon=human-activities
+StartupNotify=true
+Type=Application
+Categories=Utility;FileTools;
+Keywords=filesystem;directory;disk;usage;tray;system tray;applet;
+X-GNOME-Autostart-Phase=Application
+X-GNOME-Autostart-Notify=true

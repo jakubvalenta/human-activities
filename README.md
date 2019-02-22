@@ -1,5 +1,3 @@
-# Lidské Aktivity
-
 ## Installation
 
 ### Arch Linux
@@ -8,8 +6,8 @@
 # pacman -S pipenv python-wxpython
 $ make setup
 # make install DESTDIR=/
-# systemctl enable lidske-aktivity.timer
-# systemctl start lidske-aktivity.timer
+# systemctl enable human-activities.timer
+# systemctl start human-activities.timer
 ```
 
 ### Mac
@@ -41,13 +39,13 @@ make run-debug
 ### Mac
 
 ```
-python3 -m lidske_aktivity --verbose
+python3 -m human_activities --verbose
 ```
 
 ### Windows
 
 ```
-python -m lidske_aktivity --verbose
+python -m human_activities --verbose
 ```
 
 ## Building distribution package
