@@ -1,3 +1,9 @@
+human-activities (0.8.0-1) unstable; urgency=medium
+
+  * Rename to Human Activities (was Lidské Aktivity).
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Fri, 22 Feb 2019 15:05:48 +0000
+
 human-activities (0.7.0-1) unstable; urgency=medium
 
   * Improve style of Qt5 wizard, add background image.
