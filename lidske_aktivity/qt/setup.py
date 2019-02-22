@@ -16,11 +16,6 @@ from lidske_aktivity.config import Config, NamedDirs
 from lidske_aktivity.qt.lib import NamedDirsForm, create_label, create_layout
 
 
-def add_text_heading(parent: QWidget, layout: QVBoxLayout, text: str):
-    label = create_label(parent, text)
-    layout.addWidget(label)
-
-
 def add_text_paragraph(parent: QWidget, layout: QVBoxLayout, text: str):
     label = create_label(parent, text)
     layout.addWidget(label)
@@ -34,8 +29,6 @@ def add_text_list(parent: QWidget, layout: QVBoxLayout, items: List[str]):
 
 def create_content_intro(parent: QWidget) -> QVBoxLayout:
     layout = create_layout()
-    add_text_heading(parent, layout, texts.SETUP_TITLE)
-    add_text_paragraph(parent, layout, texts.SETUP_HEADING)
     add_text_list(parent, layout, texts.SETUP_LIST.splitlines())
     return layout
 
@@ -49,7 +42,7 @@ class Setup(QWizard):
         self._config = config
         self._config.reset_named_dirs()
         super().__init__(parent=None)
-        self._add_page(create_content_intro, texts.SETUP_STEP_INTRO_TITLE)
+        self._add_page(create_content_intro, texts.SETUP_STEP_INTRO_TITLE, texts.SETUP_HEADING)
         self._add_page(
             partial(
                 NamedDirsForm,
@@ -57,7 +50,8 @@ class Setup(QWizard):
                 self._config.named_dirs,
                 self._on_named_dirs_change,
             ),
-            texts.SETUP_STEP_SETUP_TITLE
+            texts.SETUP_STEP_SETUP_TITLE,
+            texts.SETUP_STEP_SETUP_TEXT
         )
         self.setWindowTitle(texts.SETUP_TITLE)
         if self.exec_():
@@ -66,9 +60,10 @@ class Setup(QWizard):
     def sizeHint(self):
         return QSize(700, 400)
 
-    def _add_page(self, page_func: Callable[[QWizardPage], QLayout], title: str):
+    def _add_page(self, page_func: Callable[[QWizardPage], QLayout], title: str, sub_title: str):
         page = QWizardPage()
         page.setTitle(title)
+        page.setSubTitle(sub_title)
         layout = page_func(page)
         page.setLayout(layout)
         self.addPage(page)

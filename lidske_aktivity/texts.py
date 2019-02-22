@@ -21,6 +21,7 @@ and finally something different'''
 )
 SETUP_STEP_INTRO_TITLE = _('Intro')
 SETUP_STEP_SETUP_TITLE = _('Setup')
+SETUP_STEP_SETUP_TEXT = _('Now choose the directories you want to monitor.')
 LIST_BULLET = '\N{BULLET} {item}'
 
 MENU_EMPTY = _('No directories configured')
