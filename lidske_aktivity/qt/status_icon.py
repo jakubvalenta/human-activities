@@ -1,7 +1,9 @@
 import logging
 from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMenu, QStyle, QSystemTrayIcon
 
 from lidske_aktivity import __title__, is_mac, is_win, texts
 from lidske_aktivity.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
@@ -16,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 def create_menu_item(
-    menu: QtWidgets.QMenu,
+    menu: QMenu,
     label: str,
     callback: Optional[Callable] = None,
     tooltip: Optional[str] = None,
-    icon_pixmap: Optional[QtGui.QPixmap] = None,
+    icon_pixmap: Optional[QPixmap] = None,
 ):
     action = menu.addAction(label)
     if icon_pixmap:
@@ -34,10 +36,10 @@ def create_menu_item(
         action.setEnabled(False)
 
 
-class StatusIcon(QtWidgets.QSystemTrayIcon):
+class StatusIcon(QSystemTrayIcon):
     app: 'Application'
     _last_fractions: Optional[Tuple[float, ...]] = None
-    _update_signal = QtCore.pyqtSignal(DirectoryViews)
+    _update_signal = pyqtSignal(DirectoryViews)
 
     def __init__(self, app: 'Application'):
         self.app = app
@@ -48,11 +50,11 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
         self.show()
 
     def _init_menu(self, directory_views: Optional[DirectoryViews] = None):
-        menu = QtWidgets.QMenu(parent=None)
+        menu = QMenu(parent=None)
         if directory_views:
             for i, directory_view in enumerate(directory_views.values()):
                 icon_size = get_icon_size(
-                    self.app._ui_app, QtWidgets.QStyle.PM_SmallIconSize
+                    self.app._ui_app, QStyle.PM_SmallIconSize
                 )
                 icon_image = draw_pie_chart_png(
                     icon_size, directory_views.fractions, highlighted=i

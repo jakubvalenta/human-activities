@@ -1,36 +1,36 @@
 from functools import partial
 from typing import Callable, List
 
-from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import (
+    QApplication,
+    QVBoxLayout,
+    QWidget,
+    QWizard,
+    QWizardPage,
+)
 
 from lidske_aktivity import texts
 from lidske_aktivity.config import Config, NamedDirs
 from lidske_aktivity.qt.lib import NamedDirsForm, create_label, create_layout
 
 
-def add_text_heading(
-    parent: QtWidgets.QWidget, layout: QtWidgets.QVBoxLayout, text: str
-):
+def add_text_heading(parent: QWidget, layout: QVBoxLayout, text: str):
     label = create_label(parent, text)
     layout.addWidget(label)
 
 
-def add_text_paragraph(
-    parent: QtWidgets.QWidget, layout: QtWidgets.QVBoxLayout, text: str
-):
+def add_text_paragraph(parent: QWidget, layout: QVBoxLayout, text: str):
     label = create_label(parent, text)
     layout.addWidget(label)
 
 
-def add_text_list(
-    parent: QtWidgets.QWidget, layout: QtWidgets.QVBoxLayout, items: List[str]
-):
+def add_text_list(parent: QWidget, layout: QVBoxLayout, items: List[str]):
     for item in items:
         label = create_label(parent, texts.LIST_BULLET.format(item=item))
         layout.addWidget(label)
 
 
-def create_content_intro(parent: QtWidgets.QWidget) -> QtWidgets.QVBoxLayout:
+def create_content_intro(parent: QWidget) -> QVBoxLayout:
     layout = create_layout()
     add_text_heading(parent, layout, texts.SETUP_TITLE)
     add_text_paragraph(parent, layout, texts.SETUP_HEADING)
@@ -39,13 +39,10 @@ def create_content_intro(parent: QtWidgets.QWidget) -> QtWidgets.QVBoxLayout:
 
 
 def init_wizard(
-    wizard: QtWidgets.QWizard,
-    page_funcs: List[Callable],
-    callback: Callable,
-    title: str,
+    wizard: QWizard, page_funcs: List[Callable], callback: Callable, title: str
 ):
     for page_func in page_funcs:
-        page = QtWidgets.QWizardPage()
+        page = QWizardPage()
         layout = page_func(page)
         page.setLayout(layout)
         wizard.addPage(page)
@@ -54,14 +51,11 @@ def init_wizard(
         callback()
 
 
-class Setup(QtWidgets.QWizard):
+class Setup(QWizard):
     _config: Config
 
     def __init__(
-        self,
-        config: Config,
-        on_finish: Callable,
-        ui_app: QtWidgets.QApplication,
+        self, config: Config, on_finish: Callable, ui_app: QApplication
     ):
         self._config = config
         self._config.reset_named_dirs()
