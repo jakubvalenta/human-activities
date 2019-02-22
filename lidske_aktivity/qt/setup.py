@@ -60,10 +60,10 @@ class Setup(QWizard):
         )
         self.setWindowTitle(texts.SETUP_TITLE)
         if self.exec_():
-            on_finish()
+            on_finish(self._config)
 
     def sizeHint(self):
-        return QSize(600, 400)
+        return QSize(700, 400)
 
     def _add_page(self, page_func: Callable[[QWizardPage], QLayout]):
         page = QWizardPage()
