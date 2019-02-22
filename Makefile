@@ -12,6 +12,7 @@ _debian_src_dirname=${_name}-${_version}
 _debian_pkg_filename=${_name}_${_version}-${_pkgrel}_all.deb
 _uid=$(shell id -u)
 _gid=$(shell id -g)
+_timestamp=$(shell date +%s)
 
 .PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
@@ -177,9 +178,9 @@ endif
 	@echo "Done"
 
 backup:  ## Backup built packages (currently Debian-only)
-	timestamp=$$(date +%s) && \
-	mkdir -p "bak/$$timestamp" && \
-	cp "${_debian_dist_parent}/${_debian_pkg_filename}" "bak/$$timestamp"
+	mkdir -p "bak/${_timestamp}"
+	cp "${_debian_dist_parent}/${_debian_pkg_filename}" "bak/${_timestamp}"
+	cp "${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}" "bak/${_timestamp}"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
