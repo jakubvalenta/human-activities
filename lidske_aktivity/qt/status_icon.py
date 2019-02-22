@@ -61,11 +61,11 @@ class StatusIcon(QtWidgets.QSystemTrayIcon):
                 create_menu_item(
                     menu, directory_view.text, icon_pixmap=icon_pixmap
                 )
-            if directory_views.truncated:
+            if directory_views.named_dirs.truncated:
                 create_menu_item(
                     menu,
                     texts.MENU_DIRS_TRUNCATED.format(
-                        max_len=directory_views.max_len
+                        max_len=directory_views.named_dirs.max_len
                     ),
                 )
             if directory_views.threshold_days_ago:

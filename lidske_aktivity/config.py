@@ -2,7 +2,7 @@ import json
 import logging
 import os.path
 from collections import Mapping
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from lidske_aktivity import CONFIG_PATH
 from lidske_aktivity.icon import COLORS
@@ -20,13 +20,13 @@ class NamedDirs(dict):
         super().__init__()
         self.update(other, **kwargs)
 
-    def __setitem__(self, key: str, value: str):
+    def __setitem__(self, key, value):
         if key not in self and len(self) == self.max_len:
             self.truncated = True
         else:
             super().__setitem__(key, value)
 
-    def __delitem__(self, key: str):
+    def __delitem__(self, key):
         self.__delitem__(key)
         self.truncated = False
 
@@ -42,6 +42,10 @@ class NamedDirs(dict):
         new = self.__class__(self)
         new.truncated = self.truncated
         return new
+
+    @property
+    def paths(self) -> List[str]:
+        return list(self.keys())
 
 
 MODE_ROOT_PATH = 'path'

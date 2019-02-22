@@ -76,12 +76,12 @@ class StatusIcon(wx.adv.TaskBarIcon):
                 create_menu_item(
                     self, menu, directory_view.text, icon_image=icon_image
                 )
-            if directory_views.truncated:
+            if directory_views.named_dirs.truncated:
                 create_menu_item(
                     self,
                     menu,
                     texts.MENU_DIRS_TRUNCATED.format(
-                        max_len=directory_views.max_len
+                        max_len=directory_views.named_dirs.max_len
                     ),
                 )
             if directory_views.threshold_days_ago:

@@ -79,20 +79,23 @@ session_factory = sessionmaker(bind=engine)
 class Directories(list):
     _session: Session
 
-    def __init__(self):
+    def __init__(self, paths: Iterable[str]):
         self._session = scoped_session(session_factory)
+        self._load_from_db(paths)
+        self._create_missing(paths)
+        self._save()
 
-    def load_from_db(self, paths: Iterable[str]):
-        query = (
-            self._session.query(Directory)
-            .filter(Directory.path.in_(paths))
-            .order_by(Directory.path)
-        )
+    def _load_from_db(self, paths: Iterable[str]):
+        query = self._session.query(Directory).order_by(Directory.path)
         for directory in query:
-            logger.info('DB: Loaded %s', directory)
-            self.append(directory)
+            if directory.path in paths:
+                logger.info('DB: Loaded %s', directory)
+                self.append(directory)
+            else:
+                logger.info('DB: Deleting %s', directory)
+                self._session.delete(directory)
 
-    def create_missing(self, paths: Iterable[str]):
+    def _create_missing(self, paths: Iterable[str]):
         existing_paths = [directory.path for directory in self]
         for path in paths:
             if path in existing_paths:
@@ -102,13 +105,7 @@ class Directories(list):
             self._session.add(directory)
             self.append(directory)
 
-    def clear(self):
-        for directory in self:
-            logger.info('DB: Deleting %s', directory)
-            self._session.delete(directory)
-        super().clear()
-
-    def save(self):
+    def _save(self):
         self._session.commit()
 
     def __del__(self):
@@ -118,10 +115,9 @@ class Directories(list):
 class DirectoryView(NamedTuple):
     label: str
     unit: str
-    threshold_days_ago: int
-    value: Optional[float] = None
+    value: Optional[float]
+    pending: bool
     fraction: Optional[float] = None
-    pending: bool = True
 
     @property
     def text(self):
@@ -143,33 +139,24 @@ class DirectoryView(NamedTuple):
 
 class DirectoryViews(dict):
     unit: str
-    threshold_days_ago: int = 0
-    max_len: int = 0
-    truncated: bool = False
+    threshold_days_ago: int
+    named_dirs: NamedDirs
 
-    def config(
+    def __init__(
         self, unit: str, threshold_days_ago: int, named_dirs: NamedDirs
     ):
         self.unit = unit
         self.threshold_days_ago = threshold_days_ago
-        self.clear()
-        for path, label in named_dirs.items():
-            self[path] = DirectoryView(
-                label=label, unit=unit, threshold_days_ago=threshold_days_ago
-            )
-        self.max_len = named_dirs.max_len
-        self.truncated = named_dirs.truncated
+        self.named_dirs = named_dirs
 
-    def load(self, *directories: Directory, **extra_props):
+    def load(self, *directories: Directory, pending: bool = True):
         for directory in directories:
-            if directory.path not in self:
-                logger.error(
-                    'Directory view for path %s doesn\'t exist', directory.path
-                )
-                continue
             value = directory.find_value(self.unit, self.threshold_days_ago)
-            self[directory.path] = self[directory.path]._replace(
-                value=value, **extra_props
+            self[directory.path] = DirectoryView(
+                label=self.named_dirs[directory.path],
+                unit=self.unit,
+                value=value,
+                pending=pending,
             )
         total = sum(dv.value or 0.0 for dv in self.values())
         for path, directory_view in self.items():
@@ -187,11 +174,10 @@ class DirectoryViews(dict):
         return '\n'.join(dv.text for dv in self.values())
 
     def copy(self) -> 'DirectoryViews':
-        new = self.__class__(self)
-        new.unit = self.unit
-        new.threshold_days_ago = self.threshold_days_ago
-        new.max_len = self.max_len
-        new.truncated = self.truncated
+        new = self.__class__(
+            self.unit, self.threshold_days_ago, self.named_dirs
+        )
+        new.update(self)
         return new
 
 

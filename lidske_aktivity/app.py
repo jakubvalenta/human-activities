@@ -72,15 +72,9 @@ class Application:
 
     def _create_directory_views(self):
         logger.info('Creating directory views')
-        directories = Directories()
         named_dirs = self._config.list_effective_named_dirs()
-        paths = list(named_dirs.keys())
-        directories.clear()
-        directories.load_from_db(paths)
-        directories.create_missing(paths)
-        directories.save()
-        directory_views = DirectoryViews()
-        directory_views.config(
+        directories = Directories(named_dirs.paths)
+        directory_views = DirectoryViews(
             self._config.unit, self._config.threshold_days_ago, named_dirs
         )
         directory_views.load(*directories)
