@@ -1,5 +1,4 @@
-from functools import partial
-from typing import Callable, List, NamedTuple
+from typing import Callable, NamedTuple
 
 import gi
 

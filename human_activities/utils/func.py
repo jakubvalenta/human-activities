@@ -3,6 +3,7 @@ import random
 import time
 from functools import wraps
 from threading import Event
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -25,3 +26,13 @@ def random_wait(event_stop: Event, min_sec: int = 1, max_sec: int = 20):
             logger.warning('Stopping test sleep')
             break
         time.sleep(1)
+
+
+def after(func: Callable, *funcs_after: Callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        for func_after in funcs_after:
+            func_after()
+
+    return wrapper

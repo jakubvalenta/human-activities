@@ -147,7 +147,7 @@ class DirectoryViews(dict):
         for directory in directories:
             value = directory.find_value(self.unit, self.threshold_days_ago)
             self[directory.path] = DirectoryView(
-                label=self.configured_dirs[directory.path],
+                label=self.configured_dirs.get_label(directory.path),
                 unit=self.unit,
                 value=value,
                 pending=pending,

@@ -1,8 +1,7 @@
 import io
 import logging
-import os.path
 from functools import partial
-from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
+from typing import Callable, Dict, Iterable, NamedTuple, Optional, Union
 
 import wx
 import wx.lib.filebrowsebutton
@@ -10,6 +9,7 @@ from PIL import Image
 
 from human_activities import texts
 from human_activities.config import NamedDirs
+from human_activities.utils.func import after
 
 logger = logging.getLogger(__name__)
 
@@ -194,16 +194,14 @@ class RootPathForm(Form):
         root_path: Optional[str],
         on_change: Callable[[str], None],
         parent: wx.Panel,
-        *args,
-        **kwargs,
     ):
         self._root_path = root_path
         self._on_change = on_change
         self._parent = parent
-        super().__init__(self._parent, *args, **kwargs)
-        self._init_button()
+        super().__init__(self._parent)
+        self._create_widgets()
 
-    def _init_button(self):
+    def _create_widgets(self):
         vbox = create_sizer(self.panel)
         button = create_dir_browse_button(
             self.panel,
@@ -216,14 +214,8 @@ class RootPathForm(Form):
         self._on_change(path)
 
 
-class NamedDir(NamedTuple):
-    path: str = ''
-    name: str = ''
-
-
 class NamedDirsForm(Form):
-    _named_dirs_list: List[NamedDir]
-    _max_len: int
+    _named_dirs: NamedDirs
     _vbox: wx.BoxSizer
     _custom_names_enabled: bool
 
@@ -234,29 +226,26 @@ class NamedDirsForm(Form):
         parent: wx.Panel,
         on_redraw: Optional[Callable[[], None]] = None,
         custom_names_enabled: bool = True,
-        *args,
-        **kwargs,
     ):
-        self._named_dirs_list = [
-            NamedDir(path, name) for path, name in named_dirs.items()
-        ]
-        self._max_len = named_dirs.max_len
+        self._named_dirs = named_dirs
         self._on_change = on_change
         self._on_redraw = on_redraw
         self._parent = parent
         self._custom_names_enabled = custom_names_enabled
-        super().__init__(self._parent, *args, **kwargs)
-        self._init_controls()
+        super().__init__(self._parent)
+        self._create_widgets()
 
-    def _init_controls(self):
+    def _create_widgets(self):
         self._vbox = create_sizer(self.panel)
-        for i, named_dir in enumerate(self._named_dirs_list):
+        for i, named_dir in enumerate(self._named_dirs):
             hbox = wx.BoxSizer(wx.HORIZONTAL)
             if self._custom_names_enabled:
                 name_control = create_text_control(
                     self.panel,
                     value=named_dir.name or '',
-                    callback=partial(self._on_name_changed, i),
+                    callback=after(
+                        partial(self._named_dirs.set_name, i), self._changed
+                    ),
                 )
                 hbox.Add(
                     name_control,
@@ -267,7 +256,9 @@ class NamedDirsForm(Form):
             path_button = create_dir_browse_button(
                 self.panel,
                 value=named_dir.path or '',
-                callback=partial(self._on_path_changed, i),
+                callback=after(
+                    partial(self._named_dirs.set_path, i), self._changed
+                ),
             )
             hbox.Add(
                 path_button, proportion=3, flag=wx.EXPAND | wx.RIGHT, border=10
@@ -275,7 +266,11 @@ class NamedDirsForm(Form):
             remove_button = create_button(
                 self.panel,
                 texts.BUTTON_REMOVE,
-                callback=partial(self._on_remove_clicked, i),
+                callback=after(
+                    partial(self._named_dirs.remove, i),
+                    self._recreate,
+                    self._changed,
+                ),
             )
             hbox.Add(remove_button, proportion=1, flag=wx.EXPAND)
             if i == 0:
@@ -283,54 +278,34 @@ class NamedDirsForm(Form):
             else:
                 flag = wx.EXPAND | wx.TOP
             self._vbox.Add(hbox, flag=flag, border=5)
-        if len(self._named_dirs_list) < self._max_len:
+        if not self._named_dirs.max_reached:
             add_button = create_button(
-                self.panel, texts.BUTTON_ADD, callback=self._on_add_clicked
+                self.panel,
+                texts.BUTTON_ADD,
+                callback=after(
+                    self._named_dirs.new, self._recreate, self._changed
+                ),
             )
             self._vbox.Add(add_button, flag=wx.TOP, border=10)
         else:
             label = create_label(
                 self.panel,
-                texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len),
+                texts.SETTINGS_MAX_DIRS_REACHED.format(
+                    max_len=self._named_dirs.max_len
+                ),
             )
             self._vbox.Add(label, flag=wx.TOP, border=10)
 
+    def _changed(self):
+        self._on_change(self._named_dirs)
+
     def _recreate(self):
-        self.panel.DestroyChildren()
-        self._init_controls()
-        self._vbox.Layout()
-        self.panel.Layout()
-        if self._on_redraw:
-            self._on_redraw()
+        def wrapper():
+            self.panel.DestroyChildren()
+            self._create_widgets()
+            self._vbox.Layout()
+            self.panel.Layout()
+            if self._on_redraw:
+                self._on_redraw()
 
-    def _on_name_changed(self, i: int, name: str):
-        named_dir = self._named_dirs_list[i]
-        self._named_dirs_list[i] = named_dir._replace(name=name)
-        self._on_change(self._named_dirs)
-
-    def _on_path_changed(self, i: int, path: str):
-        named_dir = self._named_dirs_list[i]
-        self._named_dirs_list[i] = named_dir._replace(path=path)
-        self._on_change(self._named_dirs)
-
-    def _on_remove_clicked(self, i: int):
-        del self._named_dirs_list[i]
-        self._on_change(self._named_dirs)
-        wx.CallAfter(self._recreate)
-
-    def _on_add_clicked(self):
-        new_named_dir = NamedDir()
-        self._named_dirs_list.append(new_named_dir)
-        self._on_change(self._named_dirs)
-        wx.CallAfter(self._recreate)
-
-    @property
-    def _named_dirs(self) -> NamedDirs:
-        return NamedDirs(
-            {
-                named_dir.path: named_dir.name
-                or os.path.basename(named_dir.path)
-                for named_dir in self._named_dirs_list
-                if named_dir.path
-            }
-        )
+        wx.CallAfter(wrapper)

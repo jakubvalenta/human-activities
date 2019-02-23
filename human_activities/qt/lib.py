@@ -1,13 +1,11 @@
 import io
 import logging
-import os.path
 from functools import partial
 from typing import (
     Callable,
     Dict,
     Iterable,
     Iterator,
-    List,
     NamedTuple,
     Optional,
     Union,
@@ -36,6 +34,7 @@ from PyQt5.QtWidgets import (
 
 from human_activities import texts
 from human_activities.config import NamedDirs
+from human_activities.utils.func import after
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +101,12 @@ def create_button(
     if icon_pixmap:
         icon = create_icon(icon_pixmap)
         button.setIcon(icon)
-    button.clicked.connect(callback)
+    button.clicked.connect(partial(on_button_clicked, callback=callback))
     return button
+
+
+def on_button_clicked(button: QPushButton, callback: Callable):
+    callback()
 
 
 class RadioConfig(NamedTuple):
@@ -242,9 +245,9 @@ class RootPathForm(QVBoxLayout):
         self._on_change = on_change
         self._parent = parent
         super().__init__()
-        self._init_button()
+        self._create_widgets()
 
-    def _init_button(self):
+    def _create_widgets(self):
         file_chooser_form = FileChooserForm(
             self._ui_app,
             self._parent,
@@ -257,15 +260,9 @@ class RootPathForm(QVBoxLayout):
         self._on_change(path)
 
 
-class NamedDir(NamedTuple):
-    path: str = ''
-    name: str = ''
-
-
 class NamedDirsForm(QVBoxLayout):
     _ui_app: QApplication
-    _named_dirs_list: List[NamedDir]
-    _max_len: int
+    _named_dirs: NamedDirs
     _parent: QWidget
     _custom_names_enabled: bool
 
@@ -278,25 +275,24 @@ class NamedDirsForm(QVBoxLayout):
         custom_names_enabled: bool = True,
     ):
         self._ui_app = ui_app
-        self._named_dirs_list = [
-            NamedDir(path, name) for path, name in named_dirs.items()
-        ]
-        self._max_len = named_dirs.max_len
+        self._named_dirs = named_dirs
         self._on_change = on_change
         self._parent = parent
         self._custom_names_enabled = custom_names_enabled
         super().__init__(self._parent)
-        self._init_line_edits()
+        self._create_widgets()
 
-    def _init_line_edits(self):
+    def _create_widgets(self):
         grid = QGridLayout(self._parent)
-        for i, named_dir in enumerate(self._named_dirs_list):
+        for i, named_dir in enumerate(self._named_dirs):
             left = 0
             if self._custom_names_enabled:
                 name_line_edit = create_line_edit(
                     self._parent,
                     value=named_dir.name or '',
-                    callback=partial(self._on_name_changed, i),
+                    callback=after(
+                        partial(self._named_dirs.set_name, i), self._changed
+                    ),
                 )
                 grid.addWidget(name_line_edit, i, left)
                 left += 1
@@ -304,65 +300,45 @@ class NamedDirsForm(QVBoxLayout):
                 self._ui_app,
                 self._parent,
                 value=named_dir.path or None,
-                callback=partial(self._on_path_changed, i),
+                callback=after(
+                    partial(self._named_dirs.set_path, i), self._changed
+                ),
             )
             grid.addLayout(file_chooser_form, i, left)
             left += 1
             remove_button = create_button(
                 self._parent,
                 label=texts.BUTTON_REMOVE,
-                callback=partial(self._on_remove_clicked, i),
+                callback=after(
+                    partial(self._named_dirs.remove, i),
+                    self._recreate,
+                    self._changed,
+                ),
             )
             grid.addWidget(remove_button, i, left)
             left += 1
         self.addLayout(grid)
-        if len(self._named_dirs_list) < self._max_len:
+        if not self._named_dirs.max_reached:
             add_button = create_button(
                 self._parent,
                 label=texts.BUTTON_ADD,
-                callback=self._on_add_clicked,
+                callback=after(
+                    self._named_dirs.new, self._recreate, self._changed
+                ),
             )
             self.addWidget(add_button, alignment=Qt.AlignLeft)
         else:
             label = create_label(
                 self._parent,
-                texts.SETTINGS_MAX_DIRS_REACHED.format(max_len=self._max_len),
+                texts.SETTINGS_MAX_DIRS_REACHED.format(
+                    max_len=self._named_dirs.max_len
+                ),
             )
             self.addWidget(label)
 
-    def _clear(self):
+    def _changed(self):
+        self._on_change(self._named_dirs)
+
+    def _recreate(self):
         remove_layout_items(self)
-
-    def _on_name_changed(self, i: int, name: str):
-        named_dir = self._named_dirs_list[i]
-        self._named_dirs_list[i] = named_dir._replace(name=name)
-        self._on_change(self._named_dirs)
-
-    def _on_path_changed(self, i: int, path: str):
-        named_dir = self._named_dirs_list[i]
-        self._named_dirs_list[i] = named_dir._replace(path=path)
-        self._on_change(self._named_dirs)
-
-    def _on_remove_clicked(self, i: int):
-        del self._named_dirs_list[i]
-        self._on_change(self._named_dirs)
-        self._clear()
-        self._init_line_edits()
-
-    def _on_add_clicked(self):
-        new_named_dir = NamedDir()
-        self._named_dirs_list.append(new_named_dir)
-        self._on_change(self._named_dirs)
-        self._clear()
-        self._init_line_edits()
-
-    @property
-    def _named_dirs(self) -> NamedDirs:
-        return NamedDirs(
-            {
-                named_dir.path: named_dir.name
-                or os.path.basename(named_dir.path)
-                for named_dir in self._named_dirs_list
-                if named_dir.path
-            }
-        )
+        self._create_widgets()
