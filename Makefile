@@ -161,9 +161,10 @@ ifeq (,$(version))
 	@echo "You must set the variable 'version'."
 	@exit 1
 endif
-	sed -i s/${_version}/${version}/ Makefile
-	sed -i s/${_version}/${version}/ ${_pypkgname}/__init__.py
-	sed -i s/${_version}/${version}/ arch_linux/PKGBUILD
+	sed -i s/${_version}/${version}/g Makefile
+	sed -i s/${_version}/${version}/g README.md
+	sed -i s/${_version}/${version}/g ${_pypkgname}/__init__.py
+	sed -i s/${_version}/${version}/g arch_linux/PKGBUILD
 	docker info &> /dev/null || sudo systemctl start docker
 	docker run -it --volume="$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
@@ -171,7 +172,11 @@ endif
 	@echo "Editing changelog..."
 	"${EDITOR}" debian/changelog
 	@echo "Committing changes..."
-	git add Makefile ${_pypkgname}/__init__.py arch_linux/PKGBUILD debian/changelog
+	git add \
+		Makefile \
+		README.md \
+		${_pypkgname}/__init__.py \
+		arch_linux/PKGBUILD debian/changelog
 	git commit -m "Version ${version}"
 	@echo "Creating tag..."
 	git tag "v${version}"
