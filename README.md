@@ -65,7 +65,7 @@ Tested on macOS Mojave.
 
 Tested on Ubuntu 18.04 LTS.
 
-1. Download and open [human-activities_0.8.0-1_all.deb][].
+1. Download and open [human-activities_0.9.0-1_all.deb][].
 2. Click the button *Install* in the window that appears.
 
     [screenshot install window]
@@ -75,7 +75,7 @@ Tested on Ubuntu 18.04 LTS.
 
 ### Arch Linux
 
-Download [human-activities-0.8.0-1-any.pkg.tar.xz][] and install it using
+Download [human-activities-0.9.0-1-any.pkg.tar.xz][] and install it using
 pacman. Then enable and start the `human-activities.timer` systemd unit.
 
 ## Usage
@@ -236,7 +236,7 @@ make test
 make lint
 ```
 
-[Human Activities.exe]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/Human%20Activities.exe>
-[Human Activities.app]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/Human%20Activities.app>
-[human-activities_0.8.0-1_all.deb]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/human-activities_0.8.0-1_all.deb>
-[human-activities-0.8.0-1-any.pkg.tar.xz]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/human-activities-0.8.0-1-any.pkg.tar.xz>
+[Human Activities.exe]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/Human%20Activities.exe>
+[Human Activities.app]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/Human%20Activities.app>
+[human-activities_0.9.0-1_all.deb]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/human-activities_0.9.0-1_all.deb>
+[human-activities-0.9.0-1-any.pkg.tar.xz]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/human-activities-0.9.0-1-any.pkg.tar.xz>
