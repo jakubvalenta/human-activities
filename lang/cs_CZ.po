@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: human-activities 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-07 21:44+0100\n"
-"PO-Revision-Date: 2019-02-22 15:50+0100\n"
+"POT-Creation-Date: 2019-02-23 14:57+0100\n"
+"PO-Revision-Date: 2019-02-23 14:54+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -17,126 +17,129 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: human_activities/texts.py:3
-msgid "Please choose a directory"
+msgid "Choose a directory"
 msgstr "Vyberte adresář"
 
 #: human_activities/texts.py:4
-msgid "Add"
-msgstr "Přidat"
+msgid "Add more"
+msgstr "Přidat další"
 
 #: human_activities/texts.py:5
 msgid "Remove"
 msgstr "Odstranit"
 
-#: human_activities/texts.py:7
-msgid "Human Activities advanced configuration"
-msgstr "Pokročilé nastavení Lidských Aktivit"
+#: human_activities/texts.py:6
+msgid "Browse"
+msgstr "Vybrat"
 
 #: human_activities/texts.py:8
+msgid "Human Activities - Advanced Configuration"
+msgstr "Lidské Aktivity - Pokročilé nastavení"
+
+#: human_activities/texts.py:9
 msgid "Compare"
 msgstr "Porovnávat"
 
-#: human_activities/texts.py:10
+#: human_activities/texts.py:11
 msgid "Include only files newer than (days), 0 = all files"
 msgstr ""
 "Započítávat pouze adresáře novější než (počet dní), 0 = započítávat vše"
 
-#: human_activities/texts.py:12
+#: human_activities/texts.py:13
 msgid "Directories"
 msgstr "Adresáře"
 
 #: human_activities/texts.py:14
-msgid "Human Activities setup"
-msgstr "Základní nastavení Lidských Aktivit"
+#, python-brace-format
+msgid "Reached the maximum of {max_len} directories"
+msgstr "Dosaženo maximálního počtu adresářů ({max_len})"
 
-#: human_activities/texts.py:15
-msgid "Please adjust your OS settings like this:"
-msgstr "Prosím upravte nastavení svého operačního systému takto:"
+#: human_activities/texts.py:16
+msgid "Human Activities"
+msgstr "Lidské Aktivity"
 
-#: human_activities/texts.py:17
-msgid ""
-"first do this\n"
-"than that\n"
-"and finally something different"
-msgstr ""
-"Nejdřív udělejte toto\n"
-"pak tamto\n"
-"a nakonec něco jiného"
-
-#: human_activities/texts.py:21
-msgid "Intro"
-msgstr "Úvod"
-
-#: human_activities/texts.py:22 human_activities/gtk/status_icon.py:145
+#: human_activities/texts.py:17 human_activities/gtk/status_icon.py:157
 msgid "Setup"
 msgstr "Nastavení"
 
-#: human_activities/texts.py:25
+#: human_activities/texts.py:18
+msgid "Please choose the directories you want to monitor."
+msgstr "Prosím vyberte adresáře, které si přejete sledovat."
+
+#: human_activities/texts.py:20
 msgid "No directories configured"
 msgstr "Nejsou nastavené žádné adresáře"
 
-#: human_activities/texts.py:27
+#: human_activities/texts.py:22
 #, python-brace-format
 msgid "Counting only files modified in the past {days} days"
 msgstr "Započítává pouze soubory změněné v posledních {days} dnech"
 
-#: human_activities/config.py:17
-msgid "All directories in selected directory"
-msgstr "Všechny adresáře ve zvoleném adresáři"
+#: human_activities/texts.py:25
+#, python-brace-format
+msgid ""
+"Maximum number of directories exceeded, showing only the first {max_len}"
+msgstr ""
+"Překročen maximální počet adresářů, zobrazuje se pouze prvních {max_len}"
 
-#: human_activities/config.py:18
-msgid "Predefined directories"
+#: human_activities/config.py:92
+msgid "All subdirectories of selected directory"
+msgstr "Všechny podadresáře zvoleného adresáře"
+
+#: human_activities/config.py:93
+msgid "Selected directories"
 msgstr "Vybrané adresáře"
 
-#: human_activities/config.py:22
+#: human_activities/config.py:97
 msgid "Paid work"
 msgstr "Honorovaná práce"
 
-#: human_activities/config.py:22
+#: human_activities/config.py:97
 msgid "Unpaid work"
 msgstr "Nehonorovaná práce"
 
-#: human_activities/config.py:22
+#: human_activities/config.py:97
 msgid "Others"
 msgstr "Ostatní"
 
-#: human_activities/config.py:27
+#: human_activities/config.py:102
 msgid "Size in bytes"
 msgstr "Velikost v bytech"
 
-#: human_activities/config.py:28
+#: human_activities/config.py:103
 msgid "Number of files"
 msgstr "Počet souborů"
 
-#: human_activities/model.py:147
+#: human_activities/model.py:128
 #, python-brace-format
 msgid "{value} files"
 msgstr "{value} souborů"
 
-#: human_activities/wx/status_icon.py:95 human_activities/wx/status_icon.py:106
+#: human_activities/wx/status_icon.py:102
+#: human_activities/wx/status_icon.py:116 human_activities/qt/status_icon.py:84
 msgid "&Setup"
 msgstr "Nastavení"
 
-#: human_activities/wx/status_icon.py:113
+#: human_activities/wx/status_icon.py:123 human_activities/qt/status_icon.py:86
 msgid "Advanced &configuration"
 msgstr "Pokročilé nastavení"
 
-#: human_activities/wx/status_icon.py:120
+#: human_activities/wx/status_icon.py:130 human_activities/qt/status_icon.py:88
 msgid "&About"
 msgstr "O &aplikaci"
 
-#: human_activities/wx/status_icon.py:127
+#: human_activities/wx/status_icon.py:137 human_activities/qt/status_icon.py:89
 msgid "&Quit"
 msgstr "Ukončit"
 
-#: human_activities/gtk/status_icon.py:147
+#: human_activities/gtk/status_icon.py:159
 msgid "Advanced configuration"
 msgstr "Pokročilé nastavení"
 
-#: human_activities/gtk/status_icon.py:150
+#: human_activities/gtk/status_icon.py:162
 msgid "About"
 msgstr "O aplikaci"
 
-#: human_activities/gtk/status_icon.py:155
+#: human_activities/gtk/status_icon.py:167
 msgid "Quit"
 msgstr "Ukončit"

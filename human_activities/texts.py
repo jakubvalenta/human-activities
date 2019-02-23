@@ -1,6 +1,6 @@
 from human_activities.locale import _
 
-FILE_CHOOSER_BUTTON = _('Please choose a directory')
+FILE_CHOOSER_BUTTON = _('Choose a directory')
 BUTTON_ADD = _('Add more')
 BUTTON_REMOVE = _('Remove')
 BUTTON_BROWSE = _('Browse')
@@ -11,7 +11,7 @@ SETTINGS_THRESHOLD_DAYS_OLD = _(
     'Include only files newer than (days), 0 = all files'
 )
 SETTINGS_MODE = _('Directories')
-SETTINGS_MAX_DIRS_REACHED = _('Reached the maximumg of {max_len} directories')
+SETTINGS_MAX_DIRS_REACHED = _('Reached the maximum of {max_len} directories')
 
 SETUP_TITLE = _('Human Activities')
 SETUP_HEADING = _('Setup')

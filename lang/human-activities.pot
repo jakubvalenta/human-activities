@@ -6,134 +6,139 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: human-activities 0.4.0\n"
+"Project-Id-Version: human-activities 0.8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-07 21:44+0100\n"
+"POT-Creation-Date: 2019-02-23 14:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: human_activities/texts.py:3
-msgid "Please choose a directory"
+msgid "Choose a directory"
 msgstr ""
 
 #: human_activities/texts.py:4
-msgid "Add"
+msgid "Add more"
 msgstr ""
 
 #: human_activities/texts.py:5
 msgid "Remove"
 msgstr ""
 
-#: human_activities/texts.py:7
-msgid "Human Activities advanced configuration"
+#: human_activities/texts.py:6
+msgid "Browse"
 msgstr ""
 
 #: human_activities/texts.py:8
+msgid "Human Activities - Advanced Configuration"
+msgstr ""
+
+#: human_activities/texts.py:9
 msgid "Compare"
 msgstr ""
 
-#: human_activities/texts.py:10
+#: human_activities/texts.py:11
 msgid "Include only files newer than (days), 0 = all files"
 msgstr ""
 
-#: human_activities/texts.py:12
+#: human_activities/texts.py:13
 msgid "Directories"
 msgstr ""
 
 #: human_activities/texts.py:14
-msgid "Human Activities setup"
+#, python-brace-format
+msgid "Reached the maximum of {max_len} directories"
 msgstr ""
 
-#: human_activities/texts.py:15
-msgid "Please adjust your OS settings like this:"
+#: human_activities/texts.py:16
+msgid "Human Activities"
 msgstr ""
 
-#: human_activities/texts.py:17
-msgid ""
-"first do this\n"
-"than that\n"
-"and finally something different"
-msgstr ""
-
-#: human_activities/texts.py:21
-msgid "Intro"
-msgstr ""
-
-#: human_activities/texts.py:22 human_activities/gtk/status_icon.py:145
+#: human_activities/texts.py:17 human_activities/gtk/status_icon.py:157
 msgid "Setup"
 msgstr ""
 
-#: human_activities/texts.py:25
+#: human_activities/texts.py:18
+msgid "Please choose the directories you want to monitor."
+msgstr ""
+
+#: human_activities/texts.py:20
 msgid "No directories configured"
 msgstr ""
 
-#: human_activities/texts.py:27
+#: human_activities/texts.py:22
 #, python-brace-format
 msgid "Counting only files modified in the past {days} days"
 msgstr ""
 
-#: human_activities/config.py:17
-msgid "All directories in selected directory"
+#: human_activities/texts.py:25
+#, python-brace-format
+msgid ""
+"Maximum number of directories exceeded, showing only the first {max_len}"
 msgstr ""
 
-#: human_activities/config.py:18
-msgid "Predefined directories"
+#: human_activities/config.py:92
+msgid "All subdirectories of selected directory"
 msgstr ""
 
-#: human_activities/config.py:22
+#: human_activities/config.py:93
+msgid "Selected directories"
+msgstr ""
+
+#: human_activities/config.py:97
 msgid "Paid work"
 msgstr ""
 
-#: human_activities/config.py:22
+#: human_activities/config.py:97
 msgid "Unpaid work"
 msgstr ""
 
-#: human_activities/config.py:22
+#: human_activities/config.py:97
 msgid "Others"
 msgstr ""
 
-#: human_activities/config.py:27
+#: human_activities/config.py:102
 msgid "Size in bytes"
 msgstr ""
 
-#: human_activities/config.py:28
+#: human_activities/config.py:103
 msgid "Number of files"
 msgstr ""
 
-#: human_activities/model.py:147
+#: human_activities/model.py:128
 #, python-brace-format
 msgid "{value} files"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:95 human_activities/wx/status_icon.py:106
+#: human_activities/wx/status_icon.py:102
+#: human_activities/wx/status_icon.py:116 human_activities/qt/status_icon.py:84
 msgid "&Setup"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:113
+#: human_activities/wx/status_icon.py:123 human_activities/qt/status_icon.py:86
 msgid "Advanced &configuration"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:120
+#: human_activities/wx/status_icon.py:130 human_activities/qt/status_icon.py:88
 msgid "&About"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:127
+#: human_activities/wx/status_icon.py:137 human_activities/qt/status_icon.py:89
 msgid "&Quit"
 msgstr ""
 
-#: human_activities/gtk/status_icon.py:147
+#: human_activities/gtk/status_icon.py:159
 msgid "Advanced configuration"
 msgstr ""
 
-#: human_activities/gtk/status_icon.py:150
+#: human_activities/gtk/status_icon.py:162
 msgid "About"
 msgstr ""
 
-#: human_activities/gtk/status_icon.py:155
+#: human_activities/gtk/status_icon.py:167
 msgid "Quit"
 msgstr ""

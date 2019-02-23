@@ -89,8 +89,8 @@ class ConfiguredDirs(NamedDirs):
 MODE_ROOT_PATH = 'path'
 MODE_NAMED_DIRS = 'named'
 MODES = {
-    MODE_ROOT_PATH: _('All directories in selected directory'),
-    MODE_NAMED_DIRS: _('Predefined directories'),
+    MODE_ROOT_PATH: _('All subdirectories of selected directory'),
+    MODE_NAMED_DIRS: _('Selected directories'),
 }
 DEFAULT_NAMED_DIRS = NamedDirs(
     NamedDir(path=os.path.expanduser('~/' + name))
