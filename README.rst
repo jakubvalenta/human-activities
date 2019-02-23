@@ -138,7 +138,7 @@ You can also see a note, that **only files modified in the past 30 days** are
 counted to the size of a directory. This behavior can be changed in the
 *Advanced configuration*.
 
-From this menu you can also reach the _Setup_ (which you saw when you first
+From this menu you can also reach the *Setup* (which you saw when you first
 started the app) and the *Advanced configuration*. On Windows, these items are
 accessible in separate menu that opens when you right-click the icon.
 
