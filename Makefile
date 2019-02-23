@@ -162,7 +162,7 @@ ifeq (,$(version))
 	@exit 1
 endif
 	sed -i s/${_version}/${version}/g Makefile
-	sed -i s/${_version}/${version}/g README.md
+	sed -i s/${_version}/${version}/g README.rst
 	sed -i s/${_version}/${version}/g ${_pypkgname}/__init__.py
 	sed -i s/${_version}/${version}/g arch_linux/PKGBUILD
 	docker info &> /dev/null || sudo systemctl start docker
@@ -174,7 +174,7 @@ endif
 	@echo "Committing changes..."
 	git add \
 		Makefile \
-		README.md \
+		README.rst \
 		${_pypkgname}/__init__.py \
 		arch_linux/PKGBUILD debian/changelog
 	git commit -m "Version ${version}"

@@ -4,15 +4,20 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 from human_activities import (
-    __application_name__, __author_email__, __authors__, __license__,
-    __summary__, __uri__, __version__,
+    __application_name__,
+    __author_email__,
+    __authors__,
+    __license__,
+    __summary__,
+    __uri__,
+    __version__,
 )
 
 setup(
     name=__application_name__,
     version=__version__,
     description=__summary__,
-    long_description=(Path(__file__).parent / 'README.md').read_text(),
+    long_description=(Path(__file__).parent / 'README.rst').read_text(),
     author=__authors__[0],
     author_email=__author_email__,
     url=__uri__,
@@ -26,35 +31,30 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(),
-    package_data={
-        '': ['locale/*/LC_MESSAGES/*.mo'],
-    },
+    package_data={'': ['locale/*/LC_MESSAGES/*.mo']},
     data_files=[
-        (
-            'share/applications',
-            [f'data/{__application_name__}.desktop']
-        ),
+        ('share/applications', [f'data/{__application_name__}.desktop']),
         (
             'share/icons/hicolor/scalable/apps',
-            [f'data/{__application_name__}.svg']
+            [f'data/{__application_name__}.svg'],
         ),
-        (
-            'share/pixmaps',
-            [f'data/{__application_name__}.png']
-        ),
-    ] + [
+        ('share/pixmaps', [f'data/{__application_name__}.png']),
+    ]
+    + [
         (
             str(
-                Path('share/locale') /
-                Path(path).parent.relative_to('human_activities/locale')
+                Path('share/locale')
+                / Path(path).parent.relative_to('human_activities/locale')
             ),
-            [path]
+            [path],
         )
-        for path in glob.glob('human_activities/locale/**/*.mo', recursive=True)
+        for path in glob.glob(
+            'human_activities/locale/**/*.mo', recursive=True
+        )
     ],
     entry_points={
         'console_scripts': [
-            f'{__application_name__}=human_activities.cli:main',
-        ],
+            f'{__application_name__}=human_activities.cli:main'
+        ]
     },
 )
