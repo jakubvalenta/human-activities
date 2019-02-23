@@ -236,7 +236,7 @@ make test
 make lint
 ```
 
-[Human Activities.exe]: <https://human-activities.jakubvalenta.cz/download/0.8.0/Human%20Activities.exe>
-[Human Activities.app]: <https://human-activities.jakubvalenta.cz/download/0.8.0/Human%20Activities.app>
-[human-activities_0.8.0-1_all.deb]: <https://human-activities.jakubvalenta.cz/download/0.8.0/human-activities_0.8.0-1_all.deb>
-[human-activities-0.8.0-1-any.pkg.tar.xz]: <https://human-activities.jakubvalenta.cz/download/0.8.0/human-activities-0.8.0-1-any.pkg.tar.xz>
+[Human Activities.exe]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/Human%20Activities.exe>
+[Human Activities.app]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/Human%20Activities.app>
+[human-activities_0.8.0-1_all.deb]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/human-activities_0.8.0-1_all.deb>
+[human-activities-0.8.0-1-any.pkg.tar.xz]: <https://github.com/jakubvalenta/human-activities/releases/download/v0.8.0/human-activities-0.8.0-1-any.pkg.tar.xz>
