@@ -130,6 +130,7 @@ class Config:
 
     def to_json(self) -> str:
         d = {
+            'interval_sec': self.interval_sec,
             'mode': self.mode,
             'root_path': self.root_path,
             'named_dirs': self.named_dirs.to_dict(),
