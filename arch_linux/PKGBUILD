@@ -41,9 +41,6 @@ package() {
   DESTDIR="$pkgdir" make install
 
   install -D -m644 -t "$pkgdir/etc/xdg/autostart/" data/*.desktop
-  install -D -m644 -t "$pkgdir/usr/lib/systemd/system/" data/*.service data/*.timer
-  install -d -m755 "$pkgdir/usr/lib/systemd/system/timers.target.wants"
-  ln -s ../human-activities.timer "$pkgdir/usr/lib/systemd/system/timers.target.wants/human-activities.timer"
 }
 
 # vim:set ts=2 sw=2 et:

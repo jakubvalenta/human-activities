@@ -1,8 +1,0 @@
-[Unit]
-Description=Scan directories monitored by Human Activities
-
-[Service]
-ExecStart=/usr/bin/human-activities --scan
-
-[Install]
-WantedBy=multi-user.target

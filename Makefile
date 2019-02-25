@@ -14,7 +14,7 @@ _uid=$(shell id -u)
 _gid=$(shell id -g)
 _timestamp=$(shell date +%s)
 
-.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean-cache scan test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean-cache test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -81,7 +81,6 @@ ${_debian_dist_parent}/${_debian_src_filename}:
 
 ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_src_filename}
 	cd "${_debian_dist_parent}" && tar xvf "${_debian_src_filename}"
-	cp -f data/*.service data/*.timer "${_debian_dist_parent}/${_debian_src_dirname}/debian"
 
 ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
 	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
@@ -112,9 +111,6 @@ generate-data: data/${_name}.png
 clean-cache:  ## Clean cache
 	pipenv run python3 -m ${_pypkgname} --verbose --clean
 
-scan:  ## Scan directories
-	pipenv run python3 -m ${_pypkgname} --verbose --scan
-
 test:  ## Run unit tests
 	tox -e py37
 
@@ -126,8 +122,6 @@ lint-arch-linux:
 
 lint-data:
 	desktop-file-validate "data/${_name}.desktop"
-	systemd-analyze verify "data/${_name}.service"
-	systemd-analyze verify "data/${_name}.timer"
 
 reformat:  ## Reformat Python code using Black
 	black -l 79 --skip-string-normalization ${_pypkgname}

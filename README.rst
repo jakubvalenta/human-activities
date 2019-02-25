@@ -82,7 +82,7 @@ Arch Linux
 ^^^^^^^^^^
 
 Download `human-activities-0.9.0-1-any.pkg.tar.xz`_ and install it using
-pacman. Then enable and start the ``human-activities.timer`` systemd unit.
+pacman.
 
 Usage
 -----
