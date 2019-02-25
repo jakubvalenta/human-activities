@@ -119,6 +119,7 @@ class Config:
 
     def copy(self):
         new = self.__class__()
+        new.interval_sec = self.interval_sec
         new.mode = self.mode
         new.root_path = self.root_path
         new.named_dirs = self.named_dirs
