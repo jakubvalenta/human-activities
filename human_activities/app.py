@@ -58,10 +58,10 @@ class Application:
         else:
             self._scan_start(0)
 
-    def _scan_start(self, interval: int):
-        logger.info(f'Starting scan timer in %ss', interval)
+    def _scan_start(self, interval_sec: int):
+        logger.info(f'Starting scan timer in %ss', interval_sec)
         self._scan_event_stop = Event()
-        self._scan_timer = Timer(interval, self._scan)
+        self._scan_timer = Timer(interval_sec, self._scan)
         self._scan_timer.start()
 
     def _scan(self):
