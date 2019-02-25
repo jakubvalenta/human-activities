@@ -11,6 +11,3 @@ XDG_MUSIC_DIR="\$HOME"
 XDG_PICTURES_DIR="\$HOME"
 XDG_VIDEOS_DIR="\$HOME"
 EOF
-cat > "$HOME/.config/user-dirs.conf" <<EOF
-enabled=false
-EOF
