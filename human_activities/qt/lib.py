@@ -151,9 +151,15 @@ def create_line_edit(
 
 
 def create_spin_box(
-    parent: QWidget, value: int, callback: Callable
+    parent: QWidget,
+    value: int,
+    callback: Callable,
+    min_val: int = 0,
+    max_val: int = 9999,
 ) -> QSpinBox:
     spin_box = QSpinBox(parent)
+    spin_box.setMinimum(min_val)
+    spin_box.setMaximum(max_val)
     spin_box.setValue(value)
     spin_box.valueChanged[int].connect(callback)
     return spin_box

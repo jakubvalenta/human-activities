@@ -52,8 +52,9 @@ class Settings(QDialog):
         super().__init__()
         self._init_window()
         widgets = [
+            self._create_interval_sec_box(),
             self._create_unit_box(),
-            self._create_threshold_box(),
+            self._create_threshold_days_ago_box(),
             self._create_mode_box(),
             self._create_dialog_buttons(),
         ]
@@ -67,6 +68,20 @@ class Settings(QDialog):
         self.setWindowTitle(texts.SETTINGS_TITLE)
         self._layout = create_layout()
         self.setLayout(self._layout)
+
+    def _create_interval_sec_box(self) -> QWidget:
+        box = create_group_box(texts.SETTINGS_INTERVAL_SEC, self)
+        self._interval_sec_entry = create_spin_box(
+            self,
+            value=self._config.interval_sec,
+            callback=self._on_interval_sec_changed,
+            max_val=999_999,
+        )
+        add_layout_items(box.layout(), [self._interval_sec_entry])
+        return box
+
+    def _on_interval_sec_changed(self, interval_sec: int):
+        self._config.interval_sec = interval_sec
 
     def _create_unit_box(self) -> QWidget:
         box = create_group_box(texts.SETTINGS_UNIT, self)
@@ -85,7 +100,7 @@ class Settings(QDialog):
     def _on_unit_radio_toggled(self, unit: str):
         self._config.unit = unit
 
-    def _create_threshold_box(self) -> QWidget:
+    def _create_threshold_days_ago_box(self) -> QWidget:
         box = create_group_box(texts.SETTINGS_THRESHOLD_DAYS_OLD, self)
         self._threshold_days_ago_entry = create_spin_box(
             self,
