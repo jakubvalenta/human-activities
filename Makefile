@@ -40,10 +40,10 @@ run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m ${_pypkgname} --verbose
 
 run-wx:  ## Start the app with the WxWidgets backend and extended logging
-	pipenv run python3 -m ${_pypkgname} --verbose --wxwidgets
+	pipenv run python3 -m ${_pypkgname} --verbose --backend=wx
 
 run-qt:  ## Start the app with the Qt backend and extended logging
-	pipenv run python3 -m ${_pypkgname} --verbose --qt
+	pipenv run python3 -m ${_pypkgname} --verbose --backend=qt
 
 ${_arch_linux_dist_parent}/${_arch_linux_src_filename}:
 	mkdir -p "${_arch_linux_dist_parent}"

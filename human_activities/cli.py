@@ -37,21 +37,13 @@ def main():
         '-c', '--clean', action='store_true', help='Clean cache and exit'
     )
     parser.add_argument(
-        '-w',
-        '--wxwidgets',
-        action='store_true',
+        '-b',
+        '--backend',
+        choices=('gtk', 'qt', 'wx', 'auto'),
+        default='auto',
         help=(
-            'Force the use of the WxWidget backend; by default, GTK is '
-            'always used when AppIndicator is available'
-        ),
-    )
-    parser.add_argument(
-        '-q',
-        '--qt',
-        action='store_true',
-        help=(
-            'Force the use of the Qt5 backend; by default, GTK is '
-            'always used when AppIndicator is available'
+            'UI toolkit to use. When set to "auto", the first installed '
+            'toolkit in the list GTK+, Qt, WxWidgets will be chosen.'
         ),
     )
     args = parser.parse_args()
@@ -65,20 +57,20 @@ def main():
         clean_cache()
         return
     app = Application()
-    if args.wxwidgets:
-        logger.info('Using UI toolkit WxWidgets (reason: cli option)')
-        import human_activities.wx as ui
-    elif args.qt:
-        logger.info('Using UI toolkit Qt5 (reason: cli option)')
-        import human_activities.qt as ui
-    elif is_appindicator_available():
-        logger.info('Using UI toolkit Gtk+3 (reason: AppIndicator available)')
+    if (
+        args.backend == 'gtk'
+        or args.backend == 'auto'
+        and is_appindicator_available()
+    ):
+        logger.info('Using UI toolkit GTK+3')
         import human_activities.gtk as ui
-    elif is_pyqt5_available():
-        logger.info('Using UI toolkit Qt5 (reason: PyQt5 available)')
+    elif (
+        args.backend == 'qt' or args.backend == 'auto' and is_pyqt5_available()
+    ):
+        logger.info('Using UI toolkit Qt5')
         import human_activities.qt as ui
     else:
-        logger.info('Using UI toolkit WxWidgets (reason: PyQt5 not available)')
+        logger.info('Using UI toolkit WxWidgets')
         import human_activities.wx as ui
     return_code = app.run_ui(ui)
     sys.exit(return_code)
