@@ -68,6 +68,12 @@ class Settings(wx.Dialog):
         )
 
     def _create_widgets(self):
+        self._interval_sec_control = create_spin_control(
+            self._panel,
+            value=self._config.interval_sec,
+            callback=self._on_interval_sec_changed,
+            max_val=999_999,
+        )
         self._create_unit_radios()
         self._threshold_days_ago_control = create_spin_control(
             self._panel,
@@ -88,6 +94,9 @@ class Settings(wx.Dialog):
         self._create_mode_radios()
 
     def _add_widgets(self):
+        label = create_label(self._panel, texts.SETTINGS_INTERVAL_SEC)
+        self._sizer.Add(label, flag=wx.ALL, border=5)
+        self._sizer.Add(self._interval_sec_control, flag=wx.ALL, border=5)
         label = create_label(self._panel, texts.SETTINGS_UNIT)
         self._sizer.Add(label, flag=wx.ALL, border=5)
         for radio in self._unit_radios.values():
@@ -119,6 +128,9 @@ class Settings(wx.Dialog):
             active_value=self._config.unit,
             callback=self._on_unit_radio_toggled,
         )
+
+    def _on_interval_sec_changed(self, interval_sec: int):
+        self._config.interval_sec = interval_sec
 
     def _on_unit_radio_toggled(self, unit: str):
         self._config.unit = unit
