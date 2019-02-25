@@ -6,6 +6,9 @@ BUTTON_REMOVE = _('Remove')
 BUTTON_BROWSE = _('Browse')
 
 SETTINGS_TITLE = _('Human Activities - Advanced Configuration')
+SETTINGS_INTERVAL_SEC = _(
+    'Rescan every (seconds), 0 = scan only when application starts'
+)
 SETTINGS_UNIT = _('Compare')
 SETTINGS_THRESHOLD_DAYS_OLD = _(
     'Include only files newer than (days), 0 = all files'

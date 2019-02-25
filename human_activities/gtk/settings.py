@@ -67,6 +67,11 @@ class Settings(Gtk.Dialog):
         self._box.set_spacing(10)
 
     def _create_widgets(self):
+        self._interval_sec_entry = create_spin_button(
+            value=self._config.interval_sec,
+            callback=self._on_interval_sec_changed,
+            max_val=999_999,
+        )
         self._create_unit_radios()
         self._threshold_days_ago_entry = create_spin_button(
             value=self._config.threshold_days_ago,
@@ -84,7 +89,11 @@ class Settings(Gtk.Dialog):
 
     def _add_widgets(self):
         widgets = (
-            [create_label(texts.SETTINGS_UNIT)]
+            [
+                create_label(texts.SETTINGS_INTERVAL_SEC),
+                self._interval_sec_entry,
+                create_label(texts.SETTINGS_UNIT),
+            ]
             + list(self._unit_radios.values())
             + [
                 create_label(texts.SETTINGS_THRESHOLD_DAYS_OLD),
@@ -108,6 +117,9 @@ class Settings(Gtk.Dialog):
             active_value=self._config.unit,
             callback=self._on_unit_radio_toggled,
         )
+
+    def _on_interval_sec_changed(self, interval_sec: int):
+        self._config.interval_sec = interval_sec
 
     def _on_unit_radio_toggled(self, unit: str):
         self._config.unit = unit
