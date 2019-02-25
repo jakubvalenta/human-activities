@@ -14,7 +14,7 @@ _uid=$(shell id -u)
 _gid=$(shell id -g)
 _timestamp=$(shell date +%s)
 
-.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian install-arch-linux install-debian generate-data clean-cache test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian dist-mac install-arch-linux install-debian generate-data clean-cache test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -72,6 +72,13 @@ dist-debian-build:
 dist-debian-shell:
 	docker run -it --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
 		bash
+
+dist-mac:
+	-rm -r build/human-activities
+	-rm -r dist/human-activities
+	-rm -r "dist/Human Activities".*
+	sh mac/pyinstaller.sh
+	cd dist && zip -r "Human Activities ${_version}.zip" "Human Activities.app"
 
 ${_debian_dist_parent}/${_debian_src_filename}:
 	mkdir -p "${_debian_dist_parent}"

@@ -231,7 +231,7 @@ Mac
 ::
 
    pip3 install pyinstaller
-   sh mac/pyinstaller.sh
+   make dist-mac
 
 Debian
 """"""
