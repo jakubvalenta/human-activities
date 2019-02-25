@@ -51,15 +51,17 @@ macOS
 
 Tested on macOS Mojave.
 
-1. Download `Human Activities.app`_ and move it to *Applications*.
+1. Download `Human Activities 0.10.0.zip`_ and open it.
+
+2. Move the file *Human Activities.app" that appears to *Applications*.
 
    [screenshot moving to applications]
 
-2. Human Activities can now be started from *Launcher*.
+3. Human Activities can now be started from *Launcher*.
 
    [screenshot launcher]
 
-3. To automatically start Human Activities each time your Mac starts, open
+4. To automatically start Human Activities each time your Mac starts, open
    *System Preferences* > *Users & Groups*, click on the tab *Login Items*,
    click on the little plus sign icon and select the app *Human Activities*.
 
@@ -266,6 +268,6 @@ Testing and linting
    make lint
 
 .. _Human Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/Human%20Activities.exe
-.. _Human Activities.app: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/Human%20Activities.app
+.. _Human Activities 0.10.0.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/Human%20Activities%200.10.0.zip
 .. _human-activities_0.10.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/human-activities_0.10.0-1_all.deb
 .. _human-activities-0.10.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/human-activities-0.10.0-1-any.pkg.tar.xz
