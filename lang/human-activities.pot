@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: human-activities 0.8.0\n"
+"Project-Id-Version: human-activities 0.10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-23 14:57+0100\n"
+"POT-Creation-Date: 2019-02-25 19:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,45 +37,49 @@ msgstr ""
 msgid "Human Activities - Advanced Configuration"
 msgstr ""
 
-#: human_activities/texts.py:9
+#: human_activities/texts.py:10
+msgid "Scan every (seconds), 0 = scan only on application startup"
+msgstr ""
+
+#: human_activities/texts.py:12
 msgid "Compare"
 msgstr ""
 
-#: human_activities/texts.py:11
+#: human_activities/texts.py:14
 msgid "Include only files newer than (days), 0 = all files"
 msgstr ""
 
-#: human_activities/texts.py:13
+#: human_activities/texts.py:16
 msgid "Directories"
 msgstr ""
 
-#: human_activities/texts.py:14
+#: human_activities/texts.py:17
 #, python-brace-format
 msgid "Reached the maximum of {max_len} directories"
 msgstr ""
 
-#: human_activities/texts.py:16
+#: human_activities/texts.py:19
 msgid "Human Activities"
 msgstr ""
 
-#: human_activities/texts.py:17 human_activities/gtk/status_icon.py:157
+#: human_activities/texts.py:20 human_activities/gtk/status_icon.py:157
 msgid "Setup"
 msgstr ""
 
-#: human_activities/texts.py:18
+#: human_activities/texts.py:21
 msgid "Please choose the directories you want to monitor."
 msgstr ""
 
-#: human_activities/texts.py:20
+#: human_activities/texts.py:23
 msgid "No directories configured"
 msgstr ""
 
-#: human_activities/texts.py:22
+#: human_activities/texts.py:25
 #, python-brace-format
 msgid "Counting only files modified in the past {days} days"
 msgstr ""
 
-#: human_activities/texts.py:25
+#: human_activities/texts.py:28
 #, python-brace-format
 msgid ""
 "Maximum number of directories exceeded, showing only the first {max_len}"

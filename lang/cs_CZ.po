@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: human-activities 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-23 14:57+0100\n"
-"PO-Revision-Date: 2019-02-23 14:54+0100\n"
+"POT-Creation-Date: 2019-02-25 19:46+0100\n"
+"PO-Revision-Date: 2019-02-25 19:47+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -36,46 +36,50 @@ msgstr "Vybrat"
 msgid "Human Activities - Advanced Configuration"
 msgstr "Lidské Aktivity - Pokročilé nastavení"
 
-#: human_activities/texts.py:9
+#: human_activities/texts.py:10
+msgid "Scan every (seconds), 0 = scan only on application startup"
+msgstr "Přepočítat adresáře každých (počet sekund), 0 = přepočítat pouze po spuštění aplikace"
+
+#: human_activities/texts.py:12
 msgid "Compare"
 msgstr "Porovnávat"
 
-#: human_activities/texts.py:11
+#: human_activities/texts.py:14
 msgid "Include only files newer than (days), 0 = all files"
 msgstr ""
 "Započítávat pouze adresáře novější než (počet dní), 0 = započítávat vše"
 
-#: human_activities/texts.py:13
+#: human_activities/texts.py:16
 msgid "Directories"
 msgstr "Adresáře"
 
-#: human_activities/texts.py:14
+#: human_activities/texts.py:17
 #, python-brace-format
 msgid "Reached the maximum of {max_len} directories"
 msgstr "Dosaženo maximálního počtu adresářů ({max_len})"
 
-#: human_activities/texts.py:16
+#: human_activities/texts.py:19
 msgid "Human Activities"
 msgstr "Lidské Aktivity"
 
-#: human_activities/texts.py:17 human_activities/gtk/status_icon.py:157
+#: human_activities/texts.py:20 human_activities/gtk/status_icon.py:157
 msgid "Setup"
 msgstr "Nastavení"
 
-#: human_activities/texts.py:18
+#: human_activities/texts.py:21
 msgid "Please choose the directories you want to monitor."
 msgstr "Prosím vyberte adresáře, které si přejete sledovat."
 
-#: human_activities/texts.py:20
+#: human_activities/texts.py:23
 msgid "No directories configured"
 msgstr "Nejsou nastavené žádné adresáře"
 
-#: human_activities/texts.py:22
+#: human_activities/texts.py:25
 #, python-brace-format
 msgid "Counting only files modified in the past {days} days"
 msgstr "Započítává pouze soubory změněné v posledních {days} dnech"
 
-#: human_activities/texts.py:25
+#: human_activities/texts.py:28
 #, python-brace-format
 msgid ""
 "Maximum number of directories exceeded, showing only the first {max_len}"

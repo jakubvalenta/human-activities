@@ -7,7 +7,7 @@ BUTTON_BROWSE = _('Browse')
 
 SETTINGS_TITLE = _('Human Activities - Advanced Configuration')
 SETTINGS_INTERVAL_SEC = _(
-    'Rescan every (seconds), 0 = scan only when application starts'
+    'Scan every (seconds), 0 = scan only on application startup'
 )
 SETTINGS_UNIT = _('Compare')
 SETTINGS_THRESHOLD_DAYS_OLD = _(
