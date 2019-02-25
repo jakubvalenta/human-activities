@@ -10,12 +10,17 @@ from human_activities.config import (
     UNITS,
     Config,
     NamedDirs,
+    find_user_dirs,
+    hide_user_dirs,
+    restore_user_dirs,
 )
 from human_activities.gtk.lib import (
     NamedDirsForm,
     RadioConfig,
     RootPathForm,
     box_add,
+    create_box,
+    create_button,
     create_label,
     create_radio_group,
     create_spin_button,
@@ -86,6 +91,7 @@ class Settings(Gtk.Dialog):
         # Mode radios must be created after the forms, because the radio
         # callback immediately tries to toggle the forms.
         self._create_mode_radios()
+        self._create_user_dirs_form()
 
     def _add_widgets(self):
         widgets = (
@@ -103,6 +109,8 @@ class Settings(Gtk.Dialog):
                 self._root_path_form,
                 self._mode_radios[MODE_NAMED_DIRS],
                 self._named_dirs_form,
+                create_label(texts.SETTINGS_USER_DIRS),
+                self._user_dirs_form,
             ]
         )
         for widget in widgets:
@@ -149,6 +157,39 @@ class Settings(Gtk.Dialog):
 
     def _on_named_dirs_change(self, named_dirs: NamedDirs):
         self._config.named_dirs = named_dirs
+
+    def _create_user_dirs_form(self):
+        self._user_dirs_form = create_box(Gtk.Orientation.HORIZONTAL)
+        self._user_dirs_form.set_spacing(10)
+        self._hide_user_dirs_button = create_button(
+            self._on_hide_user_dirs_clicked, texts.SETTINGS_HIDE_USER_DIRS
+        )
+        box_add(
+            self._user_dirs_form, self._hide_user_dirs_button, expand=False
+        )
+        self._restore_user_dirs_button = create_button(
+            self._on_restore_user_dirs_clicked,
+            texts.SETTINGS_RESTORE_USER_DIRS,
+        )
+        box_add(
+            self._user_dirs_form, self._restore_user_dirs_button, expand=False
+        )
+        self._toggle_user_dirs_buttons()
+
+    def _on_hide_user_dirs_clicked(self):
+        hide_user_dirs(self.user_dirs)
+        self._toggle_user_dirs_buttons()
+
+    def _on_restore_user_dirs_clicked(self):
+        restore_user_dirs(self.user_dirs)
+        self._toggle_user_dirs_buttons()
+
+    def _toggle_user_dirs_buttons(self):
+        self.user_dirs = find_user_dirs()
+        self._hide_user_dirs_button.set_sensitive(self.user_dirs.can_hide)
+        self._restore_user_dirs_button.set_sensitive(
+            self.user_dirs.can_restore
+        )
 
     def _show(self):
         response = self.run()

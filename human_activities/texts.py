@@ -15,6 +15,9 @@ SETTINGS_THRESHOLD_DAYS_OLD = _(
 )
 SETTINGS_MODE = _('Directories')
 SETTINGS_MAX_DIRS_REACHED = _('Reached the maximum of {max_len} directories')
+SETTINGS_USER_DIRS = _('Default directories')
+SETTINGS_HIDE_USER_DIRS = _('Hide')
+SETTINGS_RESTORE_USER_DIRS = _('Restore')
 
 SETUP_TITLE = _('Human Activities')
 SETUP_HEADING = _('Setup')

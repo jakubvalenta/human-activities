@@ -1,9 +1,11 @@
 import json
 import logging
 import os.path
+import shutil
+from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional
 
-from human_activities import CONFIG_PATH
+from human_activities import CONFIG_PATH, get_xdg_config_dir
 from human_activities.icon import COLORS
 from human_activities.locale import _
 from human_activities.utils import filesystem
@@ -228,3 +230,49 @@ def save_config(config: Config):
     logger.info('Writing config %s', config_json)
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     CONFIG_PATH.write_text(config_json)
+
+
+class UserDirs(NamedTuple):
+    path_orig: Path
+    path_backup: Path
+    can_hide: bool
+    can_restore: bool
+
+
+def find_user_dirs() -> UserDirs:
+    xdg_config_dir = get_xdg_config_dir()
+    path_orig = Path(xdg_config_dir) / 'user-dirs.dirs'
+    path_backup = Path(xdg_config_dir) / 'user-dirs.dirs.bak'
+    return UserDirs(
+        path_orig,
+        path_backup,
+        can_hide=not path_backup.exists(),
+        can_restore=path_backup.is_file(),
+    )
+    return path_orig, path_backup
+
+
+def hide_user_dirs(user_dirs: UserDirs) -> bool:
+    if not user_dirs.can_hide:
+        return False
+    shutil.copy(user_dirs.path_orig, user_dirs.path_backup)
+    user_dirs.path_orig.write_text(
+        '''
+XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_TEMPLATES_DIR="$HOME"
+XDG_PUBLICSHARE_DIR="$HOME"
+XDG_DOCUMENTS_DIR="$HOME"
+XDG_MUSIC_DIR="$HOME"
+XDG_PICTURES_DIR="$HOME"
+XDG_VIDEOS_DIR="$HOME"
+'''
+    )
+    return True
+
+
+def restore_user_dirs(user_dirs: UserDirs) -> bool:
+    if not user_dirs.can_restore:
+        return False
+    shutil.move(user_dirs.path_backup, user_dirs.path_orig)
+    return True
