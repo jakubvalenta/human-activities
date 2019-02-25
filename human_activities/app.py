@@ -143,7 +143,7 @@ class Application:
         self._config = config
         save_config(config)
         self._scan_stop()
-        self._scan_start()
+        self._scan_start(0)
 
     def show_setup(self):
         self._ui_app.spawn_frame(
