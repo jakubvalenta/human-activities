@@ -105,6 +105,7 @@ UNITS = {
 
 
 class Config:
+    interval_sec: int = 4 * 60 * 60
     mode: str = MODE_NAMED_DIRS
     root_path: Optional[str] = None
     named_dirs: NamedDirs
@@ -159,6 +160,10 @@ class Config:
             self.named_dirs = DEFAULT_NAMED_DIRS
 
 
+def _load_config_interval_sec(config_json: Any, config: Config):
+    config.interval_sec = int(config_json['interval_sec'])
+
+
 def _load_config_root_path(config_json: Any, config: Config):
     if config_json['root_path']:
         config.root_path = os.path.expanduser(str(config_json['root_path']))
@@ -200,6 +205,7 @@ def load_config() -> Config:
         with CONFIG_PATH.open() as f:
             config_json = json.load(f)
             for fn in [
+                _load_config_interval_sec,
                 _load_config_root_path,
                 _load_config_test,
                 _load_config_mode,

@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 
 class Application:
-    _interval: int
     _config: Config
 
     _ui: Any
@@ -39,8 +38,7 @@ class Application:
     _redraw_queue: Optional[Queue] = None
     _redraw_thread: Optional[Thread] = None
 
-    def __init__(self, interval: int):
-        self._interval = interval
+    def __init__(self):
         self._config = load_config()
         save_config(self._config)
 
@@ -58,9 +56,9 @@ class Application:
             self._config.show_setup = False
             self.show_setup()
         else:
-            self.scan_start()
+            self._scan_start(0)
 
-    def scan_start(self, interval: int = 0):
+    def _scan_start(self, interval: int):
         logger.info(f'Starting scan timer in %ss', interval)
         self._scan_event_stop = Event()
         self._scan_timer = Timer(interval, self._scan)
@@ -92,8 +90,8 @@ class Application:
             ]
             wait(futures)
         logger.info('All scan threads finished')
-        if not self._scan_event_stop.is_set() and self._interval:
-            self.scan_start(self._interval)
+        if not self._scan_event_stop.is_set() and self._config.interval_sec:
+            self._scan_start(self._config.interval_sec)
         else:
             logger.info('No further scanning scheduled')
 
@@ -145,7 +143,7 @@ class Application:
         self._config = config
         save_config(config)
         self._scan_stop()
-        self.scan_start()
+        self._scan_start()
 
     def show_setup(self):
         self._ui_app.spawn_frame(

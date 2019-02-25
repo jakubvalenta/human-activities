@@ -37,23 +37,6 @@ def main():
         '-c', '--clean', action='store_true', help='Clean cache and exit'
     )
     parser.add_argument(
-        '-s',
-        '--scan',
-        action='store_true',
-        help='Scan all directories, write the results to cache, and exit',
-    )
-    parser.add_argument(
-        '-i',
-        '--interval',
-        type=int,
-        default=21600,
-        help=(
-            'Number of seconds between periodic directory scans '
-            '(default 21600 = 6h). If set to 0, periodic scanning will be '
-            'disabled.'
-        ),
-    )
-    parser.add_argument(
         '-w',
         '--wxwidgets',
         action='store_true',
@@ -81,14 +64,7 @@ def main():
     if args.clean:
         clean_cache()
         return
-    if args.scan:
-        interval = 0
-    else:
-        interval = args.interval
-    app = Application(interval)
-    if args.scan:
-        app.scan_start()
-        return
+    app = Application()
     if args.wxwidgets:
         logger.info('Using UI toolkit WxWidgets (reason: cli option)')
         import human_activities.wx as ui
