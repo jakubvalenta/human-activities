@@ -70,7 +70,7 @@ Ubuntu
 
 Tested on Ubuntu 18.04 LTS.
 
-1. Download and open `human-activities_0.9.0-1_all.deb`_.
+1. Download and open `human-activities_0.10.0-1_all.deb`_.
 2. Click the button *Install* in the window that appears.
 
    [screenshot install window]
@@ -81,7 +81,7 @@ Tested on Ubuntu 18.04 LTS.
 Arch Linux
 ^^^^^^^^^^
 
-Download `human-activities-0.9.0-1-any.pkg.tar.xz`_ and install it using
+Download `human-activities-0.10.0-1-any.pkg.tar.xz`_ and install it using
 pacman.
 
 Usage
@@ -265,7 +265,7 @@ Testing and linting
    make test
    make lint
 
-.. _Human Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/Human%20Activities.exe
-.. _Human Activities.app: https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/Human%20Activities.app
-.. _human-activities_0.9.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/human-activities_0.9.0-1_all.deb
-.. _human-activities-0.9.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.9.0/human-activities-0.9.0-1-any.pkg.tar.xz
+.. _Human Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/Human%20Activities.exe
+.. _Human Activities.app: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/Human%20Activities.app
+.. _human-activities_0.10.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/human-activities_0.10.0-1_all.deb
+.. _human-activities-0.10.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.0/human-activities-0.10.0-1-any.pkg.tar.xz
