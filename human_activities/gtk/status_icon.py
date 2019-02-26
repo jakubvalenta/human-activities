@@ -181,17 +181,20 @@ class StatusIcon:
 
     def _on_update(self, directory_views: DirectoryViews):
         self._init_menu(directory_views)
-        if self._last_fractions == directory_views.fractions:
-            return
-        self._last_fractions = directory_views.fractions
         self._set_icon(directory_views.fractions, directory_views.tooltip)
 
     def _set_icon(self, fractions: Tuple[float, ...], tooltip: str):
-        svg = draw_pie_chart_svg(fractions)
         icon_hash = calc_icon_hash(fractions)
-        icon_temp_dir = write_temp_file(
-            svg, filename=icon_hash + '.svg', prefix=__application_id__ + '-'
-        )
+        if self._last_fractions == fractions:
+            icon_temp_dir = self._icon_temp_dir
+        else:
+            svg = draw_pie_chart_svg(fractions)
+            icon_temp_dir = write_temp_file(
+                svg,
+                filename=icon_hash + '.svg',
+                prefix=__application_id__ + '-',
+            )
+            self._last_fractions = fractions
         set_indicator_icon(
             self._indicator,
             icon_theme_path=icon_temp_dir.name,

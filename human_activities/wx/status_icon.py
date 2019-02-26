@@ -56,6 +56,7 @@ class StatusIcon(wx.adv.TaskBarIcon):
     id_setup = new_id_ref_compat()
     _menu: wx.Menu
     _last_fractions: Optional[Tuple[float, ...]] = None
+    _last_icon: Optional[wx.Icon] = None
 
     def __init__(self, app: 'Application'):
         super().__init__(wx.adv.TBI_DOCK)
@@ -145,14 +146,16 @@ class StatusIcon(wx.adv.TaskBarIcon):
 
     def _on_update(self, directory_views: DirectoryViews):
         self._init_menu(directory_views)
-        if self._last_fractions == directory_views.fractions:
-            return
-        self._last_fractions = directory_views.fractions
         self._set_icon(directory_views.fractions, directory_views.tooltip)
 
     def _set_icon(self, fractions: Tuple[float, ...], tooltip: str):
-        image = draw_pie_chart_png(self.icon_size, fractions)
-        icon = image_to_icon(image)
+        if self._last_fractions == fractions and self._last_icon:
+            icon = self._last_icon
+        else:
+            image = draw_pie_chart_png(self.icon_size, fractions)
+            icon = image_to_icon(image)
+            self._last_fractions = fractions
+            self._last_icon = icon
         self.SetIcon(icon, tooltip)
 
     @property

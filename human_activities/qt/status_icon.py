@@ -95,16 +95,15 @@ class StatusIcon(QSystemTrayIcon):
     def _on_update(self, directory_views: DirectoryViews):
         logger.info('Qt StatusIcon on_update')
         self._init_menu(directory_views)
-        if self._last_fractions == directory_views.fractions:
-            return
-        self._last_fractions = directory_views.fractions
         self._set_icon(directory_views.fractions, directory_views.tooltip)
 
     def _set_icon(self, fractions: Tuple[float, ...], tooltip: str):
-        image = draw_pie_chart_png(self.icon_size, fractions)
-        pixmap = image_to_pixmap(image)
-        icon = create_icon(pixmap)
-        self.setIcon(icon)
+        if self._last_fractions != fractions:
+            image = draw_pie_chart_png(self.icon_size, fractions)
+            pixmap = image_to_pixmap(image)
+            icon = create_icon(pixmap)
+            self.setIcon(icon)
+            self._last_fractions = fractions
         self.setToolTip(tooltip)
 
     @property
