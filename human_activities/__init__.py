@@ -7,7 +7,7 @@ __application_id__ = 'cz.jakubvalenta.human-activities'
 __application_name__ = 'human-activities'
 
 __title__ = 'Human Activities'
-__version__ = '0.10.0'
+__version__ = '0.10.1'
 
 __summary__ = 'Monitor size of directories'
 __uri__ = 'https://lab.saloun.cz/jakub/human-activities'
