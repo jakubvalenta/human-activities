@@ -269,5 +269,5 @@ Testing and linting
 
 .. _Human Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.2/Human%20Activities.exe
 .. _Human Activities 0.10.2.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.2/Human%20Activities%200.10.2.zip
-.. _human-activities_0.10.2-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.2/human-activities_0.10.2-1_all.deb
-.. _human-activities-0.10.2-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.2/human-activities-0.10.2-1-any.pkg.tar.xz
+.. _human-activities_0.10.2-2_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.2/human-activities_0.10.2-2_all.deb
+.. _human-activities-0.10.2-2-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.10.2/human-activities-0.10.2-2-any.pkg.tar.xz
