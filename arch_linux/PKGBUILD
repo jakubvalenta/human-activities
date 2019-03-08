@@ -1,6 +1,6 @@
 # Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
 pkgname=human-activities
-pkgver=0.10.1
+pkgver=0.10.2
 pkgrel=1
 epoch=
 pkgdesc='Monitor size of directories'
