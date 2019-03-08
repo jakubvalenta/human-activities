@@ -1,9 +1,10 @@
 import json
 import logging
 import os.path
+import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
 from human_activities import CONFIG_PATH, get_xdg_config_dir
 from human_activities.icon import COLORS
@@ -252,22 +253,27 @@ def find_user_dirs() -> UserDirs:
     return path_orig, path_backup
 
 
+regex_user_dirs = re.compile(
+    r'^(?P<begin>XDG_(TEMPLATES|PUBLICSHARE|DOCUMENTS|MUSIC|PICTURES)_DIR="\$HOME)/?.*(?P<end>")$',  # noqa:E501
+    flags=re.MULTILINE,
+)
+
+
+def change_user_dirs(orig: str) -> str:
+    return regex_user_dirs.sub(r'\g<begin>\g<end>', orig)
+
+
+def _process_file(path: Path, func: Callable[[str], str]):
+    orig_content = path.read_text()
+    new_content = func(orig_content)
+    path.write_text(new_content)
+
+
 def hide_user_dirs(user_dirs: UserDirs) -> bool:
     if not user_dirs.can_hide:
         return False
     shutil.copy(user_dirs.path_orig, user_dirs.path_backup)
-    user_dirs.path_orig.write_text(
-        '''
-XDG_DESKTOP_DIR="$HOME/Desktop"
-XDG_DOWNLOAD_DIR="$HOME/Downloads"
-XDG_TEMPLATES_DIR="$HOME"
-XDG_PUBLICSHARE_DIR="$HOME"
-XDG_DOCUMENTS_DIR="$HOME"
-XDG_MUSIC_DIR="$HOME"
-XDG_PICTURES_DIR="$HOME"
-XDG_VIDEOS_DIR="$HOME"
-'''
-    )
+    _process_file(user_dirs.path_orig, change_user_dirs)
     return True
 
 

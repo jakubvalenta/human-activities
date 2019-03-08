@@ -6,6 +6,7 @@ from human_activities import (
     __application_name__,
     get_cache_dir,
 )
+from human_activities.config import change_user_dirs
 
 WIN_HOME = PureWindowsPath(r'C:\Documents and Settings\foo')
 MAC_HOME = PurePosixPath('/Users/foo')
@@ -54,3 +55,43 @@ class TestConfigLinux(TestCase):
         self.assertEqual(
             get_cache_dir(), XDG_CACHE_HOME / __application_name__
         )
+
+
+class TestConfigUserDirs(TestCase):
+    def test_create_new_dirs(self):
+        orig = '''
+# This file is written by xdg-user-dirs-update
+# If you want to change or add directories, just edit the line you're
+# interested in. All local changes will be retained on the next run.
+# Format is XDG_xxx_DIR="$HOME/yyy", where yyy is a shell-escaped
+# homedir-relative path, or XDG_xxx_DIR="/yyy", where /yyy is an
+# absolute path. No other format is supported.
+#
+XDG_DESKTOP_DIR="$HOME/Plocha"
+XDG_DOWNLOAD_DIR="$HOME/Stažené"
+XDG_TEMPLATES_DIR="$HOME/Šablony"
+XDG_PUBLICSHARE_DIR="$HOME/Veřejné"
+XDG_DOCUMENTS_DIR="$HOME"
+XDG_MUSIC_DIR="$HOME/My Music"
+XDG_PICTURES_DIR="$HOME/"
+XDG_VIDEOS_DIR="/custom/path"
+'''
+        expected = '''
+# This file is written by xdg-user-dirs-update
+# If you want to change or add directories, just edit the line you're
+# interested in. All local changes will be retained on the next run.
+# Format is XDG_xxx_DIR="$HOME/yyy", where yyy is a shell-escaped
+# homedir-relative path, or XDG_xxx_DIR="/yyy", where /yyy is an
+# absolute path. No other format is supported.
+#
+XDG_DESKTOP_DIR="$HOME/Plocha"
+XDG_DOWNLOAD_DIR="$HOME/Stažené"
+XDG_TEMPLATES_DIR="$HOME"
+XDG_PUBLICSHARE_DIR="$HOME"
+XDG_DOCUMENTS_DIR="$HOME"
+XDG_MUSIC_DIR="$HOME"
+XDG_PICTURES_DIR="$HOME"
+XDG_VIDEOS_DIR="/custom/path"
+'''
+        result = change_user_dirs(orig)
+        self.assertEqual(result, expected)
