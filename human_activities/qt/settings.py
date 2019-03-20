@@ -52,7 +52,7 @@ class Settings(QDialog):
         super().__init__()
         self._init_window()
         widgets = [
-            self._create_interval_sec_box(),
+            self._create_interval_hours_box(),
             self._create_unit_box(),
             self._create_threshold_days_ago_box(),
             self._create_mode_box(),
@@ -69,19 +69,19 @@ class Settings(QDialog):
         self._layout = create_layout()
         self.setLayout(self._layout)
 
-    def _create_interval_sec_box(self) -> QWidget:
-        box = create_group_box(texts.SETTINGS_INTERVAL_SEC, self)
-        self._interval_sec_entry = create_spin_box(
+    def _create_interval_hours_box(self) -> QWidget:
+        box = create_group_box(texts.SETTINGS_INTERVAL_HOURS, self)
+        self._interval_hours_entry = create_spin_box(
             self,
-            value=self._config.interval_sec,
-            callback=self._on_interval_sec_changed,
-            max_val=999_999,
+            value=self._config.interval_hours,
+            callback=self._on_interval_hours_changed,
+            max_val=999,
         )
-        add_layout_items(box.layout(), [self._interval_sec_entry])
+        add_layout_items(box.layout(), [self._interval_hours_entry])
         return box
 
-    def _on_interval_sec_changed(self, interval_sec: int):
-        self._config.interval_sec = interval_sec
+    def _on_interval_hours_changed(self, interval_hours: int):
+        self._config.interval_hours = interval_hours
 
     def _create_unit_box(self) -> QWidget:
         box = create_group_box(texts.SETTINGS_UNIT, self)

@@ -6,8 +6,8 @@ BUTTON_REMOVE = _('Remove')
 BUTTON_BROWSE = _('Browse')
 
 SETTINGS_TITLE = _('Human Activities - Advanced Configuration')
-SETTINGS_INTERVAL_SEC = _(
-    'Scan every (seconds), 0 = scan only on application startup'
+SETTINGS_INTERVAL_HOURS = _(
+    'Scan every (hours), 0 = scan only on application startup'
 )
 SETTINGS_UNIT = _('Compare')
 SETTINGS_THRESHOLD_DAYS_OLD = _(
@@ -15,7 +15,7 @@ SETTINGS_THRESHOLD_DAYS_OLD = _(
 )
 SETTINGS_MODE = _('Directories')
 SETTINGS_MAX_DIRS_REACHED = _('Reached the maximum of {max_len} directories')
-SETTINGS_USER_DIRS = _('Default directories')
+SETTINGS_USER_DIRS = _('System directories')
 SETTINGS_HIDE_USER_DIRS = _('Hide')
 SETTINGS_RESTORE_USER_DIRS = _('Restore')
 

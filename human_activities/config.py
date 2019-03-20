@@ -108,7 +108,7 @@ UNITS = {
 
 
 class Config:
-    interval_sec: int = 4 * 60 * 60
+    interval_sec: int = 4 * 3600
     mode: str = MODE_NAMED_DIRS
     root_path: Optional[str] = None
     named_dirs: NamedDirs
@@ -163,6 +163,14 @@ class Config:
         self.mode = MODE_NAMED_DIRS
         if not self.named_dirs:
             self.named_dirs = DEFAULT_NAMED_DIRS
+
+    @property
+    def interval_hours(self) -> int:
+        return self.interval_sec // 3600
+
+    @interval_hours.setter
+    def interval_hours(self, interval_hours: int):
+        self.interval_sec = interval_hours * 3600
 
 
 def _load_config_interval_sec(config_json: Any, config: Config):

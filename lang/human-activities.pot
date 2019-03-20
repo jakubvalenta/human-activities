@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: human-activities 0.10.0\n"
+"Project-Id-Version: human-activities 0.10.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-25 19:46+0100\n"
+"POT-Creation-Date: 2019-03-20 17:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,34 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: human_activities/config.py:95
+msgid "All subdirectories of selected directory"
+msgstr ""
+
+#: human_activities/config.py:96
+msgid "Selected directories"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Paid work"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Unpaid work"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Others"
+msgstr ""
+
+#: human_activities/config.py:105
+msgid "Size in bytes"
+msgstr ""
+
+#: human_activities/config.py:106
+msgid "Number of files"
+msgstr ""
 
 #: human_activities/texts.py:3
 msgid "Choose a directory"
@@ -38,7 +66,7 @@ msgid "Human Activities - Advanced Configuration"
 msgstr ""
 
 #: human_activities/texts.py:10
-msgid "Scan every (seconds), 0 = scan only on application startup"
+msgid "Scan every (hours), 0 = scan only on application startup"
 msgstr ""
 
 #: human_activities/texts.py:12
@@ -58,59 +86,43 @@ msgstr ""
 msgid "Reached the maximum of {max_len} directories"
 msgstr ""
 
+#: human_activities/texts.py:18
+msgid "System directories"
+msgstr ""
+
 #: human_activities/texts.py:19
+msgid "Hide"
+msgstr ""
+
+#: human_activities/texts.py:20
+msgid "Restore"
+msgstr ""
+
+#: human_activities/texts.py:22
 msgid "Human Activities"
 msgstr ""
 
-#: human_activities/texts.py:20 human_activities/gtk/status_icon.py:157
+#: human_activities/texts.py:23 human_activities/gtk/status_icon.py:157
 msgid "Setup"
 msgstr ""
 
-#: human_activities/texts.py:21
+#: human_activities/texts.py:24
 msgid "Please choose the directories you want to monitor."
 msgstr ""
 
-#: human_activities/texts.py:23
+#: human_activities/texts.py:26
 msgid "No directories configured"
-msgstr ""
-
-#: human_activities/texts.py:25
-#, python-brace-format
-msgid "Counting only files modified in the past {days} days"
 msgstr ""
 
 #: human_activities/texts.py:28
 #, python-brace-format
+msgid "Counting only files modified in the past {days} days"
+msgstr ""
+
+#: human_activities/texts.py:31
+#, python-brace-format
 msgid ""
 "Maximum number of directories exceeded, showing only the first {max_len}"
-msgstr ""
-
-#: human_activities/config.py:92
-msgid "All subdirectories of selected directory"
-msgstr ""
-
-#: human_activities/config.py:93
-msgid "Selected directories"
-msgstr ""
-
-#: human_activities/config.py:97
-msgid "Paid work"
-msgstr ""
-
-#: human_activities/config.py:97
-msgid "Unpaid work"
-msgstr ""
-
-#: human_activities/config.py:97
-msgid "Others"
-msgstr ""
-
-#: human_activities/config.py:102
-msgid "Size in bytes"
-msgstr ""
-
-#: human_activities/config.py:103
-msgid "Number of files"
 msgstr ""
 
 #: human_activities/model.py:128
@@ -118,20 +130,20 @@ msgstr ""
 msgid "{value} files"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:102
-#: human_activities/wx/status_icon.py:116 human_activities/qt/status_icon.py:84
+#: human_activities/wx/status_icon.py:103
+#: human_activities/wx/status_icon.py:117 human_activities/qt/status_icon.py:84
 msgid "&Setup"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:123 human_activities/qt/status_icon.py:86
+#: human_activities/wx/status_icon.py:124 human_activities/qt/status_icon.py:86
 msgid "Advanced &configuration"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:130 human_activities/qt/status_icon.py:88
+#: human_activities/wx/status_icon.py:131 human_activities/qt/status_icon.py:88
 msgid "&About"
 msgstr ""
 
-#: human_activities/wx/status_icon.py:137 human_activities/qt/status_icon.py:89
+#: human_activities/wx/status_icon.py:138 human_activities/qt/status_icon.py:89
 msgid "&Quit"
 msgstr ""
 
