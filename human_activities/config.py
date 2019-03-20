@@ -112,7 +112,7 @@ class Config:
     mode: str = MODE_NAMED_DIRS
     root_path: Optional[str] = None
     named_dirs: NamedDirs
-    unit: str = UNIT_SIZE_BYTES
+    unit: str = UNIT_NUM_FILES
     threshold_days_ago: int = 30
     show_setup: bool = True
     test: bool = False
