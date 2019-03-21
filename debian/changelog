@@ -1,3 +1,10 @@
+human-activities (0.11.0-1) unstable; urgency=medium
+
+  * Config: Count number of files by default
+  * Settings: Display and edit scan interval in hours
+
+ -- Jakub Valenta <jakub@jakubvalenta.cz>  Thu, 21 Mar 2019 09:50:31 +0000
+
 human-activities (0.10.2-1) unstable; urgency=medium
 
   * Linux: Fix changing user dirs config when the dirs are translated.
