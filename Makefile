@@ -187,8 +187,8 @@ backup:  ## Backup built packages
 	mkdir -p "bak/${_timestamp}"
 	-cp "${_debian_dist_parent}/"*.deb "bak/${_timestamp}"
 	-cp "${_arch_linux_dist_parent}/"*.pkg.tar.xz "bak/${_timestamp}"
-	-cp -a "${_arch_linux_dist_parent}/"*.app "bak/${_timestamp}"
-	-cp -a "${_arch_linux_dist_parent}/"*.exe "bak/${_timestamp}"
+	-cp -a dist/*.app "bak/${_timestamp}"
+	-cp -a dist/*.exe "bak/${_timestamp}"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
