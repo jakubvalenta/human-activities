@@ -76,7 +76,7 @@ dist-debian-shell:
 dist-mac:
 	-rm -r build/human-activities
 	-rm -r dist/human-activities
-	-rm -r "dist/Human Activities".*
+	-rm -r dist/Human Activities.app
 	sh mac/pyinstaller.sh
 	cd dist && zip -r "Human Activities ${_version}.zip" "Human Activities.app"
 
