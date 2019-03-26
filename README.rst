@@ -31,7 +31,7 @@ Windows
 
 Requires Windows 7 or newer.
 
-1. Download and open `Human Activities.exe`_. The app will start
+1. Download and open `Human.Activities.exe`_. The app will start
    immediatelly, it doesn't need any special installation.
 2. To automatically start Human Activities each time your PC starts, copy *Human
    Activities.exe* into the *Startup* folder of the Start Menu.
@@ -51,9 +51,9 @@ macOS
 
 Tested on macOS Mojave.
 
-1. Download `Human Activities 0.11.0.zip`_ and open it.
+1. Download `Human.Activities.0.11.0.zip`_ and open it.
 
-2. Move the file *Human Activities.app" that appears to *Applications*.
+2. Move the file *Human.Activities.app" that appears to *Applications*.
 
    [screenshot moving to applications]
 
@@ -268,7 +268,7 @@ Testing and linting
    make test
    make lint
 
-.. _Human Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human%20Activities.exe
-.. _Human Activities 0.11.0.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human%20Activities%200.11.0.zip
+.. _Human.Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities.exe
+.. _Human.Activities.0.11.0.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities.0.11.0.zip
 .. _human-activities_0.11.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/human-activities_0.11.0-1_all.deb
 .. _human-activities-0.11.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/human-activities-0.11.0-1-any.pkg.tar.xz
