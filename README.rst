@@ -31,8 +31,9 @@ Windows
 
 Requires Windows 7 or newer.
 
-1. Download and open `Human.Activities.exe`_. The app will start
-   immediatelly, it doesn't need any special installation.
+1. Windows 7 or 8: download and open `Human.Activities-win7.exe`_. Windows 10:
+   download and open `Human.Activities-win10.exe`_. The app will start
+   immediately. No installation process is required.
 2. To automatically start Human Activities each time your PC starts, copy *Human
    Activities.exe* into the *Startup* folder of the Start Menu.
 
@@ -268,7 +269,8 @@ Testing and linting
    make test
    make lint
 
-.. _Human.Activities.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities.exe
+.. _Human.Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities-win7.exe
+.. _Human.Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities-win10.exe
 .. _Human.Activities.0.11.0.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities.0.11.0.zip
 .. _human-activities_0.11.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/human-activities_0.11.0-1_all.deb
 .. _human-activities-0.11.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/human-activities-0.11.0-1-any.pkg.tar.xz
