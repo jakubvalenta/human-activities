@@ -277,6 +277,12 @@ Testing and linting
    make test
    make lint
 
+Contributing
+------------
+
+**Feel free to remix this project** under the terms of the GNU General Public
+License version 3 or later. See `COPYING`_ and `NOTICE`_.
+
 .. _Human Activities: http://humanactivities.cz/
 .. _The Foundation for Contemporary Arts Prague: https://fca.fcca.cz/en/news/
 .. _Human.Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/Human.Activities-win7.exe
@@ -285,3 +291,5 @@ Testing and linting
 .. _human-activities_0.11.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/human-activities_0.11.0-1_all.deb
 .. _human-activities-0.11.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.0/human-activities-0.11.0-1-any.pkg.tar.xz
 .. _GitHub Issues: https://github.com/jakubvalenta/human-activities/issues
+.. _COPYING: ./COPYING
+.. _NOTICE: ./NOTICE
