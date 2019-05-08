@@ -11,7 +11,7 @@ the directories and the exact number of files appears.
 .. image:: ./screenshots/human_activities_macos.png
    :alt: Human Activities running on macOS
 
-.. image:: ./screenshots/human_activities_windows7.png
+.. image:: ./screenshots/human_activities_win7.png
    :alt: Human Activities running on Windows 7
 
 .. image:: ./screenshots/human_activities_ubuntu.png
