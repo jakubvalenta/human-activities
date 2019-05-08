@@ -16,4 +16,5 @@ dist
 install
 linux_pyinstaller
 mac
+screenshots
 win

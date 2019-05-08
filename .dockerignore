@@ -1,4 +1,11 @@
 .*
 __pycache__
+arch_linux
+bak
 build
 dist
+install
+linux_pyinstaller
+mac
+screenshots
+win
