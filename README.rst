@@ -3,10 +3,10 @@ Human Activities
 
 *monitor size of directories*
 
-Human Activities is an application that displays a pie chart icon in the Windows
-Taskbar, macOS Menu Bar or Linux System Tray. The icon shows ratio between the
-number of files in configured directories. When clicked, a menu with a list of
-the directories and the exact number of files appears.
+Human Activities is an application that displays a **pie chart icon** in the
+Windows Taskbar, macOS Menu Bar or Linux System Tray. The icon shows ratio
+between the number of files in configured directories. When clicked, a menu with
+a list of the directories and the exact number of files appears.
 
 .. image:: ./screenshots/human_activities_macos.png
    :alt: Human Activities running on macOS
@@ -17,17 +17,14 @@ the directories and the exact number of files appears.
 .. image:: ./screenshots/human_activities_ubuntu.png
    :alt: Human Activities running on Ubuntu
 
-The application can be configured to compare the size of the data in the
+The application can be **configured** to compare the size of the data in the
 directories instead of the number of files in them. It can also be configured to
 only count files that are newer than specified number of days.
 
-.. image:: ./screenshots/human_activities_macos_configuration.png
-   :alt: Advanced configuration of Human Activities
-
-Human Activities is an offline application. It doesn't send any data over the
+Human Activities is an **offline** application. It doesn't send any data over the
 internet.
 
-The `Human Activities`_ project was partially financed by `The Foundation for
+The `Human Activities`_ project was partially **financed by** `The Foundation for
 Contemporary Arts Prague`_.
 
 Installation
