@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: human-activities 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-20 17:20+0100\n"
+"POT-Creation-Date: 2019-05-09 12:18+0200\n"
 "PO-Revision-Date: 2019-03-20 17:24+0100\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: English\n"
@@ -15,34 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: human_activities/config.py:95
-msgid "All subdirectories of selected directory"
-msgstr ""
-
-#: human_activities/config.py:96
-msgid "Selected directories"
-msgstr ""
-
-#: human_activities/config.py:100
-msgid "Paid work"
-msgstr ""
-
-#: human_activities/config.py:100
-msgid "Unpaid work"
-msgstr ""
-
-#: human_activities/config.py:100
-msgid "Others"
-msgstr ""
-
-#: human_activities/config.py:105
-msgid "Size in bytes"
-msgstr ""
-
-#: human_activities/config.py:106
-msgid "Number of files"
-msgstr ""
 
 #: human_activities/texts.py:3
 msgid "Choose a directory"
@@ -122,6 +94,38 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "Maximum number of directories exceeded, showing only the first {max_len}"
+msgstr ""
+
+#: human_activities/config.py:95
+msgid "All subdirectories of selected directory"
+msgstr ""
+
+#: human_activities/config.py:96
+msgid "Selected directories"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Paid work"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Unpaid work"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Recreation"
+msgstr ""
+
+#: human_activities/config.py:100
+msgid "Other"
+msgstr ""
+
+#: human_activities/config.py:105
+msgid "Size in bytes"
+msgstr ""
+
+#: human_activities/config.py:106
+msgid "Number of files"
 msgstr ""
 
 #: human_activities/model.py:128

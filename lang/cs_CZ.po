@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: human-activities 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-20 17:20+0100\n"
-"PO-Revision-Date: 2019-03-20 17:22+0100\n"
+"POT-Creation-Date: 2019-05-09 12:18+0200\n"
+"PO-Revision-Date: 2019-05-09 12:19+0200\n"
 "Last-Translator:  <jakub@jakubvalenta.cz>\n"
 "Language-Team: Czech\n"
 "Language: cs_CZ\n"
@@ -15,34 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: human_activities/config.py:95
-msgid "All subdirectories of selected directory"
-msgstr "Všechny podadresáře zvoleného adresáře"
-
-#: human_activities/config.py:96
-msgid "Selected directories"
-msgstr "Vybrané adresáře"
-
-#: human_activities/config.py:100
-msgid "Paid work"
-msgstr "Honorovaná práce"
-
-#: human_activities/config.py:100
-msgid "Unpaid work"
-msgstr "Nehonorovaná práce"
-
-#: human_activities/config.py:100
-msgid "Others"
-msgstr "Ostatní"
-
-#: human_activities/config.py:105
-msgid "Size in bytes"
-msgstr "Velikost v bytech"
-
-#: human_activities/config.py:106
-msgid "Number of files"
-msgstr "Počet souborů"
 
 #: human_activities/texts.py:3
 msgid "Choose a directory"
@@ -66,7 +38,9 @@ msgstr "Lidské Aktivity - Pokročilé nastavení"
 
 #: human_activities/texts.py:10
 msgid "Scan every (hours), 0 = scan only on application startup"
-msgstr "Přepočítat adresáře každých (počet hodin), 0 = přepočítat pouze po spuštění aplikace"
+msgstr ""
+"Přepočítat adresáře každých (počet hodin), 0 = přepočítat pouze po spuštění "
+"aplikace"
 
 #: human_activities/texts.py:12
 msgid "Compare"
@@ -125,6 +99,38 @@ msgid ""
 "Maximum number of directories exceeded, showing only the first {max_len}"
 msgstr ""
 "Překročen maximální počet adresářů, zobrazuje se pouze prvních {max_len}"
+
+#: human_activities/config.py:95
+msgid "All subdirectories of selected directory"
+msgstr "Všechny podadresáře zvoleného adresáře"
+
+#: human_activities/config.py:96
+msgid "Selected directories"
+msgstr "Vybrané adresáře"
+
+#: human_activities/config.py:100
+msgid "Paid work"
+msgstr "Honorovaná práce"
+
+#: human_activities/config.py:100
+msgid "Unpaid work"
+msgstr "Nehonorovaná práce"
+
+#: human_activities/config.py:100
+msgid "Recreation"
+msgstr "Volný čas"
+
+#: human_activities/config.py:100
+msgid "Other"
+msgstr "Ostatní"
+
+#: human_activities/config.py:105
+msgid "Size in bytes"
+msgstr "Velikost v bytech"
+
+#: human_activities/config.py:106
+msgid "Number of files"
+msgstr "Počet souborů"
 
 #: human_activities/model.py:128
 #, python-brace-format

@@ -97,7 +97,7 @@ MODES = {
 }
 DEFAULT_NAMED_DIRS = NamedDirs(
     NamedDir(path=os.path.expanduser('~/' + name))
-    for name in (_('Paid work'), _('Unpaid work'), _('Others'))
+    for name in (_('Paid work'), _('Unpaid work'), _('Recreation'), _('Other'))
 )
 UNIT_SIZE_BYTES = 'size_bytes'
 UNIT_NUM_FILES = 'num_files'
