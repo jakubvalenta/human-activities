@@ -73,10 +73,11 @@ dist-debian-shell:
 	docker run -it --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
 		bash
 
-dist-mac:
+dist-mac:  ## Build macOS package
 	-rm -r build/human-activities
 	-rm -r dist/human-activities
-	-rm -r dist/Human Activities.app
+	-rm -r "dist/Human Activities.app"
+	-rm -r dist/Human_Activities*.app
 	sh mac/pyinstaller.sh
 	cd dist && zip -r "Human_Activities-${_version}.zip" "Human Activities.app"
 
