@@ -33,10 +33,10 @@ Installation
 Windows 7 and 8
 ^^^^^^^^^^^^^^^
 
-1. Download and open `Human.Activities-win7.exe`_. The app will start
+1. Download and open `Human_Activities-win7.exe`_. The app will start
    immediately. No installation process is required.
 2. To launch the application automatically each time you start the computer,
-   copy ``Human Activities.exe`` into the *Startup* folder of the Start Menu.
+   copy ``Human_Activities-win7.exe`` into the *Startup* folder of the Start Menu.
 3. To make sure that the application icon is always visible:
 
    a) Click the arrow icon in the Taskbar and select *Customize*.
@@ -46,13 +46,13 @@ Windows 7 and 8
 Windows 10
 ^^^^^^^^^^
 
-1. Download and open `Human.Activities-win10.exe`_. The app will start
+1. Download and open `Human_Activities-win10.exe`_. The app will start
    immediately. No installation process is required.
 2. To launch the application automatically each time you start the computer:
 
    a) Press ``WIN+R``. In the window that pops up, write the command
       ``shell:startup`` and click OK.
-   b) Then move ``Human Activities.exe`` to the window that opens up.
+   b) Then move ``Human_Activities-win7.exe`` to the window that opens up.
 
 3. To make sure that the application icon is always visible:
 
@@ -65,8 +65,8 @@ macOS
 
 Requires macOS Mojave.
 
-1. Download `Human.Activities.0.11.1.zip`_ and open it.
-2. Move the file ``Human.Activities.app`` to *Applications*.
+1. Download `Human_Activities-0.11.1.zip`_ and open it.
+2. Move the file ``Human Activities.app`` to *Applications*.
 3. Human Activities can now be started from *Launcher*.
 4. To launch the application automatically each time you start the computer:
 
@@ -162,19 +162,19 @@ Uninstallation
 Windows 7
 ^^^^^^^^^
 
-Delete ``Human Activities.exe`` from the *Startup* folder of the Start Menu.
+Delete ``Human_Activities-win7.exe`` from the *Startup* folder of the Start Menu.
 
 Windows 10
 ^^^^^^^^^^
 
 1. Press ``WIN+R``. In the window that pops up, write the command
    ``shell:startup`` and click OK.
-2. Then delete ``Human Activities.exe`` from the window that opens up.
+2. Then delete ``Human_Activities-win10.exe`` from the window that opens up.
 
 macOS
 ^^^^^
 
-Delete ``Human.Activities.app`` from the *Applications* folder.
+Delete ``Human Activities.app`` from the *Applications* folder.
 
 Ubuntu
 ^^^^^^
@@ -226,13 +226,21 @@ Arch Linux
 Creating distribution packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Windows
-"""""""
+Windows 7 + 8
+"""""""""""""
 
 ::
 
    pip install pyinstaller
-   win/pyinstaller.cmd
+   win7/pyinstaller.cmd
+
+Windows 10
+""""""""""
+
+::
+
+   pip install pyinstaller
+   win10/pyinstaller.cmd
 
 Mac
 """
@@ -282,9 +290,9 @@ License version 3 or later. See `COPYING`_ and `NOTICE`_.
 
 .. _Human Activities: http://humanactivities.cz/
 .. _The Foundation for Contemporary Arts Prague: https://fca.fcca.cz/en/news/
-.. _Human.Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human.Activities-win7.exe
-.. _Human.Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human.Activities-win10.exe
-.. _Human.Activities.0.11.1.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human.Activities.0.11.1.zip
+.. _Human_Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win7.exe
+.. _Human_Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win10.exe
+.. _Human_Activities-0.11.1.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-0.11.1.zip
 .. _human-activities_0.11.1-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities_0.11.1-1_all.deb
 .. _human-activities-0.11.1-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities-0.11.1-1-any.pkg.tar.xz
 .. _GitHub Issues: https://github.com/jakubvalenta/human-activities/issues
