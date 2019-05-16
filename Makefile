@@ -185,8 +185,8 @@ endif
 
 backup:  ## Backup built packages
 	mkdir -p "bak/${_timestamp}"
-	-cp "${_debian_dist_parent}/"*.deb "bak/${_timestamp}"
-	-cp "${_arch_linux_dist_parent}/"*.pkg.tar.xz "bak/${_timestamp}"
+	-cp -a "${_debian_dist_parent}/"*.deb "bak/${_timestamp}"
+	-cp -a "${_arch_linux_dist_parent}/"*.pkg.tar.xz "bak/${_timestamp}"
 	-cp -a dist/*.app "bak/${_timestamp}"
 	-cp -a dist/*.exe "bak/${_timestamp}"
 
