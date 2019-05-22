@@ -52,7 +52,7 @@ Windows 10
 
    a) Press ``WIN+R``. In the window that pops up, write the command
       ``shell:startup`` and click OK.
-   b) Then move ``Human_Activities-win7.exe`` to the window that opens up.
+   b) Then move ``Human_Activities-win10.exe`` to the window that opens up.
 
 3. To make sure that the application icon is always visible:
 
@@ -159,8 +159,8 @@ The advanced configuration allows you to:
 Uninstallation
 --------------
 
-Windows 7
-^^^^^^^^^
+Windows 7 and 8
+^^^^^^^^^^^^^^^
 
 Delete ``Human_Activities-win7.exe`` from the *Startup* folder of the Start Menu.
 
@@ -226,8 +226,8 @@ Arch Linux
 Creating distribution packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Windows 7 + 8
-"""""""""""""
+Windows 7 and 8
+"""""""""""""""
 
 ::
 
