@@ -104,7 +104,7 @@ window** (this might take a few seconds).
 
 Here you can choose which directories to monitor. You can only **choose existing
 directories**. The app doesn't create any new directories itself. When you
-remove a directory, it will only be remove from the app, your files will stay on
+remove a directory, it will be removed only from the app, your files will stay on
 the disk. Human Activities never creates, modifies or deletes any files.
 
 Icon and menu
@@ -120,7 +120,7 @@ setup. The **colors** are assigned to the directories automatically.
 When you click the icon you can see a **menu** with the exact number of files in
 the directories and the exact percentages.
 
-You can also see a note, that **only files modified in the past 30 days** are
+You can also see a note that **only files modified in the past 30 days** are
 counted to the size of a directory. This behavior can be changed in the
 *Advanced configuration*.
 
