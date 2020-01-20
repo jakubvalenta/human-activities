@@ -77,7 +77,7 @@ Requires macOS Mojave.
 Ubuntu
 ^^^^^^
 
-Tested on Ubuntu 18.04 LTS.
+Tested on Ubuntu 18.04 LTS and 19.10.
 
 1. Download and open `human-activities_0.11.1-1_all.deb`_.
 2. Click the button *Install* in the window that opens up.
