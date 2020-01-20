@@ -120,7 +120,7 @@ clean-cache:  ## Clean cache
 	pipenv run python3 -m ${_pypkgname} --verbose --clean
 
 test:  ## Run unit tests
-	tox -e py37
+	tox -e py38
 
 lint:  ## Run linting
 	tox -e lint
