@@ -87,7 +87,7 @@ Tested on Ubuntu 18.04 LTS.
 Arch Linux
 ^^^^^^^^^^
 
-Download `human-activities-0.11.1-1-any.pkg.tar.xz`_ and install it using
+Download `human-activities-0.11.1-2-any.pkg.tar.xz`_ and install it using
 pacman.
 
 Usage
@@ -262,7 +262,7 @@ Arch Linux
 
 ::
 
-   make dist-arch-linux-build dist-arch-linux
+   make dist-arch-linux
 
 Notice that the package is not built from the currently checked out revision,
 but from a git tag specified as ``v`` + Makefile variable ``_version``.
@@ -294,7 +294,7 @@ License version 3 or later. See `COPYING`_ and `NOTICE`_.
 .. _Human_Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win10.exe
 .. _Human_Activities-0.11.1.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-0.11.1.zip
 .. _human-activities_0.11.1-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities_0.11.1-1_all.deb
-.. _human-activities-0.11.1-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities-0.11.1-1-any.pkg.tar.xz
+.. _human-activities-0.11.1-2-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities-0.11.1-2-any.pkg.tar.xz
 .. _GitHub Issues: https://github.com/jakubvalenta/human-activities/issues
 .. _COPYING: ./COPYING
 .. _NOTICE: ./NOTICE
