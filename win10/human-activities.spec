@@ -38,5 +38,5 @@ exe = EXE(  # noqa: F821
     upx=True,
     runtime_tmpdir=None,
     console=False,
-    icon=os.path.join('data', 'human-activities.ico'),
+    icon=os.path.join('..', 'data', 'human-activities.ico'),
 )
