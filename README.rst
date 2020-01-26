@@ -231,6 +231,7 @@ Windows 7 and 8
 
 ::
 
+   pip install Pillow sqlalchemy wxpython
    pip install pyinstaller
    win7/pyinstaller.cmd
 
@@ -239,6 +240,7 @@ Windows 10
 
 ::
 
+   pip install Pillow sqlalchemy wxpython
    pip install pyinstaller
    win10/pyinstaller.cmd
 
@@ -247,6 +249,7 @@ Mac
 
 ::
 
+   pip3 install Pillow sqlalchemy PyQt5
    pip3 install pyinstaller
    make dist-mac
 
