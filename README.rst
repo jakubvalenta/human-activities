@@ -129,9 +129,9 @@ Before installing the package, you can verify its GPG signature:
 
 ::
 
-   dpkg-sig --verify "human-activities_0.11.1-1_all.deb"'
-   Processing human-activities_0.11.1-1_all.deb...
-   GOODSIG _gpgbuilder E7582303262850695EF0B8A797C3CB6A11E74F7E 1580145523
+   $ dpkg-sig --verify human-activities_0.11.1-2_all.deb
+   Processing human-activities_0.11.1-2_all.deb...
+   GOODSIG _gpgbuilder E7582303262850695EF0B8A797C3CB6A11E74F7E <timestamp>
 
 Arch Linux
 ^^^^^^^^^^
