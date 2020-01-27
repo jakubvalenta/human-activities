@@ -1,11 +1,11 @@
-# Maintainer: Jakub Valenta <jakub@jakubvalenta.cz>
+# Maintainer: Jakub Valenta <jakub at jakubvalenta dot cz>
 pkgname=human-activities
 pkgver=0.11.1
 pkgrel=2
 epoch=
 pkgdesc='Monitor size of directories'
 arch=('any')
-url='https://lab.saloun.cz/jakub/human-activities'
+url='https://github.com/jakubvalenta/human-activities'
 license=('GPL')
 groups=()
 depends=('python-pillow' 'python-sqlalchemy' 'python-wxpython>=4')
@@ -44,4 +44,3 @@ package() {
 }
 
 # vim:set ts=2 sw=2 et:
-md5sums=('53d1e1a1c67c8ad6684a4a28b8390f6f')
