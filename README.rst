@@ -129,9 +129,10 @@ Before installing the package, you can verify its GPG signature:
 
 ::
 
+   $ gpg --recv-key 11E74F7E
    $ dpkg-sig --verify human-activities_0.11.1-2_all.deb
    Processing human-activities_0.11.1-2_all.deb...
-   GOODSIG _gpgbuilder E7582303262850695EF0B8A797C3CB6A11E74F7E <timestamp>
+   GOODSIG _gpgbuilder E7582303262850695EF0B8A797C3CB6A11E74F7E 1580146502
 
 Arch Linux
 ^^^^^^^^^^
@@ -310,6 +311,12 @@ Install Docker and start it. Then run:
 ::
 
    make dist-debian-build dist-debian
+
+Additionally, you can sign the created package with GPG:
+
+::
+
+   make dist-debian-sign key_id='<gpg key fingerprint>'
 
 Arch Linux
 """"""""""
