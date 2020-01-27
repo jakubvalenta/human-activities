@@ -10,3 +10,4 @@ build
 dist
 install/arch_linux
 !install/arch_linux/PKGBUILD
+README.html
