@@ -46,7 +46,7 @@ exe = EXE(  # noqa: F821
 app = BUNDLE(  # noqa: F821
     exe,
     name='Human Activities.app',
-    icon=os.path.join('data', 'human-activities.icns'),
+    icon=os.path.join('..', 'data', 'human-activities.icns'),
     bundle_identifier='cz.jakubvalenta.human-activities',
     info_plist={
         'NSPrincipleClass': 'NSApplication',
