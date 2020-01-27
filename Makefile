@@ -14,7 +14,7 @@ _uid=$(shell id -u)
 _gid=$(shell id -g)
 _timestamp=$(shell date +%s)
 
-.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian dist-mac install-arch-linux install-debian generate-data clean-cache test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
+.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian dist-debian-sign dist-debian-verify dist-mac install-arch-linux install-debian generate-data clean-cache test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
 
 build:  ## Build the app using setuptools
 	python3 setup.py build
@@ -70,7 +70,8 @@ dist-debian-build:
 	docker build -f debian/Dockerfile -t human_activities_debian .
 
 dist-debian-shell:
-	docker run -it --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
+	docker run --rm -it -u "${_uid}:${_gid}" -v "$$(pwd):/app" \
+		human_activities_debian \
 		bash
 
 dist-mac:  ## Build macOS package
@@ -91,12 +92,38 @@ ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_
 	cd "${_debian_dist_parent}" && tar xvf "${_debian_src_filename}"
 
 ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
-	docker run --rm --volume="$$(pwd)/${_debian_dist_parent}:/app" human_activities_debian \
-		sh -c 'cd "${_debian_src_dirname}" && debuild -us -uc; chown -R ${_uid}:${_gid} /app'
+	docker run --rm \
+		-u "${_uid}:${_gid}" \
+		-v "$$(pwd):/app" \
+		-w "/app/${_debian_dist_parent}/${_debian_src_dirname}" \
+		human_activities_debian \
+		debuild -us -uc
 
 dist-debian:  ## Build a Debian package
 	-rm -r dist/debian
 	$(MAKE) ${_debian_dist_parent}/${_debian_pkg_filename}
+
+dist-debian-sign: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian-build  ## Sign the Debian package
+ifeq ($(key_id),)
+	@echo "You must define the variable 'key_id'"
+	exit 1
+endif
+	 # See https://nixaid.com/using-gpg-inside-a-docker-container/
+	docker run --rm -it -u "${_uid}:${_gid}" -v "$$(pwd):/app" \
+		-v "${HOME}/.gnupg/:/.gnupg/:ro" \
+		--tmpfs "/run/user/${_uid}/:mode=0700,uid=${_uid},gid=${_gid}" \
+		-w "/app/${_debian_dist_parent}" \
+		human_activities_debian \
+		sh -c 'gpg-agent --daemon && dpkg-sig -k "${key_id}" --sign builder "${_debian_pkg_filename}"'
+
+dist-debian-verify: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian-build  ## Verify the signature of the Debian package
+	 # See https://nixaid.com/using-gpg-inside-a-docker-container/
+	docker run --rm -it -u "${_uid}:${_gid}" -v "$$(pwd):/app:ro" \
+		-v "${HOME}/.gnupg/:/.gnupg/:ro" \
+		--tmpfs "/run/user/${_uid}/:mode=0700,uid=${_uid},gid=${_gid}" \
+		-w "/app/${_debian_dist_parent}" \
+		human_activities_debian \
+		sh -c 'gpg-agent --daemon && dpkg-sig --verify "${_debian_pkg_filename}"'
 
 install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install built Debian package
 	sudo dpkg -i "${_debian_dist_parent}/${_debian_pkg_filename}"
@@ -168,9 +195,10 @@ endif
 	sed -i s/${_version}/${version}/g ${_pypkgname}/__init__.py
 	sed -i s/${_version}/${version}/g arch_linux/PKGBUILD
 	docker info &> /dev/null || sudo systemctl start docker
-	docker run -it --volume="$$(pwd):/app" \
+	docker run --rm -it -u "${_uid}:${_gid}" -v "$$(pwd):/app" \
 		-e NAME="Jakub Valenta" -e EMAIL="jakub@jakubvalenta.cz" \
-		human_activities_debian dch -v "${version}-${_pkgrel}" "New version"
+		human_activities_debian \
+		dch -v "${version}-${_pkgrel}" "New version"
 	@echo "Editing changelog..."
 	"${EDITOR}" debian/changelog
 	@echo "Committing changes..."

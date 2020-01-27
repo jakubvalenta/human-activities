@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install --yes \
         build-essential \
         debhelper \
         devscripts \
+        dpkg-sig \
         python3
 
 ADD ./debian/control /app/debian/control

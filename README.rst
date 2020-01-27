@@ -51,6 +51,16 @@ Windows 7 and 8
    b) In the window that opens up, choose *Show icon and notifications* next to
       the item *Human Activities*.
 
+Security
+""""""""
+
+Before opening `Human_Activities-win7.exe`_, you can check the sha256 checksum
+of this file:
+
+::
+
+   163cd2a044c4e0565e1a99902163277fc31f6dd8ebaa950c0a5d978a9d00c60b  Human_Activities-win7.exe
+
 Windows 10
 ^^^^^^^^^^
 
@@ -68,10 +78,20 @@ Windows 10
    b) In the window that opens up, click on *Select which icons appear on the
       Taskbar* and then switch item *Human Acitivities* on.
 
+Security
+""""""""
+
+Before opening `Human_Activities-win10.exe`_, you can check the sha256 checksum
+of this file:
+
+::
+
+   b9d6bb85d38f3faaa1ca88873463292680275663a6fb2fde40d1532c9b3e8a06  Human_Activities-win10.exe
+
 macOS
 ^^^^^
 
-Requires macOS Mojave.
+Requires macOS Mojave or newer. Tested on macOS Mojave.
 
 1. Download `Human_Activities-0.11.1.zip`_ and open it.
 2. Move the file ``Human Activities.app`` to *Applications*.
@@ -82,6 +102,16 @@ Requires macOS Mojave.
    b) Click on the tab *Login Items*,
    c) Click on the little plus sign icon and select the app *Human Activities*.
 
+Security
+""""""""
+
+Before opening `Human_Activities-0.11.1.zip`_, you can check the sha256 checksum
+of this file:
+
+::
+
+   864fbb0b7dc7e1f131470587bd1b733b21a924ad1cfcf71a5dd687c3ff8d2958  Human_Activities-0.11.1.zip
+
 Ubuntu
 ^^^^^^
 
@@ -91,6 +121,17 @@ Tested on Ubuntu 18.04 LTS and 19.10.
 2. Click the button *Install* in the window that opens up.
 3. Human Acitivies can now be started from the main *Applications* menu. It will
    also start automatically each time you start the computer.
+
+Security
+""""""""
+
+Before installing the package, you can verify its GPG signature:
+
+::
+
+   dpkg-sig --verify "human-activities_0.11.1-1_all.deb"'
+   Processing human-activities_0.11.1-1_all.deb...
+   GOODSIG _gpgbuilder E7582303262850695EF0B8A797C3CB6A11E74F7E 1580145523
 
 Arch Linux
 ^^^^^^^^^^
@@ -263,6 +304,8 @@ Mac
 
 Debian
 """"""
+
+Install Docker and start it. Then run:
 
 ::
 
