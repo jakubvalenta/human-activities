@@ -117,7 +117,7 @@ Ubuntu
 
 Tested on Ubuntu 18.04 LTS and 19.10.
 
-1. Download and open `human-activities_0.11.1-1_all.deb`_.
+1. Download and open `human-activities_0.11.1-2_all.deb`_.
 2. Click the button *Install* in the window that opens up.
 3. Human Acitivies can now be started from the main *Applications* menu. It will
    also start automatically each time you start the computer.
@@ -137,8 +137,8 @@ Before installing the package, you can verify its GPG signature:
 Arch Linux
 ^^^^^^^^^^
 
-Download `human-activities-0.11.1-2-any.pkg.tar.xz`_ and install it using
-pacman.
+Build the package from provided `PKGBUILD`_ or download
+`human-activities-0.11.1-2-any.pkg.tar.xz`_ and install it with pacman.
 
 Usage
 -----
@@ -354,8 +354,9 @@ License version 3 or later. See `COPYING`_ and `NOTICE`_.
 .. _Human_Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win7.exe
 .. _Human_Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win10.exe
 .. _Human_Activities-0.11.1.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-0.11.1.zip
-.. _human-activities_0.11.1-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities_0.11.1-1_all.deb
+.. _human-activities_0.11.1-2_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities_0.11.1-2_all.deb
 .. _human-activities-0.11.1-2-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities-0.11.1-2-any.pkg.tar.xz
 .. _GitHub Issues: https://github.com/jakubvalenta/human-activities/issues
 .. _COPYING: ./COPYING
 .. _NOTICE: ./NOTICE
+.. _PKGBUILD: ./arch_linux/PKGBUILD
