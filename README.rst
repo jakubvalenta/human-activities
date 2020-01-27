@@ -24,7 +24,15 @@ only count files that are newer than specified number of days.
 Human Activities is an **offline** application. It doesn't send any data over the
 internet.
 
-The `Human Activities`_ project was partially **financed by** `The Foundation for
+The Human Activities project
+----------------------------
+
+This application is part of the `Human Activities`_ project which focuses on
+limiting the exploitation of individuals as part of contemporary production
+relationships. Read more about the project on its `website <Human
+Activities_>`_.
+
+The Human Activities project was partially **financed by** `The Foundation for
 Contemporary Arts Prague`_.
 
 Installation
