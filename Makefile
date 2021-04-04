@@ -14,11 +14,11 @@ _uid=$(shell id -u)
 _gid=$(shell id -g)
 _timestamp=$(shell date +%s)
 
-.PHONY: build install setup setup-dev run run-debug run-wx run-qt dist-arch-linux dist-debian-build dist-debian-shell dist-debian dist-debian-sign dist-debian-verify dist-mac install-arch-linux install-debian generate-data clean-cache test lint lint-arch-linux lint-data reformat check clean-lang gen-lang bump-version backup help
-
+.PHONY: build
 build:  ## Build the app using setuptools
 	python3 setup.py build
 
+.PHONY: install
 install:  ## Install built files to the filesystem
 ifeq (,$(DESTDIR))
 	@echo "You must set the variable 'DESTDIR'."
@@ -26,22 +26,24 @@ ifeq (,$(DESTDIR))
 endif
 	python3 setup.py install --root="${DESTDIR}/" --optimize=1 --skip-build
 
+.PHONY: setup
 setup:  ## Create Pipenv virtual environment and install dependencies.
 	pipenv --three --site-packages
 	pipenv install --dev
 
-setup-dev:  ## Install development dependencies
-	pipenv install --dev
-
+.PHONY: run
 run:  ## Start the app
 	pipenv run python3 -m ${_pypkgname}
 
+.PHONY: run-debug
 run-debug:  ## Start the app with extended logging
 	pipenv run python3 -m ${_pypkgname} --verbose
 
+.PHONY: run-wx
 run-wx:  ## Start the app with the WxWidgets backend and extended logging
 	pipenv run python3 -m ${_pypkgname} --verbose --backend=wx
 
+.PHONY: run-qt
 run-qt:  ## Start the app with the Qt backend and extended logging
 	pipenv run python3 -m ${_pypkgname} --verbose --backend=qt
 
@@ -59,21 +61,26 @@ ${_arch_linux_dist_parent}/PKGBUILD: ${_arch_linux_dist_parent}/${_arch_linux_sr
 ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}: ${_arch_linux_dist_parent}/PKGBUILD
 	cd "${_arch_linux_dist_parent}" && makepkg -sf
 
+.PHONY: dist-arch-linux
 dist-arch-linux:  ## Build an Arch Linux package
 	-rm -r dist/arch_linux
 	$(MAKE) ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}
 
+.PHONY: install-arch-linux
 install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux package
 	sudo pacman -U "${_arch_linux_pkg_path}"
 
+.PHONY: dist-debian-build
 dist-debian-build:
 	docker build -f debian/Dockerfile -t human_activities_debian .
 
+.PHONY: dist-debian-shell
 dist-debian-shell:
 	docker run --rm -it -u "${_uid}:${_gid}" -v "$$(pwd):/app" \
 		human_activities_debian \
 		bash
 
+.PHONY: dist-mac
 dist-mac:  ## Build macOS package
 	-rm -r build/human-activities
 	-rm -r dist/human-activities
@@ -99,10 +106,12 @@ ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian
 		human_activities_debian \
 		debuild -us -uc
 
+.PHONY: dist-debian
 dist-debian:  ## Build a Debian package
 	-rm -r dist/debian
 	$(MAKE) ${_debian_dist_parent}/${_debian_pkg_filename}
 
+.PHONY: dist-debian-sign
 dist-debian-sign: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian-build  ## Sign the Debian package
 ifeq ($(key_id),)
 	@echo "You must define the variable 'key_id'"
@@ -116,6 +125,7 @@ endif
 		human_activities_debian \
 		sh -c 'gpg-agent --daemon && dpkg-sig -k "${key_id}" --sign builder "${_debian_pkg_filename}"'
 
+.PHONY: dist-debian-verify
 dist-debian-verify: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian-build  ## Verify the signature of the Debian package
 	 # See https://nixaid.com/using-gpg-inside-a-docker-container/
 	docker run --rm -it -u "${_uid}:${_gid}" -v "$$(pwd):/app:ro" \
@@ -125,6 +135,7 @@ dist-debian-verify: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian
 		human_activities_debian \
 		sh -c 'gpg-agent --daemon && dpkg-sig --verify "${_debian_pkg_filename}"'
 
+.PHONY: install-debian
 install-debian: ${_debian_dist_parent}/${_debian_pkg_filename}   ## Install built Debian package
 	sudo dpkg -i "${_debian_dist_parent}/${_debian_pkg_filename}"
 	sudo apt-get install -f --yes
@@ -141,26 +152,34 @@ data/${_name}.ico: data/${_name}.png
 data/${_name}.icns: data/${_name}.svg
 	sh data/bin/create_icns.sh
 
+.PHONY: generate-data
 generate-data: data/${_name}.png
 
+.PHONY: clean-cache
 clean-cache:  ## Clean cache
 	pipenv run python3 -m ${_pypkgname} --verbose --clean
 
+.PHONY: test
 test:  ## Run unit tests
 	tox -e py39
 
+.PHONY: lint
 lint:  ## Run linting
 	tox -e lint
 
+.PHONY: lint-arch-linux
 lint-arch-linux:
 	namcap install/arch_linux/PKGBUILD
 
+.PHONY: lint-data
 lint-data:
 	desktop-file-validate "data/${_name}.desktop"
 
+.PHONY: reformat
 reformat:  ## Reformat Python code using Black
 	black -l 79 --skip-string-normalization ${_pypkgname}
 
+.PHONY: check
 check:  ## Test installed app
 	python3 -m pytest ${_pypkgname}/tests
 
@@ -179,12 +198,15 @@ ${_pypkgname}/locale/%/LC_MESSAGES/${_name}.mo: lang/%.po
 	mkdir -p "$$(dirname "$@")"
 	msgfmt $< -o $@
 
+.PHONY: clean-lang
 clean-lang:  ## Clean gettext .pot and .mo files
 	-rm lang/${_name}.pot
 	-rm ${_pypkgname}/locale/*/LC_MESSAGES/${_name}.mo
 
+.PHONY: gen-lang
 gen-lang: | ${_pypkgname}/locale/en_US/LC_MESSAGES/${_name}.mo ${_pypkgname}/locale/cs_CZ/LC_MESSAGES/${_name}.mo  ## Generate gettext .pot and .mo files
 
+.PHONY: bump-version
 bump-version:  ## Increase application version (automatically change code)
 ifeq (,$(version))
 	@echo "You must set the variable 'version'."
@@ -212,6 +234,7 @@ endif
 	git tag "v${version}"
 	@echo "Done"
 
+.PHONY: backup
 backup:  ## Backup built packages
 	mkdir -p "bak/${_timestamp}"
 	-cp -a "${_debian_dist_parent}/"*.deb "bak/${_timestamp}"
@@ -219,5 +242,6 @@ backup:  ## Backup built packages
 	-cp -a dist/*.app "bak/${_timestamp}"
 	-cp -a dist/*.exe "bak/${_timestamp}"
 
+.PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}'
