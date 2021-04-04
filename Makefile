@@ -67,8 +67,8 @@ dist-arch-linux:  ## Build an Arch Linux package
 	$(MAKE) ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}
 
 .PHONY: install-arch-linux
-install-arch-linux: ${_arch_linux_pkg_path}   ## Install built Arch Linux package
-	sudo pacman -U "${_arch_linux_pkg_path}"
+install-arch-linux: ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}  ## Install built Arch Linux package
+	sudo pacman -U "$<"
 
 .PHONY: dist-debian-build
 dist-debian-build:
@@ -108,7 +108,6 @@ ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian
 
 .PHONY: dist-debian
 dist-debian:  ## Build a Debian package
-	-rm -r dist/debian
 	$(MAKE) ${_debian_dist_parent}/${_debian_pkg_filename}
 
 .PHONY: dist-debian-sign
