@@ -41,10 +41,6 @@ setup(
             [f'data/{__application_name__}.svg'],
         ),
         ('share/pixmaps', [f'data/{__application_name__}.png']),
-        (
-            f'etc/xdg/{__application_name__}',
-            [f'human_activities/etc/{__application_name__}.fdignore'],
-        ),
     ]
     + [
         (

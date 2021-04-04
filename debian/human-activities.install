@@ -1,1 +1,2 @@
 data/human-activities.desktop /etc/xdg/autostart
+human_activities/etc/human-activities.fdignore /etc/xdg/human-activities

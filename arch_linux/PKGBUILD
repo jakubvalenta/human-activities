@@ -20,7 +20,7 @@ options=()
 install=
 changelog=
 source=($pkgname-$pkgver.tar.xz)
-md5sums=('53d1e1a1c67c8ad6684a4a28b8390f6f')
+md5sums=('295e0a3a390deb29b28128c4d636b263')
 noextract=()
 
 build() {
@@ -41,6 +41,8 @@ package() {
   DESTDIR="$pkgdir" make install
 
   install -D -m644 -t "$pkgdir/etc/xdg/autostart/" data/*.desktop
+  install -D -m644 -t "$pkgdir/etc/xdg/human-activities/" human_activities/etc/*.fdignore
 }
 
 # vim:set ts=2 sw=2 et:
+md5sums=('295e0a3a390deb29b28128c4d636b263')
