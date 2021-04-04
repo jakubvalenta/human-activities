@@ -13,7 +13,7 @@ from sqlalchemy.orm.session import Session
 
 from human_activities import CACHE_PATH
 from human_activities.config import UNIT_SIZE_BYTES, ConfiguredDirs
-from human_activities.locale import _
+from human_activities.l10n import _
 from human_activities.utils import filesystem, func
 from human_activities.utils.math import safe_div
 

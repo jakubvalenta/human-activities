@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
 from human_activities import CONFIG_PATH, get_xdg_config_dir
 from human_activities.icon import COLORS
-from human_activities.locale import _
+from human_activities.l10n import _
 from human_activities.utils import filesystem
 
 logger = logging.getLogger(__name__)

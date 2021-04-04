@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QMenu, QStyle, QSystemTrayIcon
 
 from human_activities import __title__, is_mac, is_win, texts
 from human_activities.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
-from human_activities.locale import _
+from human_activities.l10n import _
 from human_activities.model import DirectoryViews
 from human_activities.qt.lib import create_icon, get_icon_size, image_to_pixmap
 

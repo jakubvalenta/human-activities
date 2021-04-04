@@ -19,7 +19,7 @@ from human_activities.icon import (
     draw_pie_chart_png,
     draw_pie_chart_svg,
 )
-from human_activities.locale import _
+from human_activities.l10n import _
 from human_activities.model import DirectoryViews
 
 gi.require_version('AppIndicator3', '0.1')

@@ -1,4 +1,4 @@
-from human_activities.locale import _
+from human_activities.l10n import _
 
 FILE_CHOOSER_BUTTON = _('Choose a directory')
 BUTTON_ADD = _('Add more')

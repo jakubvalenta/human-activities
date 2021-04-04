@@ -7,7 +7,7 @@ from PIL import Image
 
 from human_activities import __title__, texts
 from human_activities.icon import DEFAULT_FRACTIONS, draw_pie_chart_png
-from human_activities.locale import _
+from human_activities.l10n import _
 from human_activities.model import DirectoryViews
 from human_activities.wx.lib import (
     image_to_bitmap,
