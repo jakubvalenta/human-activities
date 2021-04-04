@@ -7,9 +7,8 @@ from human_activities import (
     __application_id__,
     __application_name__,
     get_cache_dir,
-    get_fdignore_path,
 )
-from human_activities.config import change_user_dirs
+from human_activities.config import change_user_dirs, get_fdignore_path
 
 WIN_HOME = PureWindowsPath(r'C:\Documents and Settings\foo')
 MAC_HOME = PurePosixPath('/Users/foo')
@@ -124,7 +123,7 @@ class TestConfigFdignore(TestCase):
         user_fdignore_path.write_text('foo')
         self.assertEqual(
             get_fdignore_path(self.config_dir, self.config_global_dir),
-            user_fdignore_path,
+            str(user_fdignore_path),
         )
 
     def test_global_fdignore_on_windows_or_mac(self):
@@ -137,7 +136,7 @@ class TestConfigFdignore(TestCase):
         global_fdignore_path.write_text('foo')
         self.assertEqual(
             get_fdignore_path(self.config_dir, self.config_global_dir),
-            global_fdignore_path,
+            str(global_fdignore_path),
         )
 
     def test_global_fdignore_on_linux_in_bundle(self):

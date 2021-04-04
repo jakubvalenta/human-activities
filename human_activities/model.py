@@ -14,7 +14,12 @@ from sqlalchemy.orm.session import Session
 from human_activities import CACHE_PATH
 from human_activities.config import UNIT_SIZE_BYTES, ConfiguredDirs
 from human_activities.l10n import _
-from human_activities.utils import filesystem, func
+from human_activities.utils import func
+from human_activities.utils.filesystem import (
+    calc_entries_size,
+    find_files,
+    humansize,
+)
 from human_activities.utils.math import safe_div
 
 logger = logging.getLogger(__name__)
@@ -124,7 +129,7 @@ class DirectoryView(NamedTuple):
     @property
     def value_str(self) -> str:
         if self.unit == UNIT_SIZE_BYTES:
-            return filesystem.humansize(self.value or 0)
+            return humansize(self.value or 0)
         return _('{value} files').format(value=self.value)
 
 
@@ -181,6 +186,7 @@ def scan_directory(
     unit: str,
     threshold_days_ago: int,
     event_stop: Event,
+    fdignore_path: Optional[str],
     callback: Callable[[Directory], None],
     test: bool = False,
 ):
@@ -192,11 +198,8 @@ def scan_directory(
         )
         threshold_seconds_ago = threshold_days_ago * 24 * 3600
         threshold_seconds = time.time() - threshold_seconds_ago
-        dir_size = filesystem.calc_dir_size(
-            directory.path,
-            threshold_seconds=threshold_seconds,
-            event_stop=event_stop,
-        )
+        entries = find_files(path, fdignore_path)
+        dir_size = calc_entries_size(entries, threshold_seconds, event_stop)
         directory.stats.clear()
         directory.stats.append(
             Stat(

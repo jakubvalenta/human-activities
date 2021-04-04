@@ -73,24 +73,9 @@ def get_config_global_dir() -> Optional[Path]:
     return Path('/etc/xdg') / __application_name__
 
 
-def get_fdignore_path(
-    config_dir: Path, config_global_dir: Optional[Path]
-) -> Optional[Path]:
-    filename = f'{__application_name__}.fdignore'
-    user_fdignore_path = config_dir / filename
-    if user_fdignore_path.is_file():
-        return user_fdignore_path
-    if config_global_dir:
-        global_fdignore_path = config_global_dir / filename
-        if global_fdignore_path.is_file():
-            return global_fdignore_path
-    return None
+CACHE_DIR = Path(get_cache_dir())
+CONFIG_DIR = Path(get_config_dir())
+CONFIG_GLOBAL_DIR = get_config_global_dir()
 
-
-_CACHE_DIR = Path(get_cache_dir())
-_CONFIG_DIR = Path(get_config_dir())
-_CONFIG_GLOBAL_DIR = get_config_global_dir()
-
-CACHE_PATH = _CACHE_DIR / 'cache.db'
-CONFIG_PATH = _CONFIG_DIR / 'config.json'
-FDIGNORE_PATH = get_fdignore_path(_CONFIG_DIR, _CONFIG_GLOBAL_DIR)
+CACHE_PATH = CACHE_DIR / 'cache.db'
+CONFIG_PATH = CONFIG_DIR / 'config.json'

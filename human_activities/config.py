@@ -6,7 +6,13 @@ import shutil
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
-from human_activities import CONFIG_PATH, get_xdg_config_dir
+from human_activities import (
+    CONFIG_DIR,
+    CONFIG_GLOBAL_DIR,
+    CONFIG_PATH,
+    __application_name__,
+    get_xdg_config_dir,
+)
 from human_activities.icon import COLORS
 from human_activities.l10n import _
 from human_activities.utils import filesystem
@@ -107,6 +113,20 @@ UNITS = {
 }
 
 
+def get_fdignore_path(
+    config_dir: Path, config_global_dir: Optional[Path]
+) -> Optional[str]:
+    filename = f'{__application_name__}.fdignore'
+    user_fdignore_path = config_dir / filename
+    if user_fdignore_path.is_file():
+        return str(user_fdignore_path)
+    if config_global_dir:
+        global_fdignore_path = config_global_dir / filename
+        if global_fdignore_path.is_file():
+            return str(global_fdignore_path)
+    return None
+
+
 class Config:
     interval_sec: int = 4 * 3600
     mode: str = MODE_NAMED_DIRS
@@ -116,6 +136,9 @@ class Config:
     threshold_days_ago: int = 30
     show_setup: bool = True
     test: bool = False
+    fdignore_path: Optional[str] = get_fdignore_path(
+        CONFIG_DIR, CONFIG_GLOBAL_DIR
+    )
 
     def __init__(self):
         self.named_dirs = NamedDirs()

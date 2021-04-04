@@ -1,10 +1,13 @@
 import logging
 import os
 import os.path
+import pkgutil
 import stat
 import subprocess
 from threading import Event
-from typing import Dict, Iterator, List, NamedTuple, Optional, Union
+from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Union
+
+from pathspec import PathSpec
 
 logger = logging.getLogger(__name__)
 
@@ -85,26 +88,37 @@ def humansize(nbytes: float) -> str:
     return f'{f} {suffixes[i]}'
 
 
-def scan_dir(path: str) -> Iterator[TDirEntry]:
+def parse_fdignore(b: bytes) -> Iterator[str]:
+    for line in b.decode().splitlines():
+        s = line.rstrip()
+        if s and not s.startswith('#'):
+            yield s
+
+
+def find_files_fd(
+    path: str, fdignore_path: Optional[str] = None
+) -> Iterator[FdDirEntry]:
+    cmd = ['fd', '-t', 'f']
+    if fdignore_path is not None:
+        cmd += ['--ignore-file', fdignore_path]
+    else:
+        fdignore_bytes = pkgutil.get_data(
+            'human_activities.etc', 'human-activities.fdignore'
+        )
+        if fdignore_bytes:
+            ignore_rules = parse_fdignore(fdignore_bytes)
+            for ignore_rule in ignore_rules:
+                cmd += ['-E', ignore_rule]
+    cmd += ['.', path]
     try:
         completed_process = subprocess.run(
-            ['fd', '-t', 'f', '.', path],
+            cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=True,
             universal_newlines=True,
             # Don't use arg 'text' for Python 3.6 compat.
         )
-    except FileNotFoundError:
-        logger.info('fd is not available')
-        try:
-            return os.scandir(path)
-        except FileNotFoundError:
-            logger.info('Directory not found "%s"', path)
-            return
-        except PermissionError:
-            logger.info('No permissions to read directory "%s"', path)
-            return
     except subprocess.CalledProcessError as err:
         logger.info(
             'fd returned error %d, stderr: "%s"',
@@ -116,10 +130,47 @@ def scan_dir(path: str) -> Iterator[TDirEntry]:
         yield FdDirEntry(path, is_file=True)
 
 
-def calc_dir_size(
-    path: str, threshold_seconds: float, event_stop: Event
+def find_files_python(
+    path: str, pathspec: Optional[PathSpec] = None
+) -> Iterator[os.DirEntry]:
+    try:
+        entries = os.scandir(path)
+    except FileNotFoundError:
+        logger.info('Directory not found "%s"', path)
+        return
+    except PermissionError:
+        logger.info('No permissions to read directory "%s"', path)
+        return
+    if pathspec is None:
+        fdignore_bytes = pkgutil.get_data(
+            'human_activities.etc', 'human-activities.fdignore'
+        )
+        if fdignore_bytes:
+            pathspec = PathSpec.from_lines(
+                'gitwildmatch', fdignore_bytes.decode().splitlines()
+            )
+    for entry in entries:
+        if entry.is_symlink():
+            continue
+        if is_hidden(entry) or pathspec.match_file(entry.path):
+            continue
+        if entry.is_file():
+            yield entry
+        elif entry.is_dir():
+            yield from find_files_python(entry.path, pathspec=pathspec)
+
+
+def find_files(path: str, fdignore_path: Optional[str]) -> Iterator[TDirEntry]:
+    try:
+        yield from find_files_fd(path, fdignore_path)
+    except FileNotFoundError:
+        logger.info('fd is not available')
+        yield from find_files_python(path)
+
+
+def calc_entries_size(
+    entries: Iterable[TDirEntry], threshold_seconds: float, event_stop: Event
 ) -> DirSize:
-    entries = scan_dir(path)
     size_bytes_all = 0
     size_bytes_new = 0
     num_files_all = 0
@@ -127,27 +178,13 @@ def calc_dir_size(
     for entry in entries:
         if event_stop.is_set():
             logger.warning('Stopping calculation')
-            return DirSize()
-        if not entry.is_symlink():
-            if entry.is_file():
-                stat_result = entry.stat()
-                size_bytes_all += stat_result.st_size
-                num_files_all += 1
-                if stat_result.st_mtime > threshold_seconds:
-                    size_bytes_new += stat_result.st_size
-                    num_files_new += 1
-            elif entry.is_dir() and not is_hidden(entry):
-                sub_dir_size = calc_dir_size(
-                    entry.path, threshold_seconds, event_stop
-                )
-                if sub_dir_size.size_bytes_all:
-                    size_bytes_all += sub_dir_size.size_bytes_all
-                if sub_dir_size.size_bytes_new:
-                    size_bytes_new += sub_dir_size.size_bytes_new
-                if sub_dir_size.num_files_all:
-                    num_files_all += sub_dir_size.num_files_all
-                if sub_dir_size.num_files_new:
-                    num_files_new += sub_dir_size.num_files_new
+            break
+        stat_result = entry.stat()
+        size_bytes_all += stat_result.st_size
+        num_files_all += 1
+        if stat_result.st_mtime > threshold_seconds:
+            size_bytes_new += stat_result.st_size
+            num_files_new += 1
     return DirSize(
         size_bytes_all=size_bytes_all,
         size_bytes_new=size_bytes_new,
