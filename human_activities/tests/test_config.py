@@ -1,10 +1,13 @@
-from pathlib import PurePosixPath, PureWindowsPath
+import shutil
+import tempfile
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from unittest import TestCase, mock
 
 from human_activities import (
     __application_id__,
     __application_name__,
     get_cache_dir,
+    get_fdignore_path,
 )
 from human_activities.config import change_user_dirs
 
@@ -103,3 +106,41 @@ XDG_DOCUMENTS_DIR="/spam"
 '''
         result = change_user_dirs(orig)
         self.assertEqual(result, orig)
+
+
+class TestConfigFdignore(TestCase):
+    def setUp(self):
+        self.config_dir = Path(tempfile.mkdtemp())
+        self.config_global_dir = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.config_dir)
+        shutil.rmtree(self.config_global_dir)
+
+    def test_user_fdignore(self):
+        user_fdignore_path = (
+            self.config_dir / f'{__application_name__}.fdignore'
+        )
+        user_fdignore_path.write_text('foo')
+        self.assertEqual(
+            get_fdignore_path(self.config_dir, self.config_global_dir),
+            user_fdignore_path,
+        )
+
+    def test_global_fdignore_on_windows_or_mac(self):
+        self.assertIsNone(get_fdignore_path(self.config_dir, None))
+
+    def test_global_fdignore_on_linux(self):
+        global_fdignore_path = (
+            self.config_global_dir / f'{__application_name__}.fdignore'
+        )
+        global_fdignore_path.write_text('foo')
+        self.assertEqual(
+            get_fdignore_path(self.config_dir, self.config_global_dir),
+            global_fdignore_path,
+        )
+
+    def test_global_fdignore_on_linux_in_bundle(self):
+        self.assertIsNone(
+            get_fdignore_path(self.config_dir, self.config_global_dir),
+        )
