@@ -7,6 +7,7 @@ name = "pypi"
 pillow = "*"
 sqlalchemy = "*"
 gettext-windows = "*"
+pathspec = "*"
 
 [dev-packages]
 "flake8" = "*"
