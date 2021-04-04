@@ -93,7 +93,7 @@ macOS
 
 Requires macOS Mojave or newer. Tested on macOS Mojave.
 
-1. Download `Human_Activities-0.11.1.zip`_ and open it.
+1. Download `Human_Activities-1.0.0.zip`_ and open it.
 2. Move the file ``Human Activities.app`` to *Applications*.
 3. Human Activities can now be started from *Launcher*.
 4. To launch the application automatically each time you start the computer:
@@ -105,7 +105,7 @@ Requires macOS Mojave or newer. Tested on macOS Mojave.
 Security
 """"""""
 
-Before opening `Human_Activities-0.11.1.zip`_, you can check the sha256 checksum
+Before opening `Human_Activities-1.0.0.zip`_, you can check the sha256 checksum
 of this file:
 
 ::
@@ -117,7 +117,7 @@ Ubuntu
 
 Tested on Ubuntu 18.04 LTS and 19.10.
 
-1. Download and open `human-activities_0.11.1-2_all.deb`_.
+1. Download and open `human-activities_1.0.0-1_all.deb`_.
 2. Click the button *Install* in the window that opens up.
 3. Human Acitivies can now be started from the main *Applications* menu. It will
    also start automatically each time you start the computer.
@@ -130,15 +130,15 @@ Before installing the package, you can verify its GPG signature:
 ::
 
    $ gpg --recv-key 11E74F7E
-   $ dpkg-sig --verify human-activities_0.11.1-2_all.deb
-   Processing human-activities_0.11.1-2_all.deb...
+   $ dpkg-sig --verify human-activities_1.0.0-1_all.deb
+   Processing human-activities_1.0.0-1_all.deb...
    GOODSIG _gpgbuilder E7582303262850695EF0B8A797C3CB6A11E74F7E 1580146502
 
 Arch Linux
 ^^^^^^^^^^
 
 Build the package from provided `PKGBUILD`_ or download
-`human-activities-0.11.1-2-any.pkg.tar.xz`_ and install it with pacman.
+`human-activities-1.0.0-1-any.pkg.tar.xz`_ and install it with pacman.
 
 Usage
 -----
@@ -372,11 +372,11 @@ License version 3 or later. See `COPYING`_ and `NOTICE`_.
 
 .. _Human Activities: http://humanactivities.cz/
 .. _The Foundation for Contemporary Arts Prague: https://fca.fcca.cz/en/news/
-.. _Human_Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win7.exe
-.. _Human_Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-win10.exe
-.. _Human_Activities-0.11.1.zip: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/Human_Activities-0.11.1.zip
-.. _human-activities_0.11.1-2_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities_0.11.1-2_all.deb
-.. _human-activities-0.11.1-2-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v0.11.1/human-activities-0.11.1-2-any.pkg.tar.xz
+.. _Human_Activities-win7.exe: https://github.com/jakubvalenta/human-activities/releases/download/v1.0.0/Human_Activities-win7.exe
+.. _Human_Activities-win10.exe: https://github.com/jakubvalenta/human-activities/releases/download/v1.0.0/Human_Activities-win10.exe
+.. _Human_Activities-1.0.0.zip: https://github.com/jakubvalenta/human-activities/releases/download/v1.0.0/Human_Activities-1.0.0.zip
+.. _human-activities_1.0.0-1_all.deb: https://github.com/jakubvalenta/human-activities/releases/download/v1.0.0/human-activities_1.0.0-1_all.deb
+.. _human-activities-1.0.0-1-any.pkg.tar.xz: https://github.com/jakubvalenta/human-activities/releases/download/v1.0.0/human-activities-1.0.0-1-any.pkg.tar.xz
 .. _GitHub Issues: https://github.com/jakubvalenta/human-activities/issues
 .. _COPYING: ./COPYING
 .. _NOTICE: ./NOTICE

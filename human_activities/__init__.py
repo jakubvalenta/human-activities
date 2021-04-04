@@ -8,7 +8,7 @@ __application_id__ = 'cz.jakubvalenta.human-activities'
 __application_name__ = 'human-activities'
 
 __title__ = 'Human Activities'
-__version__ = '0.11.1'
+__version__ = '1.0.0'
 
 __summary__ = 'Monitor size of directories'
 __uri__ = 'https://github.com/jakubvalenta/human-activities'
