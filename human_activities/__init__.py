@@ -10,7 +10,7 @@ __title__ = 'Human Activities'
 __version__ = '0.11.1'
 
 __summary__ = 'Monitor size of directories'
-__uri__ = 'https://lab.saloun.cz/jakub/human-activities'
+__uri__ = 'https://github.com/jakubvalenta/human-activities'
 
 __authors__ = ['Jakub Valenta', 'Jiří Skála']
 __author_email__ = 'jakub@jakubvalenta.cz'
