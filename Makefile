@@ -49,8 +49,9 @@ run-qt:  ## Start the app with the Qt backend and extended logging
 
 ${_arch_linux_dist_parent}/${_arch_linux_src_filename}:
 	mkdir -p "${_arch_linux_dist_parent}"
-	git archive "v${_version}" --prefix "${_arch_linux_src_dirname}/" \
-		-o "${_arch_linux_dist_parent}/${_arch_linux_src_filename}"
+	tar cJvf "${_arch_linux_dist_parent}/${_arch_linux_src_filename}" \
+		-X .tarignore \
+		--transform 's,^\.,${_arch_linux_src_dirname},' .
 
 ${_arch_linux_dist_parent}/PKGBUILD: ${_arch_linux_dist_parent}/${_arch_linux_src_filename}
 	mkdir -p "${_arch_linux_dist_parent}"
@@ -61,10 +62,7 @@ ${_arch_linux_dist_parent}/PKGBUILD: ${_arch_linux_dist_parent}/${_arch_linux_sr
 ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}: ${_arch_linux_dist_parent}/PKGBUILD
 	cd "${_arch_linux_dist_parent}" && makepkg -sf
 
-.PHONY: dist-arch-linux
-dist-arch-linux:  ## Build an Arch Linux package
-	-rm -r dist/arch_linux
-	$(MAKE) ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}
+dist-arch-linux: ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}  ## Build an Arch Linux package
 
 .PHONY: install-arch-linux
 install-arch-linux: ${_arch_linux_dist_parent}/${_arch_linux_pkg_filename}  ## Install built Arch Linux package
@@ -106,9 +104,7 @@ ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian
 		human_activities_debian \
 		debuild -us -uc
 
-.PHONY: dist-debian
-dist-debian:  ## Build a Debian package
-	$(MAKE) ${_debian_dist_parent}/${_debian_pkg_filename}
+dist-debian: ${_debian_dist_parent}/${_debian_pkg_filename}  ## Build a Debian package
 
 .PHONY: dist-debian-sign
 dist-debian-sign: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian-build  ## Sign the Debian package
