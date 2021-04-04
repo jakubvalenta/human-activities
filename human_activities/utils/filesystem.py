@@ -102,6 +102,7 @@ def find_files_fd(
     if fdignore_path is not None:
         cmd += ['--ignore-file', fdignore_path]
     else:
+        logger.info('Loading default fdignore')
         fdignore_bytes = pkgutil.get_data(
             'human_activities.etc', 'human-activities.fdignore'
         )
@@ -142,6 +143,7 @@ def find_files_python(
         logger.info('No permissions to read directory "%s"', path)
         return
     if pathspec is None:
+        logger.info('Loading default fdignore')
         fdignore_bytes = pkgutil.get_data(
             'human_activities.etc', 'human-activities.fdignore'
         )

@@ -119,11 +119,14 @@ def get_fdignore_path(
     filename = f'{__application_name__}.fdignore'
     user_fdignore_path = config_dir / filename
     if user_fdignore_path.is_file():
+        logger.info('Using user fdignore: "%s"', user_fdignore_path)
         return str(user_fdignore_path)
     if config_global_dir:
         global_fdignore_path = config_global_dir / filename
         if global_fdignore_path.is_file():
+            logger.info('Using global fdignore: "%s"', global_fdignore_path)
             return str(global_fdignore_path)
+    logger.info('No fdignore file found')
     return None
 
 
@@ -136,12 +139,11 @@ class Config:
     threshold_days_ago: int = 30
     show_setup: bool = True
     test: bool = False
-    fdignore_path: Optional[str] = get_fdignore_path(
-        CONFIG_DIR, CONFIG_GLOBAL_DIR
-    )
+    fdignore_path: Optional[str] = None
 
     def __init__(self):
         self.named_dirs = NamedDirs()
+        self.fdignore_path = get_fdignore_path(CONFIG_DIR, CONFIG_GLOBAL_DIR)
 
     def copy(self):
         new = self.__class__()
