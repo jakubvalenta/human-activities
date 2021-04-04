@@ -8,14 +8,16 @@ Build-Depends: debhelper (>= 9.20160709~),
                python3-setuptools,
                tox
 Standards-Version: 3.9.8
-Homepage: https://lab.saloun.cz/jakub/human-activities
+Homepage: https://github.com/jakubvalenta/human-activities
 X-Python3-Version: >= 3.6
-Vcs-Git: https://lab.saloun.cz/jakub/human-activities.git
-Vcs-Browser: https://lab.saloun.cz/jakub/human-activities
+Vcs-Git: https://github.com/jakubvalenta/human-activities.git
+Vcs-Browser: https://github.com/jakubvalenta/human-activities
 
 Package: human-activities
 Architecture: all
-Depends: gir1.2-appindicator3-0.1,
+Depends: fd-find,
+         gir1.2-appindicator3-0.1,
+         python3-pathspec,
          python3-pil,
          python3-sqlalchemy,
          ${python3:Depends},
