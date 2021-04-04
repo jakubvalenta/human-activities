@@ -253,16 +253,16 @@ Windows
 
 ::
 
-   pip install Pillow sqlalchemy wxpython
-   python -m human_activities --verbose
+   $ pip install Pillow sqlalchemy wxpython
+   $ python -m human_activities --verbose
 
 Mac
 """
 
 ::
 
-   pip3 install Pillow sqlalchemy PyQt5
-   python3 -m human_activities --verbose
+   $ pip3 install Pillow sqlalchemy PyQt5
+   $ python3 -m human_activities --verbose
 
 Arch Linux
 """"""""""
@@ -281,27 +281,27 @@ Windows 7 and 8
 
 ::
 
-   pip install Pillow sqlalchemy wxpython
-   pip install pyinstaller
-   win7/pyinstaller.cmd
+   $ pip install Pillow sqlalchemy wxpython
+   $ pip install pyinstaller
+   $ win7/pyinstaller.cmd
 
 Windows 10
 """"""""""
 
 ::
 
-   pip install Pillow sqlalchemy wxpython
-   pip install pyinstaller
-   win10/pyinstaller.cmd
+   $ pip install Pillow sqlalchemy wxpython
+   $ pip install pyinstaller
+   $ win10/pyinstaller.cmd
 
 Mac
 """
 
 ::
 
-   pip3 install Pillow sqlalchemy PyQt5
-   pip3 install pyinstaller
-   make dist-mac
+   $ pip3 install Pillow sqlalchemy PyQt5
+   $ pip3 install pyinstaller
+   $ make dist-mac
 
 Debian
 """"""
@@ -310,20 +310,20 @@ Install Docker and start it. Then run:
 
 ::
 
-   make dist-debian-build dist-debian
+   $ make dist-debian-build dist-debian
 
 Additionally, you can sign the created package with GPG:
 
 ::
 
-   make dist-debian-sign key_id='<gpg key fingerprint>'
+   $ make dist-debian-sign key_id='<gpg key fingerprint>'
 
 Arch Linux
 """"""""""
 
 ::
 
-   make dist-arch-linux
+   $ make dist-arch-linux
 
 Notice that the package is not built from the currently checked out revision,
 but from a git tag specified as ``v`` + Makefile variable ``_version``.
@@ -333,15 +333,15 @@ Translation
 
 Edit the ``lang/*.po`` files and then run::
 
-   make clean-lang gen-lang
+   $ make clean-lang gen-lang
 
 Testing and linting
 ^^^^^^^^^^^^^^^^^^^
 
 ::
 
-   make test
-   make lint
+   $ make test
+   $ make lint
 
 Contributing
 ------------
