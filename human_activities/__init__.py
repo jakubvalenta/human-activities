@@ -16,7 +16,7 @@ __authors__ = ['Jakub Valenta', 'Jiří Skála']
 __author_email__ = 'jakub@jakubvalenta.cz'
 
 __license__ = 'GNU GPL 3'
-__copyright__ = '\N{COPYRIGHT SIGN} 2018-2019 Jakub Valenta, Jiří Skála'
+__copyright__ = '\N{COPYRIGHT SIGN} 2018-2021 Jakub Valenta, Jiří Skála'
 
 
 def is_win() -> bool:
