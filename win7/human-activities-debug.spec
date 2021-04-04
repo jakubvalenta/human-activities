@@ -12,7 +12,11 @@ a = Analysis(  # noqa: F821
         (
             os.path.join('..', 'human_activities', 'locale'),
             os.path.join('locale'),
-        )
+        ),
+        (
+            os.path.join('..', 'human_activities', 'etc'),
+            os.path.join('human_activities', 'etc'),
+        ),
     ],
     hiddenimports=['sqlalchemy.ext.baked'],
     hookspath=[],

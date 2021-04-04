@@ -17,6 +17,10 @@ a = Analysis(  # noqa: F821
             os.path.join('..', 'human_activities', 'qt', 'data'),
             os.path.join('human_activities', 'qt', 'data'),
         ),
+        (
+            os.path.join('..', 'human_activities', 'etc'),
+            os.path.join('human_activities', 'etc'),
+        ),
     ],
     hiddenimports=['sqlalchemy.ext.baked'],
     hookspath=[],
