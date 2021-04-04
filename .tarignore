@@ -1,5 +1,4 @@
 *.deb
-.ackrc
 .dockerignore
 .git
 .gitignore
