@@ -6,6 +6,7 @@
 .pytest_cache
 .tarignore
 .tox
+README.html
 __pycache__
 arch_linux
 bak
