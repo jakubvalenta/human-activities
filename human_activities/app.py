@@ -83,6 +83,7 @@ class Application:
                     unit=self._config.unit,
                     threshold_days_ago=self._config.threshold_days_ago,
                     event_stop=self._scan_event_stop,
+                    fd_command=self._config.fd_command,
                     fdignore_path=self._config.fdignore_path,
                     callback=partial(self._on_scan, directory_views),
                     test=self._config.test,

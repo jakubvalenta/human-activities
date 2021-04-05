@@ -3,8 +3,9 @@ import logging
 import os.path
 import re
 import shutil
+import subprocess
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NamedTuple, Optional
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence
 
 from human_activities import (
     CONFIG_DIR,
@@ -113,6 +114,21 @@ UNITS = {
 }
 
 
+def get_fd_command(
+    try_commands: Sequence[str] = (
+        'fdfind',
+        'fd',
+    )
+) -> Optional[str]:
+    for cmd in try_commands:
+        try:
+            subprocess.check_call([cmd, '--version'])
+            return cmd
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            pass
+    return None
+
+
 def get_fdignore_path(
     config_dir: Path, config_global_dir: Optional[Path]
 ) -> Optional[str]:
@@ -139,10 +155,12 @@ class Config:
     threshold_days_ago: int = 30
     show_setup: bool = True
     test: bool = False
+    fd_comamnd: Optional[str] = None
     fdignore_path: Optional[str] = None
 
     def __init__(self):
         self.named_dirs = NamedDirs()
+        self.fd_command = get_fd_command()
         self.fdignore_path = get_fdignore_path(CONFIG_DIR, CONFIG_GLOBAL_DIR)
 
     def copy(self):

@@ -17,7 +17,8 @@ from human_activities.l10n import _
 from human_activities.utils import func
 from human_activities.utils.filesystem import (
     calc_entries_size,
-    find_files,
+    find_files_fd,
+    find_files_python,
     humansize,
 )
 from human_activities.utils.math import safe_div
@@ -186,6 +187,7 @@ def scan_directory(
     unit: str,
     threshold_days_ago: int,
     event_stop: Event,
+    fd_command: Optional[str],
     fdignore_path: Optional[str],
     callback: Callable[[Directory], None],
     test: bool = False,
@@ -198,7 +200,12 @@ def scan_directory(
         )
         threshold_seconds_ago = threshold_days_ago * 24 * 3600
         threshold_seconds = time.time() - threshold_seconds_ago
-        entries = find_files(path, fdignore_path)
+        if fd_command is not None:
+            logger.info('Using fd')
+            entries = find_files_fd(path, fd_command, fdignore_path)
+        else:
+            logger.info('Using os.scandir')
+            entries = find_files_python(path, fdignore_path)
         dir_size = calc_entries_size(entries, threshold_seconds, event_stop)
         directory.stats.clear()
         directory.stats.append(

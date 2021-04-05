@@ -96,9 +96,9 @@ def parse_fdignore(b: bytes) -> Iterator[str]:
 
 
 def find_files_fd(
-    path: str, fdignore_path: Optional[str] = None
-) -> Iterator[FdDirEntry]:
-    cmd = ['fd', '-t', 'f']
+    path: str, fd_command: str = 'fd', fdignore_path: Optional[str] = None
+) -> Iterator[TDirEntry]:
+    cmd = [fd_command, '-t', 'f']
     if fdignore_path is not None:
         cmd += ['--ignore-file', fdignore_path]
     else:
@@ -135,7 +135,7 @@ def find_files_python(
     path: str,
     fdignore_path: Optional[str] = None,
     pathspec: Optional[PathSpec] = None,
-) -> Iterator[os.DirEntry]:
+) -> Iterator[TDirEntry]:
     try:
         entries = os.scandir(path)
     except FileNotFoundError:
@@ -168,14 +168,6 @@ def find_files_python(
             yield from find_files_python(
                 entry.path, fdignore_path, pathspec=pathspec
             )
-
-
-def find_files(path: str, fdignore_path: Optional[str]) -> Iterator[TDirEntry]:
-    try:
-        yield from find_files_fd(path, fdignore_path)
-    except FileNotFoundError:
-        logger.info('fd is not available')
-        yield from find_files_python(path, fdignore_path)
 
 
 def calc_entries_size(
