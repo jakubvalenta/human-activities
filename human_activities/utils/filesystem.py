@@ -132,7 +132,9 @@ def find_files_fd(
 
 
 def find_files_python(
-    path: str, pathspec: Optional[PathSpec] = None
+    path: str,
+    fdignore_path: Optional[str] = None,
+    pathspec: Optional[PathSpec] = None,
 ) -> Iterator[os.DirEntry]:
     try:
         entries = os.scandir(path)
@@ -143,14 +145,18 @@ def find_files_python(
         logger.info('No permissions to read directory "%s"', path)
         return
     if pathspec is None:
-        logger.info('Loading default fdignore')
-        fdignore_bytes = pkgutil.get_data(
-            'human_activities.etc', 'human-activities.fdignore'
-        )
-        if fdignore_bytes:
-            pathspec = PathSpec.from_lines(
-                'gitwildmatch', fdignore_bytes.decode().splitlines()
+        if fdignore_path is not None:
+            with open(fdignore_path, 'rt') as f:
+                pathspec = PathSpec.from_lines('gitwildmatch', f)
+        else:
+            logger.info('Loading default fdignore')
+            fdignore_bytes = pkgutil.get_data(
+                'human_activities.etc', 'human-activities.fdignore'
             )
+            if fdignore_bytes:
+                pathspec = PathSpec.from_lines(
+                    'gitwildmatch', fdignore_bytes.decode().splitlines()
+                )
     for entry in entries:
         if entry.is_symlink():
             continue
@@ -159,7 +165,9 @@ def find_files_python(
         if entry.is_file():
             yield entry
         elif entry.is_dir():
-            yield from find_files_python(entry.path, pathspec=pathspec)
+            yield from find_files_python(
+                entry.path, fdignore_path, pathspec=pathspec
+            )
 
 
 def find_files(path: str, fdignore_path: Optional[str]) -> Iterator[TDirEntry]:
@@ -167,7 +175,7 @@ def find_files(path: str, fdignore_path: Optional[str]) -> Iterator[TDirEntry]:
         yield from find_files_fd(path, fdignore_path)
     except FileNotFoundError:
         logger.info('fd is not available')
-        yield from find_files_python(path)
+        yield from find_files_python(path, fdignore_path)
 
 
 def calc_entries_size(

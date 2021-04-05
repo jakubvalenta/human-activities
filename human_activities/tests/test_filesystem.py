@@ -54,3 +54,19 @@ class TestFilesystem(TestCase):
             str(Path(self.temp_dir) / 'bar'),
         }
         self.assertSetEqual(result_paths, expected_paths)
+
+    def test_find_files_python_with_custom_fdignore(self):
+        with tempfile.NamedTemporaryFile('w+t') as temp_file:
+            temp_file.write('bar')
+            temp_file.seek(0)
+            result_paths = set(
+                entry.path
+                for entry in find_files_python(
+                    self.temp_dir, fdignore_path=temp_file.name
+                )
+            )
+            expected_paths = {
+                str(Path(self.temp_dir) / 'foo'),
+                str(Path(self.temp_dir) / 'Thumbs.db'),
+            }
+            self.assertSetEqual(result_paths, expected_paths)
