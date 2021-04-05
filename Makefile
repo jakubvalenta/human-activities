@@ -96,7 +96,7 @@ ${_debian_dist_parent}/${_debian_src_filename}:
 ${_debian_dist_parent}/${_debian_src_dirname}: ${_debian_dist_parent}/${_debian_src_filename}
 	cd "${_debian_dist_parent}" && tar xvf "${_debian_src_filename}"
 
-${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname} | dist-debian-build
+${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian_src_dirname}
 	docker run --rm \
 		-u "${_uid}:${_gid}" \
 		-v "$$(pwd):/app" \
@@ -107,7 +107,7 @@ ${_debian_dist_parent}/${_debian_pkg_filename}: ${_debian_dist_parent}/${_debian
 dist-debian: ${_debian_dist_parent}/${_debian_pkg_filename}  ## Build a Debian package
 
 .PHONY: dist-debian-sign
-dist-debian-sign: ${_debian_dist_parent}/${_debian_pkg_filename} | dist-debian-build  ## Sign the Debian package
+dist-debian-sign: ${_debian_dist_parent}/${_debian_pkg_filename}  ## Sign the Debian package
 ifeq ($(key_id),)
 	@echo "You must define the variable 'key_id'"
 	exit 1
