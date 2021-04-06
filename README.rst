@@ -178,19 +178,19 @@ From the menu, you can also reach the *Setup* (which you saw when you first
 started the app) and the *Advanced configuration*. On Windows, these items are
 accessible in separate menu that opens when you right-click the icon.
 
-How is the pie chart calculated
+How the pie chart is calculated
 """""""""""""""""""""""""""""""
 
-Let's assume we chose 2 directories in the setup:
+Let's say we chose two directories during the setup:
 
 - ``/Users/jakub/Paid work`` which contains 15 files
 - ``/Users/jakub/Unpaid work`` which contains 30 files
 
-Human Activities will first calculate the **sum of the number of files in both
-directories**, which is 45. This will be the **100%**. Therefore ``Paid work``
-takes 33.3% and ``Unpaid work`` takes 66.6% of the total number of files. This
-percentage will then be shown as a pie chart, which is ⅓ one color and ⅔ another
-color.
+Then Human Activities will first calculate the **sum of the number of files in
+both directories**, which is 45. This will be the **100%**. Therefore ``Paid
+work`` takes 33.3% and ``Unpaid work`` takes 66.6% of the total number of
+files. This percentage will then be shown as a pie chart, which is ⅓ one color
+and ⅔ another color.
 
 Advanced configuration
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -205,6 +205,23 @@ The advanced configuration allows you to:
 - Change how new (in terms of modification time) the files have to be to be
   counted.
 - Give custom names to the configured directories.
+
+Ignoring files
+^^^^^^^^^^^^^^
+
+Human Activities never counts **hidden files and directories**.
+
+Additionaly, the application ignores some **common system files and
+directories** such as ``Thumbs.db`` on Windows. You can find the exact list of
+ignore patterns in `human-activities.fdignore`_. (On Linux, this file is also
+available at ``/etc/xdg/human-activities/human-activities.fdignore`` after the
+installation of the app.)
+
+To configure which files get ignored, copy `human-activities.fdignore`_ to
+``%APPDATA%\human-activities\human-activities.fdignore`` on Windows,
+``/User/NAME/Preferences/human-activities/human-activities.fdignore`` on macOS
+or ``~/.config/human-activities/human-activities.fdignore`` on Linux, and edit
+the file to your liking. It uses the `.gitignore`_ syntax.
 
 Uninstallation
 --------------
@@ -360,3 +377,5 @@ License version 3 or later. See `COPYING`_ and `NOTICE`_.
 .. _COPYING: ./COPYING
 .. _NOTICE: ./NOTICE
 .. _PKGBUILD: ./arch_linux/PKGBUILD
+.. _human-activities.fdignore: ./human_activities/etc/human-activities.fdignore
+.. _.gitignore: https://git-scm.com/docs/gitignore
