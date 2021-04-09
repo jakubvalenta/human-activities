@@ -217,11 +217,15 @@ ignore patterns in `human-activities.fdignore`_. (On Linux, this file is also
 available at ``/etc/xdg/human-activities/human-activities.fdignore`` after the
 installation of the app.)
 
-To configure which files get ignored, copy `human-activities.fdignore`_ to
-``%APPDATA%\human-activities\human-activities.fdignore`` on Windows,
-``/User/NAME/Preferences/human-activities/human-activities.fdignore`` on macOS
-or ``~/.config/human-activities/human-activities.fdignore`` on Linux, and edit
-the file to your liking. It uses the `.gitignore`_ syntax.
+To configure which files get ignored, copy `human-activities.fdignore`_ to:
+
+- ``C:\\Users\NAME\AppData\roaming\human-activities\human-activities.fdignore``
+  on Windows
+- ``/Users/NAME/Preferences/cz.jakubvalenta.human-activities/human-activities.fdignore``
+  on macOS
+- ``~/.config/human-activities/human-activities.fdignore`` on Linux
+
+Then edit the file to your liking. It uses the `.gitignore`_ syntax.
 
 Uninstallation
 --------------
