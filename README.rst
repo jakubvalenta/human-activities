@@ -320,7 +320,7 @@ Mac
 
 ::
 
-   $ pip3 install Pillow pathspec sqlalchemy PyQt5
+   $ pip3 install Pillow pathspec sqlalchemy PyQt5==5.15.2
    $ pip3 install pyinstaller
    $ make dist-mac
 
