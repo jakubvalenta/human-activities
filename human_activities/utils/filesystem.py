@@ -110,6 +110,8 @@ def find_files_fd(
             ignore_rules = parse_fdignore(fdignore_bytes)
             for ignore_rule in ignore_rules:
                 cmd += ['-E', ignore_rule]
+        else:
+            logger.error('Failed to load default fdignore')
     cmd += ['.', path]
     try:
         completed_process = subprocess.run(
@@ -157,6 +159,9 @@ def find_files_python(
                 pathspec = PathSpec.from_lines(
                     'gitwildmatch', fdignore_bytes.decode().splitlines()
                 )
+            else:
+                logger.error('Failed to load default fdignoe')
+                pathspec = PathSpec.from_lines('gitwildmatch', [])
     for entry in entries:
         if entry.is_symlink():
             continue
