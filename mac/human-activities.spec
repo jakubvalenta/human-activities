@@ -14,11 +14,19 @@ a = Analysis(  # noqa: F821
             os.path.join('locale'),
         ),
         (
-            os.path.join('..', 'human_activities', 'qt', 'data'),
+            os.path.join('..', 'human_activities', 'qt', 'data', '__init__.py'),
             os.path.join('human_activities', 'qt', 'data'),
         ),
         (
-            os.path.join('..', 'human_activities', 'etc'),
+            os.path.join('..', 'human_activities', 'qt', 'data', 'qt_wizard_bg.png'),
+            os.path.join('human_activities', 'qt', 'data'),
+        ),
+        (
+            os.path.join('..', 'human_activities', 'etc', '__init__.py'),
+            os.path.join('human_activities', 'etc'),
+        ),
+        (
+            os.path.join('..', 'human_activities', 'etc', 'human-activities.fdignore'),
             os.path.join('human_activities', 'etc'),
         ),
     ],
