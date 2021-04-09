@@ -270,7 +270,7 @@ Windows
 
 ::
 
-   $ pip install Pillow sqlalchemy wxpython
+   $ pip install Pillow pathspec sqlalchemy wxpython
    $ python -m human_activities --verbose
 
 Mac
@@ -278,7 +278,7 @@ Mac
 
 ::
 
-   $ pip3 install Pillow sqlalchemy PyQt5
+   $ pip3 install Pillow pathspec sqlalchemy PyQt5
    $ python3 -m human_activities --verbose
 
 Arch Linux
@@ -298,7 +298,7 @@ Windows 7 and 8
 
 ::
 
-   $ pip install Pillow sqlalchemy wxpython
+   $ pip install Pillow pathspec sqlalchemy wxpython
    $ pip install pyinstaller
    $ win7/pyinstaller.cmd
 
@@ -307,7 +307,7 @@ Windows 10
 
 ::
 
-   $ pip install Pillow sqlalchemy wxpython
+   $ pip install Pillow pathspec sqlalchemy wxpython
    $ pip install pyinstaller
    $ win10/pyinstaller.cmd
 
@@ -316,7 +316,7 @@ Mac
 
 ::
 
-   $ pip3 install Pillow sqlalchemy PyQt5
+   $ pip3 install Pillow pathspec sqlalchemy PyQt5
    $ pip3 install pyinstaller
    $ make dist-mac
 
