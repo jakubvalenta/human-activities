@@ -59,7 +59,7 @@ of this file:
 
 ::
 
-   163cd2a044c4e0565e1a99902163277fc31f6dd8ebaa950c0a5d978a9d00c60b  Human_Activities-win7.exe
+   6d5cfa9766ceec45d195ebbba1b06a85f176e28f88e1b660c92ad63711b023eb  Human_Activities-win7.exe
 
 Windows 10
 ^^^^^^^^^^
@@ -86,7 +86,7 @@ of this file:
 
 ::
 
-   b9d6bb85d38f3faaa1ca88873463292680275663a6fb2fde40d1532c9b3e8a06  Human_Activities-win10.exe
+   bc5343c7346c177d33e998bd144a3b5d389508e5b051bc3b5f6935866e8d3fd3  Human_Activities-win10.exe
 
 macOS
 ^^^^^
@@ -110,7 +110,7 @@ of this file:
 
 ::
 
-   864fbb0b7dc7e1f131470587bd1b733b21a924ad1cfcf71a5dd687c3ff8d2958  Human_Activities-0.11.1.zip
+   8b4657d276b0e397d9fca6a77769ef4dd90bca894ea44a1a5008bd25947c94ce  Human_Activities-1.0.0.zip
 
 Ubuntu
 ^^^^^^
